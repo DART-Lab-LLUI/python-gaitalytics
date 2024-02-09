@@ -1,0 +1,61 @@
+# This file exists so you can easily regenerate your project.
+#
+# `cookiepatcher` is a convenient shim around `cookiecutter`
+# for regenerating projects (it will generate a .cookiecutterrc
+# automatically for any template). To use it:
+#
+#    pip install cookiepatcher
+#    cookiepatcher gh:ionelmc/cookiecutter-pylibrary python-gaitalytics
+#
+# See:
+#    https://pypi.org/project/cookiepatcher
+#
+# Alternatively, you can run:
+#
+#    cookiecutter --overwrite-if-exists --config-file=python-gaitalytics/.cookiecutterrc gh:ionelmc/cookiecutter-pylibrary
+
+default_context:
+    allow_tests_inside_package: "no"
+    c_extension_function: "longest"
+    c_extension_module: "_gaitalytics"
+    c_extension_optional: "no"
+    c_extension_support: "no"
+    codacy: "no"
+    codacy_projectid: "[Get ID from https://app.codacy.com/gh/cereneo-foundation/python-gaitalytics/settings]"
+    codeclimate: "no"
+    codecov: "yes"
+    command_line_interface: "click"
+    command_line_interface_bin_name: "gaitalytics"
+    coveralls: "no"
+    distribution_name: "gaitalytics"
+    email: "andre.boeni@llui.org"
+    formatter_quote_style: "double"
+    full_name: "André Böni"
+    github_actions: "yes"
+    github_actions_osx: "yes"
+    github_actions_windows: "yes"
+    license: "MIT license"
+    package_name: "gaitalytics"
+    pre_commit: "yes"
+    project_name: "gaitalytics"
+    project_short_description: "Python package to extract gait analytic parameters for different kind of recordings (i.e. MOCAP, Force Plate)"
+    pypi_badge: "yes"
+    pypi_disable_upload: "no"
+    release_date: "today"
+    repo_hosting: "github.com"
+    repo_hosting_domain: "github.com"
+    repo_main_branch: "main"
+    repo_name: "python-gaitalytics"
+    repo_username: "cereneo-foundation"
+    scrutinizer: "no"
+    setup_py_uses_setuptools_scm: "no"
+    sphinx_docs: "yes"
+    sphinx_docs_hosting: "https://python-gaitalytics.readthedocs.org"
+    sphinx_doctest: "no"
+    sphinx_theme: "sphinx-rtd-theme"
+    test_matrix_separate_coverage: "no"
+    version: "0.0.0"
+    version_manager: "bump2version"
+    website: "https://github.com/cereneo-foundation/python-gaitalytics"
+    year_from: "2024"
+    year_to: "2024"
