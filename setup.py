@@ -10,7 +10,6 @@ def read(*names, **kwargs):
     with Path(__file__).parent.joinpath(*names).open(encoding=kwargs.get("encoding", "utf8")) as fh:
         return fh.read()
 
-
 setup(
     name="gaitalytics",
     version="0.0.0",
@@ -63,6 +62,11 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "click",
+        "pandas==2.1.4",
+        "numpy==1.26.4",
+        "scipy==1.11.3",
+        "pyyaml==6.0.1",
+        "matplotlib==3.8.0",
         # eg: "aspectlib==1.1.1", "six>=1.7",
     ],
     extras_require={
@@ -76,3 +80,4 @@ setup(
         ]
     },
 )
+

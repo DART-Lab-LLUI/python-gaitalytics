@@ -1,0 +1,99 @@
+# Environment: Motek Caren
+# Marker set: HBM2 Lower Body Trunk
+# Modelling: PIG
+environment_setting:
+  progression_axes: y
+  progression_values: negativ
+
+marker_set_mapping:
+  left_back_hip: LASIS
+  right_back_hip: RASIS
+  left_front_hip: LPSIS
+  right_front_hip: RPSIS
+
+  left_lat_upper_leg: LLTHI
+  right_lat_upper_leg: RLTHI
+
+  left_lat_knee: LLEK
+  right_lat_knee: RLEK
+  left_med_knee: LMEK
+  right_med_knee: RMEK
+
+  left_lat_lower_leg: LLSHA
+  right_lat_lower_leg: RLSHA
+
+  left_lat_malleoli: LLM
+  right_lat_malleoli: RLM
+  left_med_malleoli: LMM
+  right_med_malleoli: RMM
+
+  right_heel: RHEE
+  left_heel: LHEE
+  right_meta_2: RMT2
+  left_meta_2: LMT2
+  right_meta_5: RMT5
+  left_meta_5: LMT5
+
+  neck: C7
+  back: T10
+  jugularis: JN
+  xyphoideus: XIPH
+
+  # Additional markers which will be modelled in modelling.py
+  com: COM
+  xcom: XCOM
+  cmos: CMOS
+
+model_mapping:
+  #Angles
+  left_thorax_angles: LThoraxAngles
+  right_thorax_angles: RThoraxAngles
+  left_spine_angles: LSpineAngles
+  right_spine_angles: RSpineAngles
+  left_pelvis_angles: LPelvisAngles
+  right_pelvis_angles: RPelvisAngles
+  left_foot_progression_angles: LFootProgressAngles
+  right_foot_progression_angles: RFootProgressAngles
+  left_hip_angles: LHipAngles
+  right_hip_angles: RHipAngles
+  left_knee_angles: LKneeAngles
+  right_knee_angles: RKneeAngles
+  left_ankle_angles: LAnkleAngles
+  right_ankle_angles: RAnkleAngles
+
+  #Forces
+  left_GRF: LGroundReactionForce
+  right_GRF: RGroundReactionForce
+  left_nGRF: LNormalisedGRF
+  right_nGRF: RNormalisedGRF
+  left_waist_force: LWaistForce
+  right_waist_force: RWaistForce
+  left_hip_force: LHipForce
+  right_hip_force: RHipForce
+  left_knee_force: LKneeForce
+  right_knee_force: RKneeForce
+  left_ankle_force: LAnkleForce
+  right_ankle_force: RAnkleForce
+
+  #Moments
+  left_GRM: LGroundReactionMoment
+  right_GRM: RGroundReactionMoment
+  left_waist_moment: LWaistMoment
+  right_waist_moment: RWaistMoment
+  left_hip_moment: LHipMoment
+  right_hip_moment: RHipMoment
+  left_knee_moment: LKneeMoment
+  right_knee_moment: RKneeMoment
+  left_ankle_moment: LAnkleMoment
+  right_ankle_moment: RAnkleMoment
+
+  #Powers
+  left_waist_power: LWaistPower
+  right_waist_power: RWaistPower
+  left_hip_power: LHipPower
+  right_hip_power: RHipPower
+  left_knee_power: LKneePower
+  right_knee_power: RKneePower
+  left_ankle_power: LAnklePower
+  right_ankle_power: RAnklePower
+
