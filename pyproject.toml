@@ -37,16 +37,16 @@ select = [
     "W", # pycodestyle warnings
 ]
 src = ["src", "tests"]
-target-version = "py38"
+target-version = "py39"
 
-[tool.ruff.flake8-pytest-style]
+[tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 mark-parentheses = false
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 forced-separate = ["conftest"]
 force-single-line = true
 
 [tool.black]
 line-length = 140
-target-version = ["py38"]
+target-version = ["py39"]

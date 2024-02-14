@@ -1,7 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
 from types import MappingProxyType
-from typing import List
 
 import numpy as np
 from btk import btkAcquisition
@@ -300,7 +299,7 @@ class AbstractEventAnomalyChecker(ABC):
         return anomaly_detected, abnormal_event_frames
 
     @abstractmethod
-    def _check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, List[GaitEventAnomaly]]:
+    def _check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, list[GaitEventAnomaly]]:
         """
         Implementation of event checker
         :param file_handler: Acquisition with added Events
@@ -313,7 +312,7 @@ class ContextPatternChecker(AbstractEventAnomalyChecker):
     Checks if events are alternating between Heel_Strike and Foot_Off per context
     """
 
-    def _check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, List[GaitEventAnomaly]]:
+    def _check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, list[GaitEventAnomaly]]:
         """
         kick off the checker
         :param file_handler: Acquisition with added Events
@@ -344,7 +343,7 @@ class EventSpacingChecker(AbstractEventAnomalyChecker):
         super().__init__(event_checker)
         self._frame_threshold = frame_threshold
 
-    def _check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, List[GaitEventAnomaly]]:
+    def _check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, list[GaitEventAnomaly]]:
         anomaly_detected = False
         abnormal_event_frames = []
         for current_event_index in range(file_handler.get_events_size()):
@@ -366,9 +365,9 @@ class EventSpacingChecker(AbstractEventAnomalyChecker):
 # utils
 def find_next_event(
     file_handler: gaitalytics.files.FileHandler, label: str, context, start_index: int
-) -> [gaitalytics.utils.GaitEvent, List[gaitalytics.utils.GaitEvent]]:
+) -> [gaitalytics.utils.GaitEvent, list[gaitalytics.utils.GaitEvent]]:
     if file_handler.get_events_size() >= start_index + 1:
-        unused_events: List[gaitalytics.utils.GaitEvent] = []
+        unused_events: list[gaitalytics.utils.GaitEvent] = []
         for event_index in range(start_index + 1, file_handler.get_events_size()):
             event = file_handler.get_event(event_index)
             if event.context == context:

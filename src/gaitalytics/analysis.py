@@ -1,7 +1,6 @@
 import logging
 from abc import ABC
 from abc import abstractmethod
-from typing import Dict
 
 import numpy as np
 from pandas import DataFrame
@@ -14,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class AbstractAnalysis(ABC):
-    def __init__(self, data_list: Dict[str, gaitalytics.utils.BasicCyclePoint], configs: gaitalytics.utils.ConfigProvider):
-        self._data_list: Dict[str, gaitalytics.utils.BasicCyclePoint] = data_list
+    def __init__(self, data_list: dict[str, gaitalytics.utils.BasicCyclePoint], configs: gaitalytics.utils.ConfigProvider):
+        self._data_list: dict[str, gaitalytics.utils.BasicCyclePoint] = data_list
         self._configs = configs
 
     @abstractmethod
@@ -27,7 +26,7 @@ class AbstractCycleAnalysis(AbstractAnalysis, ABC):
 
     def __init__(
         self,
-        data_list: Dict[str, gaitalytics.utils.BasicCyclePoint],
+        data_list: dict[str, gaitalytics.utils.BasicCyclePoint],
         configs: gaitalytics.utils.ConfigProvider,
         data_type: gaitalytics.utils.PointDataType,
     ):
@@ -77,7 +76,7 @@ class AbstractCycleAnalysis(AbstractAnalysis, ABC):
 
 class JointForcesCycleAnalysis(AbstractCycleAnalysis):
 
-    def __init__(self, data_list: Dict, configs: gaitalytics.utils.ConfigProvider):
+    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider):
         super().__init__(data_list, configs, gaitalytics.utils.PointDataType.FORCES)
 
     def _filter_keys(self, key: str) -> bool:
@@ -101,7 +100,7 @@ class JointForcesCycleAnalysis(AbstractCycleAnalysis):
 
 class JointMomentsCycleAnalysis(AbstractCycleAnalysis):
 
-    def __init__(self, data_list: Dict, configs: gaitalytics.utils.ConfigProvider):
+    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider):
         super().__init__(data_list, configs, gaitalytics.utils.PointDataType.MOMENTS)
 
     def _filter_keys(self, key: str) -> bool:
@@ -125,7 +124,7 @@ class JointMomentsCycleAnalysis(AbstractCycleAnalysis):
 
 class JointPowerCycleAnalysis(AbstractCycleAnalysis):
 
-    def __init__(self, data_list: Dict, configs: gaitalytics.utils.ConfigProvider):
+    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider):
         super().__init__(data_list, configs, gaitalytics.utils.PointDataType.POWERS)
 
     def _filter_keys(self, key: str) -> bool:
@@ -150,7 +149,7 @@ class JointPowerCycleAnalysis(AbstractCycleAnalysis):
 
 class JointAnglesCycleAnalysis(AbstractCycleAnalysis):
 
-    def __init__(self, data_list: Dict, configs: gaitalytics.utils.ConfigProvider):
+    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider):
         super().__init__(data_list, configs, gaitalytics.utils.PointDataType.ANGLES)
 
     def _filter_keys(self, key: str) -> bool:
@@ -178,7 +177,7 @@ class JointAnglesCycleAnalysis(AbstractCycleAnalysis):
 
 class CMosAnalysis(AbstractCycleAnalysis):
 
-    def __init__(self, data_list: Dict, configs: gaitalytics.utils.ConfigProvider):
+    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider):
         super().__init__(data_list, configs, gaitalytics.utils.PointDataType.MARKERS)
 
     def _filter_keys(self, key: str) -> bool:
@@ -267,7 +266,7 @@ class MosAnalysis(AbstractAnalysis):
 
 class SpatioTemporalAnalysis(AbstractAnalysis):
 
-    def __init__(self, data_list: Dict, configs: gaitalytics.utils.ConfigProvider, body_height: float = 1800, frequency: int = 100):
+    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider, body_height: float = 1800, frequency: int = 100):
         super().__init__(data_list, configs)
         self._frequency = frequency
         self._body_height = body_height
@@ -645,7 +644,7 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
 
 class MinimalClearingDifference(AbstractAnalysis):
 
-    def __init__(self, data_list: Dict[str, gaitalytics.utils.BasicCyclePoint], configs: gaitalytics.utils.ConfigProvider):
+    def __init__(self, data_list: dict[str, gaitalytics.utils.BasicCyclePoint], configs: gaitalytics.utils.ConfigProvider):
         super().__init__(data_list, configs)
 
     def analyse(self, **kwargs) -> DataFrame:
