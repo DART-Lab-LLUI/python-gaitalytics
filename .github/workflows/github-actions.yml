@@ -13,7 +13,7 @@ jobs:
             python: '3.11'
             toxpython: 'python3.11'
             tox_env: 'check'
-            os: 'ubuntu-latest'
+            os: 'windows-latest'
           - name: 'docs'
             python: '3.11'
             toxpython: 'python3.11'
