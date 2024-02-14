@@ -1,9 +1,12 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from types import MappingProxyType
 from typing import List
 
 import numpy as np
-from btk import btkAcquisition, btkForcePlatformsExtractor, btkGroundReactionWrenchFilter
+from btk import btkAcquisition
+from btk import btkForcePlatformsExtractor
+from btk import btkGroundReactionWrenchFilter
 from matplotlib import pyplot as plt
 from scipy import signal
 
@@ -21,15 +24,17 @@ class AbstractGaitEventDetector(ABC):
         pass
 
     @staticmethod
-    def _create_event(file_handler: gaitalytics.files.FileHandler,
-                      frame: int,
-                      event_label: gaitalytics.utils.GaitEventLabel,
-                      event_context: gaitalytics.utils.GaitEventContext):
+    def _create_event(
+        file_handler: gaitalytics.files.FileHandler,
+        frame: int,
+        event_label: gaitalytics.utils.GaitEventLabel,
+        event_context: gaitalytics.utils.GaitEventContext,
+    ):
         start_frame = file_handler.get_actual_start_frame()
 
         event = gaitalytics.utils.GaitEvent(file_handler.get_actual_start_frame(), file_handler.get_point_frequency())
         event.label = event_label.value
-        event.frame = int(frame + start_frame)
+        event.frame = int(frame + start_frame - 1)
         event.icon_id = gaitalytics.utils.GaitEventLabel.get_type_id(event_label.value)
         event.context = event_context.value
         return event
@@ -40,9 +45,8 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
     This class detects gait events from cgm2 model data
     """
 
-    def __init__(self, configs: gaitalytics.utils.ConfigProvider,
-                 **kwargs):
-        """ Initializes Object
+    def __init__(self, configs: gaitalytics.utils.ConfigProvider, **kwargs):
+        """Initializes Object
 
         :param foot_strike_offset: numbers of frames to offset next foot strike event
         :param foot_off_offset: number of frames to offset next foot off event
@@ -61,26 +65,20 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
         min_distance = kwargs.get("min_distance", 100)
         show_plot = kwargs.get("show_plot", False)
 
-        right_heel = file_handler.get_point(self._config.MARKER_MAPPING.right_heel.value).values[:,
-                     gaitalytics.utils.AxesNames.y.value]
-        left_heel = file_handler.get_point(self._config.MARKER_MAPPING.left_heel.value).values[:,
-                    gaitalytics.utils.AxesNames.y.value]
-        right_toe = file_handler.get_point(self._config.MARKER_MAPPING.right_meta_2.value).values[:,
-                    gaitalytics.utils.AxesNames.y.value]
-        left_toe = file_handler.get_point(self._config.MARKER_MAPPING.left_meta_2.value).values[:,
-                   gaitalytics.utils.AxesNames.y.value]
-        right_hip = file_handler.get_point(self._config.MARKER_MAPPING.right_back_hip.value).values[:,
-                    gaitalytics.utils.AxesNames.y.value]
-        left_hip = file_handler.get_point(self._config.MARKER_MAPPING.left_back_hip.value).values[:,
-                   gaitalytics.utils.AxesNames.y.value]
-        '''
+        right_heel = file_handler.get_point(self._config.MARKER_MAPPING.right_heel.value).values[:, gaitalytics.utils.AxesNames.y.value]
+        left_heel = file_handler.get_point(self._config.MARKER_MAPPING.left_heel.value).values[:, gaitalytics.utils.AxesNames.y.value]
+        right_toe = file_handler.get_point(self._config.MARKER_MAPPING.right_meta_2.value).values[:, gaitalytics.utils.AxesNames.y.value]
+        left_toe = file_handler.get_point(self._config.MARKER_MAPPING.left_meta_2.value).values[:, gaitalytics.utils.AxesNames.y.value]
+        right_hip = file_handler.get_point(self._config.MARKER_MAPPING.right_back_hip.value).values[:, gaitalytics.utils.AxesNames.y.value]
+        left_hip = file_handler.get_point(self._config.MARKER_MAPPING.left_back_hip.value).values[:, gaitalytics.utils.AxesNames.y.value]
+        """
         left_heel, left_toe, right_heel, right_toe, right_hip, left_hip = self._move_to_plus(left_heel,
                                                                                              left_hip,
                                                                                              left_toe,
                                                                                              right_heel,
                                                                                              right_hip,
                                                                                              right_toe)
-        '''
+        """
         sacrum = (right_hip + left_hip) / 2.0
         right_diff_heel = (right_heel - sacrum) * -1
         left_diff_heel = (left_heel - sacrum) * -1
@@ -89,27 +87,47 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
 
         if show_plot:
             base_title = "Test"
-            self._plot_curves(right_diff_heel,
-                              right_heel,
-                              sacrum, f"{base_title}_right_heel")
-            self._plot_curves(left_diff_heel,
-                              left_heel,
-                              sacrum, f"{base_title}_left_heel")
+            self._plot_curves(right_diff_heel, right_heel, sacrum, f"{base_title}_right_heel")
+            self._plot_curves(left_diff_heel, left_heel, sacrum, f"{base_title}_left_heel")
 
-        self._create_events(file_handler, left_diff_toe, gaitalytics.utils.GaitEventLabel.FOOT_OFF,
-                            gaitalytics.utils.GaitEventContext.LEFT, min_distance, show_plot)
-        self._create_events(file_handler, right_diff_toe, gaitalytics.utils.GaitEventLabel.FOOT_OFF,
-                            gaitalytics.utils.GaitEventContext.RIGHT, min_distance, show_plot)
-        self._create_events(file_handler, left_diff_heel, gaitalytics.utils.GaitEventLabel.FOOT_STRIKE,
-                            gaitalytics.utils.GaitEventContext.LEFT, min_distance, show_plot)
-        self._create_events(file_handler, right_diff_heel, gaitalytics.utils.GaitEventLabel.FOOT_STRIKE,
-                            gaitalytics.utils.GaitEventContext.RIGHT, min_distance, show_plot)
+        self._create_events(
+            file_handler,
+            left_diff_toe,
+            gaitalytics.utils.GaitEventLabel.FOOT_OFF,
+            gaitalytics.utils.GaitEventContext.LEFT,
+            min_distance,
+            show_plot,
+        )
+        self._create_events(
+            file_handler,
+            right_diff_toe,
+            gaitalytics.utils.GaitEventLabel.FOOT_OFF,
+            gaitalytics.utils.GaitEventContext.RIGHT,
+            min_distance,
+            show_plot,
+        )
+        self._create_events(
+            file_handler,
+            left_diff_heel,
+            gaitalytics.utils.GaitEventLabel.FOOT_STRIKE,
+            gaitalytics.utils.GaitEventContext.LEFT,
+            min_distance,
+            show_plot,
+        )
+        self._create_events(
+            file_handler,
+            right_diff_heel,
+            gaitalytics.utils.GaitEventLabel.FOOT_STRIKE,
+            gaitalytics.utils.GaitEventContext.RIGHT,
+            min_distance,
+            show_plot,
+        )
 
     @staticmethod
     def _plot_curves(diff, foot, sacrum, title):
         from_frame = 3000
         to_frame = 3500
-        fig, host = plt.subplots(figsize=(15, 12), layout='constrained')
+        fig, host = plt.subplots(figsize=(15, 12), layout="constrained")
         diff_short = diff[from_frame:to_frame]
         foot_short = foot[from_frame:to_frame]
         sacrum_short = sacrum[from_frame:to_frame]
@@ -122,27 +140,22 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
         ax2.set_ylabel("foot")
         ax3.set_ylabel("sacrum")
 
-        color1, color2, color3 = plt.cm.viridis([0, .5, .9])
+        color1, color2, color3 = plt.cm.viridis([0, 0.5, 0.9])
         p1 = host.plot(diff_short, color=color1, label="diff")
         extremes, foo = signal.find_peaks(diff_short)
         host.plot(extremes, diff_short[extremes], "x")
         p2 = ax2.plot(foot_short, color=color2, label="foot")
         p3 = ax3.plot(sacrum_short, color=color3, label="sacrum")
 
-        host.legend(handles=p1 + p2 + p3, loc='best')
+        host.legend(handles=p1 + p2 + p3, loc="best")
         # right, left, top, bottom
-        ax3.spines['right'].set_position(('outward', 60))
+        ax3.spines["right"].set_position(("outward", 60))
         plt.savefig(f"./playground/{title}.png")
         plt.show()
 
     @staticmethod
     def _move_to_plus(left_heel, left_hip, left_toe, right_heel, right_hip, right_toe):
-        min_value = abs(min([min(right_heel),
-                             min(right_toe),
-                             min(left_heel),
-                             min(left_toe),
-                             min(right_hip),
-                             min(left_hip)]))
+        min_value = abs(min([min(right_heel), min(right_toe), min(left_heel), min(left_toe), min(right_hip), min(left_hip)]))
         right_heel = right_heel + min_value
         left_heel = left_heel + min_value
         right_toe = right_toe + min_value
@@ -154,16 +167,20 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
 
     #   gaitalytics.c3d.sort_events(acq)
 
-    def _create_events(self, file_handler: gaitalytics.files.FileHandler,
-                       diff,
-                       event_label: gaitalytics.utils.GaitEventLabel,
-                       event_context: gaitalytics.utils.GaitEventContext,
-                       min_distance: int = 100,
-                       show_plot: bool = False):
+    def _create_events(
+        self,
+        file_handler: gaitalytics.files.FileHandler,
+        diff,
+        event_label: gaitalytics.utils.GaitEventLabel,
+        event_context: gaitalytics.utils.GaitEventContext,
+        min_distance: int = 100,
+        show_plot: bool = False,
+    ):
         data = diff
         if gaitalytics.files.is_progression_axes_flip(
-                file_handler.get_point(self._config.MARKER_MAPPING.left_heel.value).values,
-                file_handler.get_point(self._config.MARKER_MAPPING.left_meta_5.value).values):
+            file_handler.get_point(self._config.MARKER_MAPPING.left_heel.value).values,
+            file_handler.get_point(self._config.MARKER_MAPPING.left_meta_5.value).values,
+        ):
             data = data * -1
 
         data = gaitalytics.utils.min_max_norm(data)
@@ -197,7 +214,7 @@ class ForcePlateEventDetection(AbstractGaitEventDetector):
     def detect_events(self, file_handler: gaitalytics.files.FileHandler, **kwargs):
         """
         Detect force plate gait events with peak detection
-        :param acq: loaded and filtered acquisition
+        :param file_handler:
         """
         if isinstance(file_handler, gaitalytics.files.BtkFileHandler):
 
@@ -221,7 +238,7 @@ class ForcePlateEventDetection(AbstractGaitEventDetector):
         Return array of ["Type of event":str,index of event:int]
         :param force_plate_signal: Signal of the force plate
         :param detected_force_plate_events: detection from detect_onset
-        :return: 2 dimensional array with event name and frame index
+        :return: 2-dimensional array with event name and frame index
         """
 
         signal_length = len(force_plate_signal)
@@ -289,7 +306,6 @@ class AbstractEventAnomalyChecker(ABC):
         :param file_handler: Acquisition with added Events
         :return: flag is anomalies found, list of anomalies
         """
-        pass
 
 
 class ContextPatternChecker(AbstractEventAnomalyChecker):
@@ -306,9 +322,7 @@ class ContextPatternChecker(AbstractEventAnomalyChecker):
         abnormal_event_frames = []
         anomaly_detected = False
 
-        file_handler.sort_events()
-
-        for current_event_index in range(0, file_handler.get_events_size()):
+        for current_event_index in range(file_handler.get_events_size()):
             current_event = file_handler.get_event(current_event_index)
             context = current_event.context
             for next_event_index in range(current_event_index + 1, file_handler.get_events_size()):
@@ -316,9 +330,7 @@ class ContextPatternChecker(AbstractEventAnomalyChecker):
                 if next_event.context == context:
                     if current_event.label == next_event.label:
                         anomaly_detected = True
-                        anomaly = GaitEventAnomaly(current_event.frame,
-                                                   next_event.frame, context,
-                                                   f"Event sequence off")
+                        anomaly = GaitEventAnomaly(current_event.frame, next_event.frame, context, "Event sequence off")
                         abnormal_event_frames.append(anomaly)
 
                     break
@@ -335,16 +347,16 @@ class EventSpacingChecker(AbstractEventAnomalyChecker):
     def _check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, List[GaitEventAnomaly]]:
         anomaly_detected = False
         abnormal_event_frames = []
-        for current_event_index in range(0, file_handler.get_events_size()):
+        for current_event_index in range(file_handler.get_events_size()):
             current_event = file_handler.get_event(current_event_index)
             context = current_event.context
             for next_event_index in range(current_event_index + 1, file_handler.get_events_size()):
                 next_event = file_handler.get_event(next_event_index)
                 if next_event.context == context:
                     if next_event.frame - current_event.frame < self._frame_threshold:
-                        anomaly = GaitEventAnomaly(current_event.frame,
-                                                   next_event.frame, context,
-                                                   f"Spacing smaller than {self._frame_threshold}")
+                        anomaly = GaitEventAnomaly(
+                            current_event.frame, next_event.frame, context, f"Spacing smaller than {self._frame_threshold}"
+                        )
                         abnormal_event_frames.append(anomaly)
                         anomaly_detected = True
                     break
@@ -352,8 +364,9 @@ class EventSpacingChecker(AbstractEventAnomalyChecker):
 
 
 # utils
-def find_next_event(file_handler: gaitalytics.files.FileHandler, label: str, context, start_index: int) -> \
-        [gaitalytics.utils.GaitEvent, List[gaitalytics.utils.GaitEvent]]:
+def find_next_event(
+    file_handler: gaitalytics.files.FileHandler, label: str, context, start_index: int
+) -> [gaitalytics.utils.GaitEvent, List[gaitalytics.utils.GaitEvent]]:
     if file_handler.get_events_size() >= start_index + 1:
         unused_events: List[gaitalytics.utils.GaitEvent] = []
         for event_index in range(start_index + 1, file_handler.get_events_size()):
@@ -363,7 +376,7 @@ def find_next_event(file_handler: gaitalytics.files.FileHandler, label: str, con
                     return [event, unused_events]
 
             unused_events.append(event)
-    raise IndexError()
+    raise IndexError
 
 
 def force_plate_down_sample(acq: btkAcquisition, force_plate_index: int) -> list:
@@ -386,31 +399,30 @@ def force_plate_down_sample(acq: btkAcquisition, force_plate_index: int) -> list
     ground_reaction_collection = ground_reaction_filter.GetOutput()
     ground_reaction_collection.Update()
     force = ground_reaction_collection.GetItem(force_plate_index).GetForce().GetValues()
-    return force[0:(last_frame_index - first_frame_index + 1) * analog_sample_per_frame:analog_sample_per_frame][:, 2]
+    return force[0 : (last_frame_index - first_frame_index + 1) * analog_sample_per_frame : analog_sample_per_frame][:, 2]
 
 
-def detect_onset(x, threshold=0, n_above=1, n_below=0,
-                 threshold2=None, n_above2=1, show=False, ax=None):
-    """Detects onset in data based on amplitude threshold.
-    """
+def detect_onset(x, threshold=0, n_above=1, n_below=0, threshold2=None, n_above2=1, show=False, ax=None):
+    """Detects onset in data based on amplitude threshold."""
     ## TODO rewrite code, just copied it
 
-    x = np.atleast_1d(x).astype('float64')
+    x = np.atleast_1d(x).astype("float64")
     # deal with NaN's (by definition, NaN's are not greater than threshold)
     x[np.isnan(x)] = -np.inf
     # indices of data greater than or equal to threshold
     inds = np.nonzero(x >= threshold)[0]
     if inds.size:
         # initial and final indexes of almost continuous data
-        inds = np.vstack((inds[np.diff(np.hstack((-np.inf, inds))) > n_below + 1],
-                          inds[np.diff(np.hstack((inds, np.inf))) > n_below + 1])).T
+        inds = np.vstack(
+            (inds[np.diff(np.hstack((-np.inf, inds))) > n_below + 1], inds[np.diff(np.hstack((inds, np.inf))) > n_below + 1])
+        ).T
         # indexes of almost continuous data longer than or equal to n_above
         inds = inds[inds[:, 1] - inds[:, 0] >= n_above - 1, :]
         # minimum amplitude of n_above2 values in x to detect
         if threshold2 is not None and inds.size:
             idel = np.ones(inds.shape[0], dtype=bool)
             for i in range(inds.shape[0]):
-                if np.count_nonzero(x[inds[i, 0]: inds[i, 1] + 1] >= threshold2) < n_above2:
+                if np.count_nonzero(x[inds[i, 0] : inds[i, 1] + 1] >= threshold2) < n_above2:
                     idel[i] = False
             inds = inds[idel, :]
     if not inds.size:
@@ -427,8 +439,8 @@ def tolerant_mean(arrs):
     lens = [len(i) for i in arrs]
     arr = np.ma.empty((np.max(lens), len(arrs)))
     arr.mask = True
-    for idx, l in enumerate(arrs):
-        arr[:len(l), idx] = l
+    for idx, line in enumerate(arrs):
+        arr[: len(line), idx] = line
     return arr.mean(axis=-1), arr.std(axis=-1)
 
 
@@ -438,8 +450,8 @@ def create_matrix_padded(matrix, max_length):
     for array in matrix:
         to_pad = max_length - len(array)
         if lin_array:
-            array_pad = np.pad(array, (0, to_pad), 'constant', constant_values=0)
+            array_pad = np.pad(array, (0, to_pad), "constant", constant_values=0)
         else:
-            array_pad = np.pad(array[:, 0], (0, to_pad), 'constant', constant_values=0)
+            array_pad = np.pad(array[:, 0], (0, to_pad), "constant", constant_values=0)
         matx.append(array_pad)
     return matx

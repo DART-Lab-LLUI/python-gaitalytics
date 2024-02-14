@@ -10,6 +10,7 @@ def read(*names, **kwargs):
     with Path(__file__).parent.joinpath(*names).open(encoding=kwargs.get("encoding", "utf8")) as fh:
         return fh.read()
 
+
 setup(
     name="gaitalytics",
     version="0.0.0",
@@ -80,4 +81,3 @@ setup(
         ]
     },
 )
-

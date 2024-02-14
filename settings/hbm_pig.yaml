@@ -96,4 +96,3 @@ model_mapping:
   right_knee_power: RKneePower
   left_ankle_power: LAnklePower
   right_ankle_power: RAnklePower
-

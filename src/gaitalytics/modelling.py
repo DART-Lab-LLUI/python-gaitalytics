@@ -1,11 +1,12 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 
 import numpy as np
 import scipy as sc
 from matplotlib import pyplot as plt
 
-import gaitalytics.utils
 import gaitalytics.files
+import gaitalytics.utils
 
 
 class BaseOutputModeller(ABC):
@@ -30,7 +31,7 @@ class BaseOutputModeller(ABC):
 class COMModeller(BaseOutputModeller):
 
     def __init__(self, configs: gaitalytics.utils.ConfigProvider):
-        super().__init__(configs.MARKER_MAPPING.com.value, gaitalytics.utils.PointDataType.Marker)
+        super().__init__(configs.MARKER_MAPPING.com.value, gaitalytics.utils.PointDataType.MARKERS)
         self._configs = configs
 
     def _calculate_point(self, file_handler: gaitalytics.files.FileHandler, **kwargs):
@@ -43,7 +44,7 @@ class COMModeller(BaseOutputModeller):
 
 class XCOMModeller(BaseOutputModeller):
     def __init__(self, configs: gaitalytics.utils.ConfigProvider):
-        super().__init__(configs.MARKER_MAPPING.xcom.value, gaitalytics.utils.PointDataType.Marker)
+        super().__init__(configs.MARKER_MAPPING.xcom.value, gaitalytics.utils.PointDataType.MARKERS)
         self._configs = configs
 
     def _calculate_point(self, file_handler: gaitalytics.files.FileHandler, **kwargs):
@@ -54,12 +55,12 @@ class XCOMModeller(BaseOutputModeller):
 
     def _calculate_xcom(self, belt_speed: float, com: np.ndarray, dominant_leg_length: float):
         com_v = self._calculate_point_velocity(com)
-        sos = sc.signal.butter(2, 5,'low', fs= 100, output='sos')
+        sos = sc.signal.butter(2, 5, "low", fs=100, output="sos")
         com_v[:, 0] = sc.signal.sosfilt(sos, com_v[:, 0])
         com_v[:, 1] = sc.signal.sosfilt(sos, com_v[:, 1])
         com_v[:, 2] = sc.signal.sosfilt(sos, com_v[:, 2])
         # to meter
-        dominant_leg_length = (dominant_leg_length / 1000)
+        dominant_leg_length = dominant_leg_length / 1000
         com = com / 1000
 
         # from mm/(s/100) to m/s
@@ -92,7 +93,7 @@ class CMoSModeller(BaseOutputModeller):
 
     def __init__(self, configs: gaitalytics.utils.ConfigProvider, **kwargs):
         self._configs = configs
-        super().__init__(configs.MARKER_MAPPING.cmos.value, gaitalytics.utils.PointDataType.Marker)
+        super().__init__(configs.MARKER_MAPPING.cmos.value, gaitalytics.utils.PointDataType.MARKERS)
 
     def _calculate_point(self, file_handler: gaitalytics.files.FileHandler, **kwargs) -> np.ndarray:
         x_com = file_handler.get_point(self._configs.MARKER_MAPPING.xcom.value).values
@@ -106,30 +107,34 @@ class CMoSModeller(BaseOutputModeller):
         foot_left = file_handler.get_point(self._configs.MARKER_MAPPING.left_meta_2.value).values
         foot_right = file_handler.get_point(self._configs.MARKER_MAPPING.right_meta_2.value).values
 
-        return self._calculate_cMoS(x_com,
-                                    lat_malleoli_left,
-                                    lat_malleoli_right,
-                                    med_malleoli_left,
-                                    med_malleoli_right,
-                                    foot_left,
-                                    foot_right,
-                                    heel_left,
-                                    heel_right,
-                                    file_handler,
-                                    **kwargs)
+        return self._calculate_cMoS(
+            x_com,
+            lat_malleoli_left,
+            lat_malleoli_right,
+            med_malleoli_left,
+            med_malleoli_right,
+            foot_left,
+            foot_right,
+            heel_left,
+            heel_right,
+            file_handler,
+            **kwargs,
+        )
 
-    def _calculate_cMoS(self,
-                        x_com: np.ndarray,
-                        lat_malleoli_left: np.ndarray,
-                        lat_malleoli_right: np.ndarray,
-                        med_malleoli_left: np.ndarray,
-                        med_malleoli_right: np.ndarray,
-                        foot_left: np.ndarray,
-                        foot_right: np.ndarray,
-                        heel_left: np.ndarray,
-                        heel_right: np.ndarray,
-                        file_handler: gaitalytics.files.FileHandler,
-                        **kwargs) -> np.ndarray:
+    def _calculate_cMoS(
+        self,
+        x_com: np.ndarray,
+        lat_malleoli_left: np.ndarray,
+        lat_malleoli_right: np.ndarray,
+        med_malleoli_left: np.ndarray,
+        med_malleoli_right: np.ndarray,
+        foot_left: np.ndarray,
+        foot_right: np.ndarray,
+        heel_left: np.ndarray,
+        heel_right: np.ndarray,
+        file_handler: gaitalytics.files.FileHandler,
+        **kwargs,
+    ) -> np.ndarray:
         def mos_non_event(x_com_v, frame_index, side):
             return [0, 0, 0]
 
@@ -174,8 +179,6 @@ class CMoSModeller(BaseOutputModeller):
         current_context = None
         mos_function = mos_non_event
         for frame_i in range(len(x_com)):
-            if frame_i == 1420:
-                print(frame_i)
 
             if frame_i == next_event.frame:
                 current_context = gaitalytics.utils.GaitEventContext(next_event.context)
@@ -207,42 +210,42 @@ class CMoSModeller(BaseOutputModeller):
         from_frame = 1420
         to_frame = 1534
 
-        plot_mosml = ax1.plot(mos[from_frame:to_frame, 0], color='blue', label='MOSml')
+        plot_mosml = ax1.plot(mos[from_frame:to_frame, 0], color="blue", label="MOSml")
         ax1_2 = ax1.twinx()
         ax1_3 = ax1.twinx()
-        plot_xcomml = ax1_2.plot(x_com[from_frame:to_frame, 0], color='green', label='xCOMml', linestyle='dashed')
-        plot_comml = ax1_3.plot(com[from_frame:to_frame, 0], color='brown', label='COMml', linestyle='-.')
+        plot_xcomml = ax1_2.plot(x_com[from_frame:to_frame, 0], color="green", label="xCOMml", linestyle="dashed")
+        plot_comml = ax1_3.plot(com[from_frame:to_frame, 0], color="brown", label="COMml", linestyle="-.")
         ax1.set(xlabel="frame", ylabel="mos")
         ax1_2.set(ylabel="xcom")
         ax1_3.set(ylabel="com")
         ax1_3.spines["right"].set_position(("axes", 1.2))
         ax1.axhline(0, color="gray", linestyle=":")
-        ax1.axvline(0, linestyle=":", color='gray')
-        ax1.axvline(18, linestyle=":", color='gray')
-        ax1.axvline(57, linestyle=":", color='gray')
-        ax1.axvline(74, linestyle=":", color='gray')
-        ax1.axvline(to_frame - from_frame-1, linestyle=":", color='gray')
+        ax1.axvline(0, linestyle=":", color="gray")
+        ax1.axvline(18, linestyle=":", color="gray")
+        ax1.axvline(57, linestyle=":", color="gray")
+        ax1.axvline(74, linestyle=":", color="gray")
+        ax1.axvline(to_frame - from_frame - 1, linestyle=":", color="gray")
 
-        plot_mosap = ax2.plot(mos[from_frame:to_frame, 1], color='red', label='MOSap')
+        plot_mosap = ax2.plot(mos[from_frame:to_frame, 1], color="red", label="MOSap")
         ax2_2 = ax2.twinx()
         ax2_3 = ax2.twinx()
-        plot_xcomap = ax2_2.plot(x_com[from_frame:to_frame, 1], color='green', label='xCOMap', linestyle='dashed')
-        plot_comap = ax2_3.plot(com[from_frame:to_frame, 1], color='brown', label='COMap', linestyle='-.')
+        plot_xcomap = ax2_2.plot(x_com[from_frame:to_frame, 1], color="green", label="xCOMap", linestyle="dashed")
+        plot_comap = ax2_3.plot(com[from_frame:to_frame, 1], color="brown", label="COMap", linestyle="-.")
 
         ax2_3.spines["right"].set_position(("axes", 1.2))
         ax2.set(xlabel="frame", ylabel="mos")
         ax2_2.set(ylabel="xcom")
         ax2_3.set(ylabel="com")
-        ax2.axvline(0, linestyle=":", color='gray')
+        ax2.axvline(0, linestyle=":", color="gray")
         ax2.axhline(0, color="gray", linestyle=":")
-        ax2.axvline(18, linestyle=":", color='gray')
-        ax2.axvline(57, linestyle=":", color='gray')
-        ax2.axvline(74, linestyle=":", color='gray')
-        ax2.axvline(to_frame-from_frame-1, linestyle=":", color='gray')
+        ax2.axvline(18, linestyle=":", color="gray")
+        ax2.axvline(57, linestyle=":", color="gray")
+        ax2.axvline(74, linestyle=":", color="gray")
+        ax2.axvline(to_frame - from_frame - 1, linestyle=":", color="gray")
 
         lns = plot_mosml + plot_xcomml + plot_comml + plot_mosap + plot_xcomap + plot_comap
-        labels = [l.get_label() for l in lns]
-        plt.legend(lns, labels, loc='upper center', bbox_to_anchor=(0.5, -0.06), ncol=6)
+        labels = [line.get_label() for line in lns]
+        plt.legend(lns, labels, loc="upper center", bbox_to_anchor=(0.5, -0.06), ncol=6)
         # Adjust the spacing between subplots
         plt.tight_layout()
         plt.show()

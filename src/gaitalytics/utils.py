@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from abc import ABC
 from enum import Enum
-from typing import List, Dict
+from pathlib import Path
 
 import numpy as np
 import yaml
-from btk import btkEvent
-from pandas import DataFrame, read_csv
+from pandas import DataFrame
+from pandas import read_csv
 
 FILENAME_DELIMITER = "-"
 
@@ -26,43 +26,43 @@ class ConfigProvider:
     _MODEL_MAPPING = "model_mapping"
 
     def __init__(self, file_path: str):
-        self._read_configs(file_path)
-        self.MARKER_MAPPING = Enum('MarkerMapping', self._config[self._MARKER_MAPPING])
-        self.MODEL_MAPPING = Enum('ModelMapping', self._config[self._MODEL_MAPPING])
+        file_path_obj = Path(file_path)
+        self._read_configs(file_path_obj)
+        self.MARKER_MAPPING = Enum("MarkerMapping", self._config[self._MARKER_MAPPING])
+        self.MODEL_MAPPING = Enum("ModelMapping", self._config[self._MODEL_MAPPING])
 
     def get_translated_label(self, label: str, point_type: PointDataType) -> Enum | None:
         try:
-            if point_type.value == PointDataType.Marker.value:
+            if point_type.value == PointDataType.MARKERS.value:
                 return self.MARKER_MAPPING(label)
             else:
                 return self.MODEL_MAPPING(label)
-        except ValueError as e:
+        except ValueError:
             try:
-                if point_type.value == PointDataType.Marker.value:
+                if point_type.value == PointDataType.MARKERS.value:
                     return self.MARKER_MAPPING[label]
                 else:
                     return self.MODEL_MAPPING[label]
-            except KeyError as e:
+            except KeyError:
                 return None
 
-    def _read_configs(self, file_path: str):
-        with open(file_path, 'r') as f:
+    def _read_configs(self, file_path: Path):
+        with file_path.open("r") as f:
             self._config = yaml.safe_load(f)
 
     @staticmethod
-    def define_key(translated_label: Enum, point_type: PointDataType,
-                   direction: AxesNames,
-                   side: GaitEventContext) -> str:
+    def define_key(translated_label: Enum, point_type: PointDataType, direction: AxesNames, side: GaitEventContext) -> str:
         if translated_label is not None:
             return f"{translated_label.name}.{point_type.name}.{direction.name}.{side.value}"
 
 
 class SubjectMeasures(yaml.YAMLObject):
-    yaml_tag = u'!subject'
+    yaml_tag = "!subject"
     yaml_loader = yaml.SafeLoader
 
-    def __init__(self, body_mass: float, body_height: float, left_leg_length: float, right_leg_length: float,
-                 subject: str, start_frame: int):
+    def __init__(
+        self, body_mass: float, body_height: float, left_leg_length: float, right_leg_length: float, subject: str, start_frame: int
+    ):
         self.body_mass = body_mass
         self.body_height = body_height
         self.left_leg_length = left_leg_length
@@ -70,25 +70,27 @@ class SubjectMeasures(yaml.YAMLObject):
         self.subject = subject
         self.start_frame = start_frame
 
-    def to_file(self, path_out: str):
-        with open(f"{path_out}/subject.yml", "w") as f:
+    def to_file(self, path_out: Path):
+        file = path_out / "subject.yml"
+        with file.open("w") as f:
             yaml.dump(self, f)
 
     @staticmethod
-    def from_file(file_path: str):
-        with open(file_path, 'r') as f:
+    def from_file(file_path: Path):
+        with file_path.open("r") as f:
             measures = yaml.safe_load(f)
             return measures
 
 
 class PointDataType(Enum):
-    Marker = 0
-    Angles = 1
-    Forces = 2
-    Moments = 3
-    Power = 4
-    Scalar = 5
-    Reaction = 6
+    MARKERS = 0
+    ANGLES = 1
+    FORCES = 2
+    MOMENTS = 3
+    POWERS = 4
+    SCALARS = 5
+    REACTIONS = 6
+    MODELLED_MARKERS = 7
 
 
 class AxesNames(Enum):
@@ -101,6 +103,7 @@ class GaitEventContext(Enum):
     """
     Representation of gait event contexts. At the moment mainly left and right
     """
+
     LEFT = "Left"
     RIGHT = "Right"
 
@@ -115,9 +118,7 @@ def get_key_from_filename(filename: str) -> [str, str, str]:
     return filename.split(FILENAME_DELIMITER)
 
 
-def get_meta_data_filename(filename: str) -> [str, PointDataType,
-                                              AxesNames,
-                                              GaitEventContext, str, str]:
+def get_meta_data_filename(filename: str) -> [str, PointDataType, AxesNames, GaitEventContext, str, str]:
     prefix, key, postfix = get_key_from_filename(filename)
     meta_data = key.split(".")
     label = meta_data[0]
@@ -147,21 +148,20 @@ class GaitEventLabel(Enum):
 
 class GaitCycle:
 
-    def __init__(self, number: int, context: GaitEventContext, start_frame: int, end_frame: int,
-                 unused_events: List[btkEvent]):
+    def __init__(self, number: int, context: GaitEventContext, start_frame: int, end_frame: int, unused_events: list[GaitEvent]):
         self.number: int = number
         self.context: GaitEventContext = context
         self.start_frame: int = start_frame
         self.end_frame: int = end_frame
         self.length: int = end_frame - start_frame
-        self.unused_events: Dict | None = None
+        self.unused_events: dict | None = None
         self._unused_events_to_dict(unused_events)
 
-    def _unused_events_to_dict(self, unused_events: List[btkEvent]):
+    def _unused_events_to_dict(self, unused_events: list[GaitEvent]):
         if len(unused_events) <= 3:
             self.unused_events = {}
             for unused_event in unused_events:
-                self.unused_events[f"{unused_event.GetLabel()}_{unused_event.GetContext()}"] = unused_event.GetFrame()
+                self.unused_events[f"{unused_event.label}_{unused_event.context}"] = unused_event.frame
 
         else:
             raise ValueError("too much events in cycle")
@@ -170,8 +170,8 @@ class GaitCycle:
 class GaitCycleList:
 
     def __init__(self):
-        self.left_cycles: Dict[int, GaitCycle] = {}
-        self.right_cycles: Dict[int, GaitCycle] = {}
+        self.left_cycles: dict[int, GaitCycle] = {}
+        self.right_cycles: dict[int, GaitCycle] = {}
 
     def add_cycle(self, cycle: GaitCycle):
         if cycle.context == GaitEventContext.LEFT:
@@ -186,7 +186,7 @@ class GaitCycleList:
             return self._longest_cycle(self.right_cycles)
 
     @staticmethod
-    def _longest_cycle(cycles: Dict[int, GaitCycle]) -> int:
+    def _longest_cycle(cycles: dict[int, GaitCycle]) -> int:
         length = 0
         for cycle in cycles.values():
             length = length if length > cycle.length else cycle.length
@@ -296,9 +296,7 @@ class BasicCyclePoint(ABC):
 
     @staticmethod
     def define_cycle_point_file_name(cycle_point, prefix: str, postfix: str) -> str:
-        key = ConfigProvider.define_key(cycle_point.translated_label, cycle_point.data_type,
-                                        cycle_point.direction,
-                                        cycle_point.context)
+        key = ConfigProvider.define_key(cycle_point.translated_label, cycle_point.data_type, cycle_point.direction, cycle_point.context)
 
         return f"{prefix}{FILENAME_DELIMITER}{key}{FILENAME_DELIMITER}{postfix}.csv"
 
@@ -309,10 +307,7 @@ class BasicCyclePoint(ABC):
         output.to_csv(f"{path}/{filename}")
 
     @classmethod
-    def from_csv(cls, configs: ConfigProvider,
-                 path: str,
-                 filename: str,
-                 subject: SubjectMeasures) -> BasicCyclePoint:
+    def from_csv(cls, configs: ConfigProvider, path: Path, filename: str, subject: SubjectMeasures) -> BasicCyclePoint:
         [label, data_type, direction, context, cycle_point_type, prefix] = get_meta_data_filename(filename)
 
         translated = configs.get_translated_label(label, data_type)
@@ -323,7 +318,7 @@ class BasicCyclePoint(ABC):
         point.subject = subject
         point.translated_label = translated
         point.data_type = data_type
-        data_table = read_csv(f"{path}/{filename}", index_col=cls.CYCLE_NUMBER)
+        data_table = read_csv(path / filename, index_col=cls.CYCLE_NUMBER)
         frame_labels = [cls.START_FRAME, cls.END_FRAME]
         event_labels = [cls.FOOT_OFF_CONTRA, cls.FOOT_STRIKE_CONTRA, cls.FOOT_OFF]
         point.frames = data_table[frame_labels]
@@ -344,8 +339,7 @@ class TestCyclePoint(BasicCyclePoint):
         columns = np.arange(0, longest_frames)
         self.data_table = DataFrame(columns=columns, index=cycle_numbers)
         self.data_table.index.name = self.CYCLE_NUMBER
-        self.event_frames = DataFrame(columns=[self.FOOT_OFF_CONTRA, self.FOOT_STRIKE_CONTRA, self.FOOT_OFF],
-                                      index=cycle_numbers)
+        self.event_frames = DataFrame(columns=[self.FOOT_OFF_CONTRA, self.FOOT_STRIKE_CONTRA, self.FOOT_OFF], index=cycle_numbers)
         self.event_frames.index.name = self.CYCLE_NUMBER
         self.frames = DataFrame(columns=[self.START_FRAME, self.END_FRAME], index=cycle_numbers)
         self.frames.index.name = self.CYCLE_NUMBER
@@ -353,10 +347,7 @@ class TestCyclePoint(BasicCyclePoint):
 
 
 class BufferedCyclePoint(BasicCyclePoint):
-    def __init__(self, configs: ConfigProvider,
-                 path: str,
-                 filename: str,
-                 subject: SubjectMeasures):
+    def __init__(self, configs: ConfigProvider, path: Path, filename: str, subject: SubjectMeasures):
         super().__init__()
         self._configs = configs
         self._filename = filename
@@ -424,10 +415,10 @@ class Point:
         frame_number (int): The frame number associated with the point.
         label (str): The label of the point.
         residual (float): A residual value associated with the point.
-        residuals (List[float]): A list of residual values.
+        residuals (list[float]): A list of residual values.
         timestamp (float): The timestamp of the point.
         type (PointDataType): The type of the point, as defined by PointDataType.
-        values (List[float]): The values of the point.
+        values (list[float]): The values of the point.
     """
 
     def __init__(self) -> None:
@@ -449,11 +440,11 @@ class Point:
         self._label = value
 
     @property
-    def residuals(self) -> List[float]:
+    def residuals(self) -> list[float]:
         return self._residuals
 
     @residuals.setter
-    def residuals(self, value: List[float]) -> None:
+    def residuals(self, value: list[float]) -> None:
         self._residuals = value
 
     @property
@@ -516,7 +507,7 @@ class GaitEvent:
 
     @property
     def frame(self) -> int:
-        """Get or set the frame of the gait event """
+        """Get or set the frame of the gait event"""
         return self._frame
 
     @frame.setter
@@ -553,7 +544,7 @@ class GaitEvent:
 
     @property
     def description(self) -> str:
-        """Get or set the description of the gait event. Must be a string """
+        """Get or set the description of the gait event. Must be a string"""
         return self._description
 
     @description.setter
@@ -576,24 +567,24 @@ class GaitEvent:
             raise TypeError("Subject must be a string")
 
     @property
-    def icon_id(self) -> int:
+    def icon_id(self) -> float | int:
         """Get or set the icon ID of the gait event. Must be a float"""
         return self._icon_id
 
     @icon_id.setter
-    def icon_id(self, value: int):
-        if isinstance(value, int):
+    def icon_id(self, value: float | int):
+        if isinstance(value, float) or isinstance(value, int):
             self._icon_id = value
         else:
-            raise TypeError("Icon ID must be a float")
+            raise TypeError("Icon ID must be a float or an integer")
 
     @property
-    def generic_flag(self) -> int:
+    def generic_flag(self) -> float | int:
         return self._generic_flag
 
     @generic_flag.setter
-    def generic_flag(self, value: int):
-        if isinstance(value, int):
+    def generic_flag(self, value: float | int):
+        if isinstance(value, int) or isinstance(value, float):
             self._generic_flag = value
         else:
-            raise TypeError("GenericFlag must be a int")
+            raise TypeError("GenericFlag must be a float or an integer")

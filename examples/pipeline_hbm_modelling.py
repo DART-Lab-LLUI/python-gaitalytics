@@ -1,4 +1,5 @@
-from gaitalytics import utils, api
+from gaitalytics import api
+from gaitalytics import utils
 
 
 def main():

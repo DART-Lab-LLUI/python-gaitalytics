@@ -1,6 +1,10 @@
-from abc import ABC, abstractmethod
+import logging
+from abc import ABC
+from abc import abstractmethod
+from pathlib import Path
 from statistics import mean
-from typing import List, Dict, Union
+from typing import Optional
+from typing import Union
 
 import btk
 
@@ -8,13 +12,15 @@ import gaitalytics.utils
 
 ANALOG_VOLTAGE_PREFIX_LABEL = "Voltage."
 
+logger = logging.getLogger(__name__)
+
 
 def is_progression_axes_flip(left_heel, left_toe):
     return 0 < mean(left_toe[gaitalytics.utils.AxesNames.y.value] - left_heel[gaitalytics.utils.AxesNames.y.value])
 
 
 class FileHandler(ABC):
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: Path):
         self._file_path = file_path
         self.read_file()
 
@@ -24,13 +30,13 @@ class FileHandler(ABC):
         """
         events = self.get_events()
 
-        value_frame: Dict[int, gaitalytics.utils.GaitEvent] = {}
+        value_frame: dict[int, gaitalytics.utils.GaitEvent] = {}
 
-        for index in range(0, len(events)):
+        for index in range(len(events)):
             if events[index].frame not in value_frame:
                 value_frame[events[index].frame] = events[index]
 
-        sorted_keys: Dict[int, gaitalytics.utils.GaitEvent] = dict(sorted(value_frame.items()))
+        sorted_keys: dict[int, gaitalytics.utils.GaitEvent] = dict(sorted(value_frame.items()))
 
         self.clear_events()
         self.set_events(list(sorted_keys.values()))
@@ -39,7 +45,7 @@ class FileHandler(ABC):
     def read_file(self):
         pass
 
-    def write_file(self, out_file_path=None):
+    def write_file(self, out_file_path: Optional[Union[str, Path]] = None):
         if out_file_path is None:
             out_file_path = self._file_path
         self._write_file(out_file_path)
@@ -53,11 +59,11 @@ class FileHandler(ABC):
         pass
 
     @abstractmethod
-    def get_events(self) -> List[gaitalytics.utils.GaitEvent]:
+    def get_events(self) -> list[gaitalytics.utils.GaitEvent]:
         pass
 
     @abstractmethod
-    def set_events(self, events: List[gaitalytics.utils.GaitEvent]):
+    def set_events(self, events: list[gaitalytics.utils.GaitEvent]):
         pass
 
     @abstractmethod
@@ -99,7 +105,7 @@ class FileHandler(ABC):
 
 class BtkFileHandler(FileHandler):
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: Path):
         self._aqc = None
         super().__init__(file_path)
 
@@ -118,11 +124,10 @@ class BtkFileHandler(FileHandler):
         right_leg_length = self._aqc.GetMetaData().GetChild("PROCESSING").GetChild("RLegLength").GetInfo().ToDouble()[0]
         name = self._aqc.GetMetaData().GetChild("SUBJECTS").GetChild("NAMES").GetInfo().ToString()[0].strip()
         start_frame = self._aqc.GetMetaData().GetChild("TRIAL").GetChild("ACTUAL_START_FIELD").GetInfo().ToInt()[0]
-        subject = gaitalytics.utils.SubjectMeasures(body_mass, body_height, left_leg_length, right_leg_length, name,
-                                                    start_frame)
+        subject = gaitalytics.utils.SubjectMeasures(body_mass, body_height, left_leg_length, right_leg_length, name, start_frame)
         return subject
 
-    def _write_file(self, out_file_path: str):
+    def _write_file(self, out_file_path: Path):
         """
         write a c3d with Btk
 
@@ -131,7 +136,7 @@ class BtkFileHandler(FileHandler):
         """
         writer = btk.btkAcquisitionFileWriter()
         writer.SetInput(self._aqc)
-        writer.SetFilename(out_file_path)
+        writer.SetFilename(out_file_path.absolute().__str__())
         writer.Update()
 
     def read_file(self):
@@ -139,7 +144,7 @@ class BtkFileHandler(FileHandler):
         read a c3d with btk
         """
         reader = btk.btkAcquisitionFileReader()
-        reader.SetFilename(self._file_path)
+        reader.SetFilename(self._file_path.absolute().__str__())
         reader.Update()
         self._aqc = reader.GetOutput()
 
@@ -149,13 +154,13 @@ class BtkFileHandler(FileHandler):
     def get_events_size(self) -> int:
         return self._aqc.GetEventNumber()
 
-    def get_events(self) -> List[gaitalytics.utils.GaitEvent]:
-        events: List[gaitalytics.utils.GaitEvent] = []
+    def get_events(self) -> list[gaitalytics.utils.GaitEvent]:
+        events: list[gaitalytics.utils.GaitEvent] = []
         for event in btk.Iterate(self._aqc.GetEvents()):
             events.append(self.map_btk_event(event))
         return events
 
-    def set_events(self, events: List[gaitalytics.utils.GaitEvent]):
+    def set_events(self, events: list[gaitalytics.utils.GaitEvent]):
         new_events = btk.btkEventCollection()
         for gait_event in events:
             new_events.InsertItem(self.map_event(gait_event))

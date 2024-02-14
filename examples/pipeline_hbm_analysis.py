@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from gaitalytics import api
 from gaitalytics import utils
@@ -7,7 +7,7 @@ from gaitalytics import utils
 def main():
     settings_file = "settings/hbm_pig.yaml"
     buffered_path = "./raw"
-    out_path = "./spatio_temp"
+    out_path = Path("./spatio_temp")
 
     configs = utils.ConfigProvider(settings_file)
 
@@ -16,8 +16,8 @@ def main():
 
     results = api.analyse_data(cycle_data, configs)
 
-    if not os.path.exists(out_path):
-        os.mkdir(out_path)
+    if not out_path.exists():
+        out_path.mkdir()
     results.to_csv(f"{out_path}/spatio_temp.csv")
 
 
