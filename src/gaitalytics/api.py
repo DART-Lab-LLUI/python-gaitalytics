@@ -4,8 +4,6 @@ import logging
 import pathlib
 import sys
 from pathlib import Path
-from typing import Optional
-from typing import Union
 
 from pandas import DataFrame
 
