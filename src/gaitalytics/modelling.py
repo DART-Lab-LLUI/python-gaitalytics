@@ -5,7 +5,7 @@ import numpy as np
 import scipy as sc
 from matplotlib import pyplot as plt
 
-import gaitalytics.files
+import gaitalytics.c3d_reader
 import gaitalytics.utils
 
 
@@ -15,7 +15,7 @@ class BaseOutputModeller(ABC):
         self._label = label
         self._type = point_type
 
-    def create_point(self, file_handler: gaitalytics.files.FileHandler, **kwargs):
+    def create_point(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs):
         result = self._calculate_point(file_handler, **kwargs)
         point = gaitalytics.utils.Point()
         point.type = self._type
@@ -24,7 +24,7 @@ class BaseOutputModeller(ABC):
         file_handler.add_point(point)
 
     @abstractmethod
-    def _calculate_point(self, file_handler: gaitalytics.files.FileHandler, **kwargs) -> np.ndarray:
+    def _calculate_point(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs) -> np.ndarray:
         pass
 
 
@@ -34,7 +34,7 @@ class COMModeller(BaseOutputModeller):
         super().__init__(configs.MARKER_MAPPING.com.value, gaitalytics.utils.PointDataType.MARKERS)
         self._configs = configs
 
-    def _calculate_point(self, file_handler: gaitalytics.files.FileHandler, **kwargs):
+    def _calculate_point(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs):
         l_hip_b = file_handler.get_point(self._configs.MARKER_MAPPING.left_back_hip.value).values
         r_hip_b = file_handler.get_point(self._configs.MARKER_MAPPING.right_back_hip.value).values
         l_hip_f = file_handler.get_point(self._configs.MARKER_MAPPING.left_front_hip.value).values
@@ -47,7 +47,7 @@ class XCOMModeller(BaseOutputModeller):
         super().__init__(configs.MARKER_MAPPING.xcom.value, gaitalytics.utils.PointDataType.MARKERS)
         self._configs = configs
 
-    def _calculate_point(self, file_handler: gaitalytics.files.FileHandler, **kwargs):
+    def _calculate_point(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs):
         com = file_handler.get_point(self._configs.MARKER_MAPPING.com.value).values
         belt_speed = kwargs.get("belt_speed", 1)
         dominant_leg_length = kwargs.get("dominant_leg_length", 1)
@@ -95,7 +95,7 @@ class CMoSModeller(BaseOutputModeller):
         self._configs = configs
         super().__init__(configs.MARKER_MAPPING.cmos.value, gaitalytics.utils.PointDataType.MARKERS)
 
-    def _calculate_point(self, file_handler: gaitalytics.files.FileHandler, **kwargs) -> np.ndarray:
+    def _calculate_point(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs) -> np.ndarray:
         x_com = file_handler.get_point(self._configs.MARKER_MAPPING.xcom.value).values
 
         lat_malleoli_left = file_handler.get_point(self._configs.MARKER_MAPPING.left_lat_malleoli.value).values
@@ -132,7 +132,7 @@ class CMoSModeller(BaseOutputModeller):
         foot_right: np.ndarray,
         heel_left: np.ndarray,
         heel_right: np.ndarray,
-        file_handler: gaitalytics.files.FileHandler,
+        file_handler: gaitalytics.c3d_reader.FileHandler,
         **kwargs,
     ) -> np.ndarray:
         def mos_non_event(x_com_v, frame_index, side):

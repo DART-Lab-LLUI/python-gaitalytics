@@ -9,10 +9,12 @@ from pandas import DataFrame
 
 import gaitalytics.analysis
 import gaitalytics.cycle
+import gaitalytics.cycle_nomalisation
 import gaitalytics.events
-import gaitalytics.files
+import gaitalytics.c3d_reader
 import gaitalytics.modelling
 import gaitalytics.utils
+from gaitalytics.file import _cycle_points_to_csv
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -113,7 +115,7 @@ def check_gait_event(
     c3d_file_path: str | Path,
     output_path: str | Path,
     anomaly_checker: list[str] = GAIT_EVENT_CHECKER_LIST,
-    file_handler_class: type[gaitalytics.files.FileHandler] = gaitalytics.files.BtkFileHandler,
+    file_handler_class: type[gaitalytics.c3d_reader.FileHandler] = gaitalytics.c3d_reader.BtkFileHandler,
 ):
     """
     Checks events additionally
@@ -154,7 +156,7 @@ def detect_gait_events(
     configs: gaitalytics.utils.ConfigProvider,
     methode: str = GAIT_EVENT_METHODE_MARKER,
     anomaly_checker: list[str] = GAIT_EVENT_CHECKER_LIST,
-    file_handler_class: type[gaitalytics.files.FileHandler] = gaitalytics.files.BtkFileHandler,
+    file_handler_class: type[gaitalytics.c3d_reader.FileHandler] = gaitalytics.c3d_reader.BtkFileHandler,
     **kwargs,
 ):
     """
@@ -224,7 +226,7 @@ def extract_cycles(
     methode: str = CYCLE_METHOD_HEEL_STRIKE,
     buffer_output_path: str | Path | None = None,
     anomaly_checker: list[str] = GAIT_EVENT_CHECKER_LIST,
-    file_handler_class: type[gaitalytics.files.FileHandler] = gaitalytics.files.BtkFileHandler,
+    file_handler_class: type[gaitalytics.c3d_reader.FileHandler] = gaitalytics.c3d_reader.BtkFileHandler,
 ) -> dict[str, gaitalytics.utils.BasicCyclePoint]:
     """
     extracts and returns cycles from c3d. If a buffered path is delivered data will be stored in the path in separated
@@ -306,7 +308,7 @@ def normalise_cycles(
 
     # get method
     if method == NORMALISE_METHODE_LINEAR:
-        method = gaitalytics.cycle.LinearTimeNormalisation()
+        method = gaitalytics.cycle_nomalisation.LinearTimeNormalisation()
 
     # normalise
     normalised_data = method.normalise(cycle_data)
@@ -324,7 +326,7 @@ def model_data(
     output_path: str,
     configs: gaitalytics.utils.ConfigProvider,
     methode: str,
-    file_handler_class: type[gaitalytics.files.FileHandler] = gaitalytics.files.BtkFileHandler,
+    file_handler_class: type[gaitalytics.c3d_reader.FileHandler] = gaitalytics.c3d_reader.BtkFileHandler,
     **kwargs,
 ):
     """
@@ -365,15 +367,6 @@ def model_data(
     filename = c3d_file_path_obj.name.replace(".4.c3d", ".5.c3d")
     output_path_obj = output_path_obj / filename
     motion_file.write_file(output_path_obj)
-
-
-def _cycle_points_to_csv(cycle_data: dict[str, gaitalytics.utils.BasicCyclePoint], dir_path: str | Path, prefix: str):
-    logger.info("_cycle_points_to_csv")
-    subject_saved = False
-    for key in cycle_data:
-        cycle_data[key].to_csv(dir_path, prefix)
-        if not subject_saved:
-            cycle_data[key].subject.to_file(dir_path)
 
 
 def _create_path_object(file_path: str | Path) -> Path:

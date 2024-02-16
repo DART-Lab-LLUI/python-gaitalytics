@@ -77,3 +77,4 @@ docs/_build
 /raw/
 /spatio_temp/
 /gaitalytics-0.0.0/
+/.pypirc

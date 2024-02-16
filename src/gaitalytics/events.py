@@ -9,7 +9,7 @@ from btk import btkGroundReactionWrenchFilter
 from matplotlib import pyplot as plt
 from scipy import signal
 
-import gaitalytics.files
+import gaitalytics.c3d_reader
 import gaitalytics.utils
 
 FORCE_PLATE_SIDE_MAPPING_CAREN = MappingProxyType({"Left": 0, "Right": 1})
@@ -19,12 +19,12 @@ FORCE_PLATE_SIDE_MAPPING_CAREN = MappingProxyType({"Left": 0, "Right": 1})
 class AbstractGaitEventDetector(ABC):
 
     @abstractmethod
-    def detect_events(self, file_handler: gaitalytics.files.FileHandler, **kwargs):
+    def detect_events(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs):
         pass
 
     @staticmethod
     def _create_event(
-        file_handler: gaitalytics.files.FileHandler,
+        file_handler: gaitalytics.c3d_reader.FileHandler,
         frame: int,
         event_label: gaitalytics.utils.GaitEventLabel,
         event_context: gaitalytics.utils.GaitEventContext,
@@ -54,7 +54,7 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
         self._foot_strike_offset = kwargs.get("foot_strike_offset", 0)
         self._foot_off_offset = kwargs.get("foot_off_offset", 0)
 
-    def detect_events(self, file_handler: gaitalytics.files.FileHandler, **kwargs):
+    def detect_events(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs):
         """detects zeni gait events and stores it in to the acquisition
 
         :param file_handler: loaded and filtered acquisition
@@ -168,7 +168,7 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
 
     def _create_events(
         self,
-        file_handler: gaitalytics.files.FileHandler,
+        file_handler: gaitalytics.c3d_reader.FileHandler,
         diff,
         event_label: gaitalytics.utils.GaitEventLabel,
         event_context: gaitalytics.utils.GaitEventContext,
@@ -176,7 +176,7 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
         show_plot: bool = False,
     ):
         data = diff
-        if gaitalytics.files.is_progression_axes_flip(
+        if gaitalytics.c3d_reader.is_progression_axes_flip(
             file_handler.get_point(self._config.MARKER_MAPPING.left_heel.value).values,
             file_handler.get_point(self._config.MARKER_MAPPING.left_meta_5.value).values,
         ):
@@ -210,12 +210,12 @@ class ForcePlateEventDetection(AbstractGaitEventDetector):
         self._mapped_force_plate = kwargs.get("mapped_force_plate", FORCE_PLATE_SIDE_MAPPING_CAREN)
         self._weight_threshold = kwargs.get("force_gait_event_threshold", 150)
 
-    def detect_events(self, file_handler: gaitalytics.files.FileHandler, **kwargs):
+    def detect_events(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs):
         """
         Detect force plate gait events with peak detection
         :param file_handler:
         """
-        if isinstance(file_handler, gaitalytics.files.BtkFileHandler):
+        if isinstance(file_handler, gaitalytics.c3d_reader.BtkFileHandler):
 
             for context in gaitalytics.utils.GaitEventContext:
                 force_down_sample = force_plate_down_sample(file_handler.aqc, self._mapped_force_plate[context.value])
@@ -285,7 +285,7 @@ class AbstractEventAnomalyChecker(ABC):
         """
         self.child = event_checker
 
-    def check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, list]:
+    def check_events(self, file_handler: gaitalytics.c3d_reader.FileHandler) -> [bool, list]:
         """
         Calls event anomaly checker of subclass and its children in sequences
         :param file_handler: Acquisition with predefined events
@@ -299,7 +299,7 @@ class AbstractEventAnomalyChecker(ABC):
         return anomaly_detected, abnormal_event_frames
 
     @abstractmethod
-    def _check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, list[GaitEventAnomaly]]:
+    def _check_events(self, file_handler: gaitalytics.c3d_reader.FileHandler) -> [bool, list[GaitEventAnomaly]]:
         """
         Implementation of event checker
         :param file_handler: Acquisition with added Events
@@ -312,7 +312,7 @@ class ContextPatternChecker(AbstractEventAnomalyChecker):
     Checks if events are alternating between Heel_Strike and Foot_Off per context
     """
 
-    def _check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, list[GaitEventAnomaly]]:
+    def _check_events(self, file_handler: gaitalytics.c3d_reader.FileHandler) -> [bool, list[GaitEventAnomaly]]:
         """
         kick off the checker
         :param file_handler: Acquisition with added Events
@@ -343,7 +343,7 @@ class EventSpacingChecker(AbstractEventAnomalyChecker):
         super().__init__(event_checker)
         self._frame_threshold = frame_threshold
 
-    def _check_events(self, file_handler: gaitalytics.files.FileHandler) -> [bool, list[GaitEventAnomaly]]:
+    def _check_events(self, file_handler: gaitalytics.c3d_reader.FileHandler) -> [bool, list[GaitEventAnomaly]]:
         anomaly_detected = False
         abnormal_event_frames = []
         for current_event_index in range(file_handler.get_events_size()):
@@ -364,7 +364,7 @@ class EventSpacingChecker(AbstractEventAnomalyChecker):
 
 # utils
 def find_next_event(
-    file_handler: gaitalytics.files.FileHandler, label: str, context, start_index: int
+    file_handler: gaitalytics.c3d_reader.FileHandler, label: str, context, start_index: int
 ) -> [gaitalytics.utils.GaitEvent, list[gaitalytics.utils.GaitEvent]]:
     if file_handler.get_events_size() >= start_index + 1:
         unused_events: list[gaitalytics.utils.GaitEvent] = []
