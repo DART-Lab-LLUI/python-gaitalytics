@@ -2,23 +2,23 @@ from pathlib import Path
 
 from gaitalytics import api
 from gaitalytics import utils
+from gaitalytics import model
 
 
 def main():
     settings_file = "settings/hbm_pig.yaml"
     file_path = "./tests/data/Baseline.5.c3d"
-    buffered_path_raw = Path("./raw")
-    buffered_path_norm = Path("./norm")
+    buffered_path_raw = Path("./out/processed.h5")
+    buffered_path_norm = Path("./out/processed.h5")
 
     configs = utils.ConfigProvider(settings_file)
     if not buffered_path_raw.exists():
-        buffered_path_raw.mkdir(parents=True, exist_ok=True)
+        buffered_path_raw.parent.mkdir(parents=True, exist_ok=True)
         cycle_data = api.extract_cycles(file_path, configs, buffer_output_path=buffered_path_raw)
     else:
-        cycle_data = api.extract_cycles_buffered(buffered_path_raw, configs).get_raw_cycle_points()
+        cycle_data = api.extract_cycles_buffered(buffered_path_raw, configs)[model.ExtractedCycleDataCondition.RAW_DATA]
 
-    buffered_path_norm.mkdir(parents=True, exist_ok=True)
-    api.normalise_cycles(file_path, cycle_data, buffer_output_path=buffered_path_norm)
+    api.normalise_cycles(configs, cycle_data, buffer_output_path=buffered_path_norm)
 
 
 # __name__

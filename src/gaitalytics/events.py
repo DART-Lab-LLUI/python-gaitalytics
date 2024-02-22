@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 from scipy import signal
 
 import gaitalytics.c3d_reader
+import gaitalytics.model
 import gaitalytics.utils
 
 FORCE_PLATE_SIDE_MAPPING_CAREN = MappingProxyType({"Left": 0, "Right": 1})
@@ -26,15 +27,15 @@ class AbstractGaitEventDetector(ABC):
     def _create_event(
         file_handler: gaitalytics.c3d_reader.FileHandler,
         frame: int,
-        event_label: gaitalytics.utils.GaitEventLabel,
-        event_context: gaitalytics.utils.GaitEventContext,
+        event_label: gaitalytics.model.GaitEventLabel,
+        event_context: gaitalytics.model.GaitEventContext,
     ):
         start_frame = file_handler.get_actual_start_frame()
 
-        event = gaitalytics.utils.GaitEvent(file_handler.get_actual_start_frame(), file_handler.get_point_frequency())
+        event = gaitalytics.model.GaitEvent(file_handler.get_actual_start_frame(), file_handler.get_point_frequency())
         event.label = event_label.value
         event.frame = int(frame + start_frame - 1)
-        event.icon_id = gaitalytics.utils.GaitEventLabel.get_type_id(event_label.value)
+        event.icon_id = gaitalytics.model.GaitEventLabel.get_type_id(event_label.value)
         event.context = event_context.value
         return event
 
@@ -64,12 +65,12 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
         min_distance = kwargs.get("min_distance", 100)
         show_plot = kwargs.get("show_plot", False)
 
-        right_heel = file_handler.get_point(self._config.MARKER_MAPPING.right_heel.value).values[:, gaitalytics.utils.AxesNames.y.value]
-        left_heel = file_handler.get_point(self._config.MARKER_MAPPING.left_heel.value).values[:, gaitalytics.utils.AxesNames.y.value]
-        right_toe = file_handler.get_point(self._config.MARKER_MAPPING.right_meta_2.value).values[:, gaitalytics.utils.AxesNames.y.value]
-        left_toe = file_handler.get_point(self._config.MARKER_MAPPING.left_meta_2.value).values[:, gaitalytics.utils.AxesNames.y.value]
-        right_hip = file_handler.get_point(self._config.MARKER_MAPPING.right_back_hip.value).values[:, gaitalytics.utils.AxesNames.y.value]
-        left_hip = file_handler.get_point(self._config.MARKER_MAPPING.left_back_hip.value).values[:, gaitalytics.utils.AxesNames.y.value]
+        right_heel = file_handler.get_point(self._config.MARKER_MAPPING.right_heel.value).values[:, gaitalytics.model.AxesNames.y.value]
+        left_heel = file_handler.get_point(self._config.MARKER_MAPPING.left_heel.value).values[:, gaitalytics.model.AxesNames.y.value]
+        right_toe = file_handler.get_point(self._config.MARKER_MAPPING.right_meta_2.value).values[:, gaitalytics.model.AxesNames.y.value]
+        left_toe = file_handler.get_point(self._config.MARKER_MAPPING.left_meta_2.value).values[:, gaitalytics.model.AxesNames.y.value]
+        right_hip = file_handler.get_point(self._config.MARKER_MAPPING.right_back_hip.value).values[:, gaitalytics.model.AxesNames.y.value]
+        left_hip = file_handler.get_point(self._config.MARKER_MAPPING.left_back_hip.value).values[:, gaitalytics.model.AxesNames.y.value]
         """
         left_heel, left_toe, right_heel, right_toe, right_hip, left_hip = self._move_to_plus(left_heel,
                                                                                              left_hip,
@@ -92,32 +93,32 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
         self._create_events(
             file_handler,
             left_diff_toe,
-            gaitalytics.utils.GaitEventLabel.FOOT_OFF,
-            gaitalytics.utils.GaitEventContext.LEFT,
+            gaitalytics.model.GaitEventLabel.FOOT_OFF,
+            gaitalytics.model.GaitEventContext.LEFT,
             min_distance,
             show_plot,
         )
         self._create_events(
             file_handler,
             right_diff_toe,
-            gaitalytics.utils.GaitEventLabel.FOOT_OFF,
-            gaitalytics.utils.GaitEventContext.RIGHT,
+            gaitalytics.model.GaitEventLabel.FOOT_OFF,
+            gaitalytics.model.GaitEventContext.RIGHT,
             min_distance,
             show_plot,
         )
         self._create_events(
             file_handler,
             left_diff_heel,
-            gaitalytics.utils.GaitEventLabel.FOOT_STRIKE,
-            gaitalytics.utils.GaitEventContext.LEFT,
+            gaitalytics.model.GaitEventLabel.FOOT_STRIKE,
+            gaitalytics.model.GaitEventContext.LEFT,
             min_distance,
             show_plot,
         )
         self._create_events(
             file_handler,
             right_diff_heel,
-            gaitalytics.utils.GaitEventLabel.FOOT_STRIKE,
-            gaitalytics.utils.GaitEventContext.RIGHT,
+            gaitalytics.model.GaitEventLabel.FOOT_STRIKE,
+            gaitalytics.model.GaitEventContext.RIGHT,
             min_distance,
             show_plot,
         )
@@ -170,8 +171,8 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
         self,
         file_handler: gaitalytics.c3d_reader.FileHandler,
         diff,
-        event_label: gaitalytics.utils.GaitEventLabel,
-        event_context: gaitalytics.utils.GaitEventContext,
+        event_label: gaitalytics.model.GaitEventLabel,
+        event_context: gaitalytics.model.GaitEventContext,
         min_distance: int = 100,
         show_plot: bool = False,
     ):
@@ -187,9 +188,9 @@ class ZenisGaitEventDetector(AbstractGaitEventDetector):
         extremes, foo = signal.find_peaks(data, height=[0, 1], distance=min_distance)
 
         # add offset
-        if event_label == gaitalytics.utils.GaitEventLabel.FOOT_STRIKE:
+        if event_label == gaitalytics.model.GaitEventLabel.FOOT_STRIKE:
             extremes = extremes + self._foot_strike_offset
-        elif event_label == gaitalytics.utils.GaitEventLabel.FOOT_OFF:
+        elif event_label == gaitalytics.model.GaitEventLabel.FOOT_OFF:
             extremes = extremes + self._foot_off_offset
 
         for frame in extremes:
@@ -217,7 +218,7 @@ class ForcePlateEventDetection(AbstractGaitEventDetector):
         """
         if isinstance(file_handler, gaitalytics.c3d_reader.BtkFileHandler):
 
-            for context in gaitalytics.utils.GaitEventContext:
+            for context in gaitalytics.model.GaitEventContext:
                 force_down_sample = force_plate_down_sample(file_handler.aqc, self._mapped_force_plate[context.value])
                 detection = detect_onset(force_down_sample, threshold=self._weight_threshold)
                 sequence = self._detect_gait_event_type(force_down_sample, detection)
@@ -251,9 +252,9 @@ class ForcePlateEventDetection(AbstractGaitEventDetector):
                     # positive or negative slope (FeetOff or FeetStrike)
                     diff = force_plate_signal[signal_index - 20] - force_plate_signal[signal_index + 20]
                     if diff > 0:
-                        detected_event_types.append([gaitalytics.utils.GaitEventLabel.FOOT_OFF, signal_index])
+                        detected_event_types.append([gaitalytics.model.GaitEventLabel.FOOT_OFF, signal_index])
                     else:
-                        detected_event_types.append([gaitalytics.utils.GaitEventLabel.FOOT_STRIKE, signal_index])
+                        detected_event_types.append([gaitalytics.model.GaitEventLabel.FOOT_STRIKE, signal_index])
         return detected_event_types  # Contain the label of the event and the corresponding index
 
 
@@ -365,9 +366,9 @@ class EventSpacingChecker(AbstractEventAnomalyChecker):
 # utils
 def find_next_event(
     file_handler: gaitalytics.c3d_reader.FileHandler, label: str, context, start_index: int
-) -> [gaitalytics.utils.GaitEvent, list[gaitalytics.utils.GaitEvent]]:
+) -> [gaitalytics.model.GaitEvent, list[gaitalytics.model.GaitEvent]]:
     if file_handler.get_events_size() >= start_index + 1:
-        unused_events: list[gaitalytics.utils.GaitEvent] = []
+        unused_events: list[gaitalytics.model.GaitEvent] = []
         for event_index in range(start_index + 1, file_handler.get_events_size()):
             event = file_handler.get_event(event_index)
             if event.context == context:

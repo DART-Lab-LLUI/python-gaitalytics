@@ -67,6 +67,7 @@ setup(
         "scipy==1.11.3",
         "pyyaml==6.0.1",
         "matplotlib==3.8.0",
+        "h5py==3.10.0",
         # eg: "aspectlib==1.1.1", "six>=1.7",
     ],
     extras_require={

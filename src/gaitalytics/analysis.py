@@ -7,38 +7,65 @@ from pandas import DataFrame
 from pandas import concat
 from scipy import signal
 
-import gaitalytics.utils
+import gaitalytics.model as model
+import gaitalytics.utils as utils
 
 logger = logging.getLogger(__name__)
 
 
 class AbstractAnalysis(ABC):
-    def __init__(self, data_list: dict[str, gaitalytics.utils.BasicCyclePoint], configs: gaitalytics.utils.ConfigProvider):
-        self._data_list: dict[str, gaitalytics.utils.BasicCyclePoint] = data_list
+    def __init__(self,
+                 data_condition: model.ExtractedCycleDataCondition,
+                 data_list: dict[model.ExtractedCycleDataCondition, model.ExtractedCycles],
+                 configs: utils.ConfigProvider):
+        self._data_list: dict[model.ExtractedCycleDataCondition, model.ExtractedCycles] = data_list
         self._configs = configs
+        self._data_condition: model.ExtractedCycleDataCondition = data_condition
+
+    def get_point_data(self, label: model.TranslatedLabel, axis: model.AxesNames,
+                       cycle_context: model.GaitEventContext):
+        data_table = None
+        for cycle_point in self._get_points(cycle_context):
+            if cycle_point.translated_label.name == label.value:
+                data_table = cycle_point.data_table
+                break
+
+        if data_table is None:
+            raise KeyError(f"{label.name} not in extracted cycles")
+        return data_table[:][axis.value]
+
+    def _get_points(self, cycle_context) -> list[model.ExtractedCyclePoint]:
+        extracted_cycles = self._data_list[self._data_condition]
+        context_cycle = None
+        if cycle_context == model.GaitEventContext.LEFT:
+            context_cycle = extracted_cycles.left_cycle_points
+        else:
+            context_cycle = extracted_cycles.right_cycle_points
+        return context_cycle.points
 
     @abstractmethod
     def analyse(self, **kwargs) -> DataFrame:
         pass
 
 
-class AbstractCycleAnalysis(AbstractAnalysis, ABC):
+class AbstractCycleAnalysis(AbstractAnalysis):
 
     def __init__(
         self,
-        data_list: dict[str, gaitalytics.utils.BasicCyclePoint],
-        configs: gaitalytics.utils.ConfigProvider,
-        data_type: gaitalytics.utils.PointDataType,
+        data_condition: model.ExtractedCycleDataCondition,
+        data_list: dict[str, model.ExtractedCyclePoint],
+        configs: utils.ConfigProvider,
+        data_type: model.PointDataType,
     ):
-        super().__init__(data_list, configs)
+        super().__init__(data_condition, data_list, configs)
         self._point_data_type = data_type
 
     @abstractmethod
-    def _do_analysis(self, data: DataFrame) -> DataFrame:
+    def _do_analysis(self, data: np.ndarray) -> DataFrame:
         pass
 
     def _filter_keys(self, key: str) -> bool:
-        """Check if its the right point data"""
+        """Check if it's the right point data"""
         return f".{self._point_data_type.name}." in key
 
     def analyse(self, **kwargs) -> DataFrame:
@@ -58,9 +85,9 @@ class AbstractCycleAnalysis(AbstractAnalysis, ABC):
                     standing = data.copy()
                     swinging = data.copy()
                     for row in range(len(data)):
-                        event_frame = raw_point.event_frames.iloc[row][gaitalytics.utils.BasicCyclePoint.FOOT_OFF]
+                        event_frame = raw_point.event_frames.iloc[row][model.GaitEventLabel.FOOT_OFF]
                         swinging.iloc[row, 1:event_frame] = float("Nan")
-                        standing.iloc[row, event_frame + 1 : -1] = float("Nan")
+                        standing.iloc[row, event_frame + 1: -1] = float("Nan")
                     result1 = self._do_analysis(standing)
                     result1["metric"] = f"{key}.standing"
                     result2 = self._do_analysis(swinging)
@@ -76,8 +103,8 @@ class AbstractCycleAnalysis(AbstractAnalysis, ABC):
 
 class JointForcesCycleAnalysis(AbstractCycleAnalysis):
 
-    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider):
-        super().__init__(data_list, configs, gaitalytics.utils.PointDataType.FORCES)
+    def __init__(self, data_list: dict, configs: utils.ConfigProvider):
+        super().__init__(data_list, configs, model.PointDataType.FORCES)
 
     def _filter_keys(self, key: str) -> bool:
         if super()._filter_keys(key):
@@ -100,8 +127,8 @@ class JointForcesCycleAnalysis(AbstractCycleAnalysis):
 
 class JointMomentsCycleAnalysis(AbstractCycleAnalysis):
 
-    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider):
-        super().__init__(data_list, configs, gaitalytics.utils.PointDataType.MOMENTS)
+    def __init__(self, data_list: dict, configs: utils.ConfigProvider):
+        super().__init__(data_list, configs, model.PointDataType.MOMENTS)
 
     def _filter_keys(self, key: str) -> bool:
         if super()._filter_keys(key):
@@ -109,7 +136,7 @@ class JointMomentsCycleAnalysis(AbstractCycleAnalysis):
             return splits[3].lower() in splits[0]
         return False
 
-    def _do_analysis(self, data: DataFrame) -> DataFrame:
+    def _do_analysis(self, data: np.ndarray) -> DataFrame:
         results = DataFrame(index=data.index)
         rom_max = data.max(axis=1)
         rom_min = data.min(axis=1)
@@ -124,14 +151,14 @@ class JointMomentsCycleAnalysis(AbstractCycleAnalysis):
 
 class JointPowerCycleAnalysis(AbstractCycleAnalysis):
 
-    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider):
-        super().__init__(data_list, configs, gaitalytics.utils.PointDataType.POWERS)
+    def __init__(self, data_list: dict, configs: utils.ConfigProvider):
+        super().__init__(data_list, configs, model.PointDataType.POWERS)
 
     def _filter_keys(self, key: str) -> bool:
         if super()._filter_keys(key):
             splits = key.split(".")
             if splits[3].lower() in splits[0]:
-                return gaitalytics.utils.AxesNames.z.name is splits[2]
+                return model.AxesNames.z.name is splits[2]
         return False
 
     def _do_analysis(self, data: DataFrame) -> DataFrame:
@@ -149,8 +176,8 @@ class JointPowerCycleAnalysis(AbstractCycleAnalysis):
 
 class JointAnglesCycleAnalysis(AbstractCycleAnalysis):
 
-    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider):
-        super().__init__(data_list, configs, gaitalytics.utils.PointDataType.ANGLES)
+    def __init__(self, data_list: dict, configs: utils.ConfigProvider):
+        super().__init__(data_list, configs, model.PointDataType.ANGLES)
 
     def _filter_keys(self, key: str) -> bool:
         if super()._filter_keys(key):
@@ -177,8 +204,8 @@ class JointAnglesCycleAnalysis(AbstractCycleAnalysis):
 
 class CMosAnalysis(AbstractCycleAnalysis):
 
-    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider):
-        super().__init__(data_list, configs, gaitalytics.utils.PointDataType.MARKERS)
+    def __init__(self, data_list: dict, configs: utils.ConfigProvider):
+        super().__init__(data_list, configs, model.PointDataType.MARKERS)
 
     def _filter_keys(self, key: str) -> bool:
         if super()._filter_keys(key):
@@ -201,36 +228,36 @@ class MosAnalysis(AbstractAnalysis):
 
     def analyse(self, **kwargs) -> DataFrame:
         left_cmos_ap = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_cmos,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.LEFT,
             )
         ]
         left_cmos_ml = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_cmos,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.x,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.x,
+                model.GaitEventContext.LEFT,
             )
         ]
 
         right_cmos_ap = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_cmos,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.RIGHT,
             )
         ]
         right_cmos_ml = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_cmos,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.x,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.x,
+                model.GaitEventContext.RIGHT,
             )
         ]
 
@@ -238,15 +265,15 @@ class MosAnalysis(AbstractAnalysis):
         left_ml = self._extract_mos_frames(left_cmos_ml, "left", "ml")
         right_ap = self._extract_mos_frames(right_cmos_ap, "right", "ap")
         right_ml = self._extract_mos_frames(right_cmos_ml, "right", "ml")
-        result = left_ap.merge(left_ml, on=gaitalytics.utils.BasicCyclePoint.CYCLE_NUMBER)
-        result = result.merge(right_ap, on=gaitalytics.utils.BasicCyclePoint.CYCLE_NUMBER)
-        result = result.merge(right_ml, on=gaitalytics.utils.BasicCyclePoint.CYCLE_NUMBER)
+        result = left_ap.merge(left_ml, on=model.ExtractedCyclePoint)
+        result = result.merge(right_ap, on=model.ExtractedCyclePoint)
+        result = result.merge(right_ml, on=model.ExtractedCyclePoint)
 
         result["metric"] = "Mos"
         return result.pivot(columns="metric")
 
     @staticmethod
-    def _extract_mos_frames(cmos: gaitalytics.utils.BasicCyclePoint.CYCLE_NUMBER, side, direction):
+    def _extract_mos_frames(cmos: model.ExtractedCyclePoint, side, direction):
         hs_label = f"{direction}_hs_{side}"
         to_label = f"{direction}_to_{side}"
         hs_contra_label = f"{direction}_hs_contra_{side}"
@@ -255,9 +282,9 @@ class MosAnalysis(AbstractAnalysis):
         result = DataFrame(index=cmos.data_table.index)
         result[hs_label] = cmos.data_table[0].to_list()
         for cycle_number in cmos.event_frames.index.to_list():
-            to_frame = cmos.event_frames[gaitalytics.utils.BasicCyclePoint.FOOT_OFF].loc[cycle_number]
-            hs_contra_frame = cmos.event_frames[gaitalytics.utils.BasicCyclePoint.FOOT_STRIKE_CONTRA].loc[cycle_number]
-            to_contra_frame = cmos.event_frames[gaitalytics.utils.BasicCyclePoint.FOOT_OFF_CONTRA].loc[cycle_number]
+            to_frame = cmos.event_frames[model.GaitEventLabel.FOOT_OFF].loc[cycle_number]
+            hs_contra_frame = cmos.event_frames[model.GaitEventLabel].loc[cycle_number]
+            to_contra_frame = cmos.event_frames[model.GaitEventLabel].loc[cycle_number]
             result.loc[cycle_number, to_label] = cmos.data_table.loc[cycle_number, to_frame]
             result.loc[cycle_number, hs_contra_label] = cmos.data_table.loc[cycle_number, hs_contra_frame]
             result.loc[cycle_number, to_contra_label] = cmos.data_table.loc[cycle_number, to_contra_frame]
@@ -266,18 +293,19 @@ class MosAnalysis(AbstractAnalysis):
 
 class SpatioTemporalAnalysis(AbstractAnalysis):
 
-    def __init__(self, data_list: dict, configs: gaitalytics.utils.ConfigProvider, body_height: float = 1800, frequency: int = 100):
+    def __init__(self, data_list: dict, configs: utils.ConfigProvider, body_height: float = 1800,
+                 frequency: int = 100):
         super().__init__(data_list, configs)
         self._frequency = frequency
         self._body_height = body_height
 
     def analyse(self, **kwargs) -> DataFrame:
         subject = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.x,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.x,
+                model.GaitEventContext.RIGHT,
             )
         ].subject
         step_length = self._calculate_length(subject)
@@ -299,38 +327,38 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
         result["metric"] = "Spatiotemporal"
         return result.pivot(columns="metric")
 
-    def _calculate_step_width(self, subject: gaitalytics.utils.SubjectMeasures) -> DataFrame:
+    def _calculate_step_width(self, subject: model.SubjectMeasures) -> DataFrame:
 
         right_heel_x_right = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.x,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.x,
+                model.GaitEventContext.RIGHT,
             )
         ].data_table
         left_heel_x_right = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.x,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.x,
+                model.GaitEventContext.RIGHT,
             )
         ].data_table
         right_heel_x_left = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.x,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.x,
+                model.GaitEventContext.LEFT,
             )
         ].data_table
         left_heel_x_left = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.x,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.x,
+                model.GaitEventContext.LEFT,
             )
         ].data_table
 
@@ -340,7 +368,8 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
         return concat([left, right], axis=1)
 
     @staticmethod
-    def _calculate_step_width_side(context_heel_x: DataFrame, contra_heel_x: DataFrame, body_height: float, side: str) -> DataFrame:
+    def _calculate_step_width_side(context_heel_x: DataFrame, contra_heel_x: DataFrame, body_height: float,
+                                   side: str) -> DataFrame:
         # TODO: Medial marker
         column_label = f"step_width_{side}"
         width = DataFrame(index=context_heel_x.index, columns=[column_label])
@@ -352,19 +381,19 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
     def _calculate_limb_circumduction(self) -> DataFrame:
         # subject.
         right_malleoli_x_right = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_med_malleoli,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.x,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.x,
+                model.GaitEventContext.RIGHT,
             )
         ]
         left_malleoli_x_left = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_med_malleoli,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.x,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.x,
+                model.GaitEventContext.LEFT,
             )
         ]
 
@@ -374,7 +403,7 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
         return concat([left, right], axis=1)
 
     # @staticmethod
-    # def _calculate_limb_circumduction_side(context_malleoli_x: gaitalytics.utils.BasicCyclePoint, side: str) -> DataFrame:
+    # def _calculate_limb_circumduction_side(context_malleoli_x: utils.BasicCyclePoint, side: str) -> DataFrame:
     # context_malleoli_x.data_table
     # context_malleoli_x.event_frames
     #
@@ -389,7 +418,7 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
     #    return limb_circumduction
 
     #  @staticmethod
-    # def _calculate_limb_circumduction_side(context_malleoli_x: gaitalytics.utils.BasicCyclePoint, side: str) -> DataFrame:
+    # def _calculate_limb_circumduction_side(context_malleoli_x: utils.BasicCyclePoint, side: str) -> DataFrame:
     #   column_label = f"limb_circumduction_{side}"
     #  limb_circumduction = DataFrame(index=context_malleoli_x.data_table.index, columns=[column_label])
     # for cycle_number in context_malleoli_x.data_table.index.to_series():
@@ -401,7 +430,8 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
     #  return limb_circumduction
 
     @staticmethod
-    def _calculate_limb_circumduction_side(context_malleoli_x: gaitalytics.utils.BasicCyclePoint, side: str) -> DataFrame:
+    def _calculate_limb_circumduction_side(context_malleoli_x: model.ExtractedCyclePoint,
+                                           side: str) -> DataFrame:
         column_label = f"limb_circumduction_{side}"
         limb_circumduction = DataFrame(index=context_malleoli_x.data_table.index, columns=[column_label])
         data = context_malleoli_x.data_table
@@ -410,7 +440,8 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
         for cycle_number in context_malleoli_x.data_table.index.to_series():
             id_foot_off = context_malleoli_x.event_frames.loc[cycle_number]["Foot_Off"]
             id_heel_strike_end = (
-                context_malleoli_x.frames.loc[cycle_number]["end_frame"] - context_malleoli_x.frames.loc[cycle_number]["start_frame"]
+                context_malleoli_x.frames.loc[cycle_number]["end_frame"] - context_malleoli_x.frames.loc[cycle_number][
+                "start_frame"]
             )
             max_data = max(data.iloc[cycle_number - 1, id_foot_off:id_heel_strike_end])
             data_TO = data.loc[cycle_number][id_foot_off]
@@ -423,19 +454,19 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
     def _calculate_double_support_duration(self) -> DataFrame:
         # subject.
         right_heel_y_right = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.RIGHT,
             )
         ]
         left_heel_y_right = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.LEFT,
             )
         ]
 
@@ -444,7 +475,8 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
 
         return concat([left, right], axis=1)
 
-    def _calculate_double_support_duration_side(self, progression: gaitalytics.utils.BasicCyclePoint, side: str) -> DataFrame:
+    def _calculate_double_support_duration_side(self, progression: model.ExtractedCyclePoint,
+                                                side: str) -> DataFrame:
         dsd_1 = f"double_support_duration_1_{side}"
         dsd_2 = f"double_support_duration_2_{side}"
         columns = [dsd_1, dsd_2]
@@ -466,19 +498,19 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
     def _calculate_single_support_duration(self) -> DataFrame:
         # subject.
         right_heel_y_right = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.RIGHT,
             )
         ]
         left_heel_y_left = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.LEFT,
             )
         ]
 
@@ -487,7 +519,8 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
 
         return concat([left, right], axis=1)
 
-    def _calculate_single_support_duration_side(self, progression: gaitalytics.utils.BasicCyclePoint, side: str) -> DataFrame:
+    def _calculate_single_support_duration_side(self, progression: model.ExtractedCyclePoint,
+                                                side: str) -> DataFrame:
         ssd = f"single_support_duration_{side}"
         columns = [ssd]
         durations = DataFrame(index=progression.data_table.index, columns=columns)
@@ -501,21 +534,21 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
             durations.loc[cycle_number][ssd] = time_heel_strike_contra - time_foot_off_contra
         return durations
 
-    def _calculate_step_height(self, subject: gaitalytics.utils.SubjectMeasures) -> DataFrame:
+    def _calculate_step_height(self, subject: model.SubjectMeasures) -> DataFrame:
         right_heel_z = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.z,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.z,
+                model.GaitEventContext.RIGHT,
             )
         ].data_table
         left_heel_z = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.z,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.z,
+                model.GaitEventContext.LEFT,
             )
         ].data_table
 
@@ -532,19 +565,19 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
 
     def _calculate_durations(self):
         right_heel_progression = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.RIGHT,
             )
         ]
         left_heel_progression = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.LEFT,
             )
         ]
         right_durations = self._side_duration_calculation(right_heel_progression, "right")
@@ -552,7 +585,7 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
 
         return concat([left_durations, right_durations], axis=1)
 
-    def _side_duration_calculation(self, progression: gaitalytics.utils.BasicCyclePoint, side: str) -> DataFrame:
+    def _side_duration_calculation(self, progression: model.ExtractedCyclePoint, side: str) -> DataFrame:
         c_dur_label = f"cycle_duration_s_{side}"
         s_dur_label = f"step_duration_s_{side}"
         sw_dur_label = f"swing_duration_p_{side}"
@@ -560,7 +593,7 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
         columns = [c_dur_label, s_dur_label, sw_dur_label, st_dur_label]
         durations = DataFrame(index=progression.data_table.index, columns=columns)
         for cycle_number in progression.data_table.index.to_series():
-            toe_off = progression.event_frames.loc[cycle_number][gaitalytics.utils.BasicCyclePoint.FOOT_OFF]
+            toe_off = progression.event_frames.loc[cycle_number][model.BasicCyclePoint.FOOT_OFF]
             cycle_data = progression.data_table.loc[cycle_number][~progression.data_table.loc[cycle_number].isna()]
 
             durations.loc[cycle_number][c_dur_label] = len(cycle_data) / self._frequency
@@ -570,43 +603,45 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
         durations[st_dur_label] = 1 - durations[sw_dur_label]
         return durations
 
-    def _calculate_length(self, subject: gaitalytics.utils.SubjectMeasures) -> DataFrame:
+    def _calculate_length(self, subject: model.SubjectMeasures) -> DataFrame:
         right_heel_progression_right = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.RIGHT,
             )
         ].data_table
         left_heel_progression_right = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.RIGHT,
             )
         ].data_table
 
         left_heel_progression_left = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.LEFT,
             )
         ].data_table
         right_heel_progression_left = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_heel,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.y,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.y,
+                model.GaitEventContext.LEFT,
             )
         ].data_table
 
-        right = self._side_step_length_calculation(right_heel_progression_right, left_heel_progression_right, subject.body_height, "right")
-        left = self._side_step_length_calculation(left_heel_progression_left, right_heel_progression_left, subject.body_height, "left")
+        right = self._side_step_length_calculation(right_heel_progression_right, left_heel_progression_right,
+                                                   subject.body_height, "right")
+        left = self._side_step_length_calculation(left_heel_progression_left, right_heel_progression_left,
+                                                  subject.body_height, "left")
 
         results = concat([left, right], axis=1)
         ## Todo: check stride length
@@ -644,24 +679,25 @@ class SpatioTemporalAnalysis(AbstractAnalysis):
 
 class MinimalClearingDifference(AbstractAnalysis):
 
-    def __init__(self, data_list: dict[str, gaitalytics.utils.BasicCyclePoint], configs: gaitalytics.utils.ConfigProvider):
+    def __init__(self, data_list: dict[str, model.ExtractedCyclePoint],
+                 configs: utils.ConfigProvider):
         super().__init__(data_list, configs)
 
     def analyse(self, **kwargs) -> DataFrame:
         right_toe = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.right_meta_2,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.z,
-                gaitalytics.utils.GaitEventContext.RIGHT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.z,
+                model.GaitEventContext.RIGHT,
             )
         ]
         left_toe = self._data_list[
-            gaitalytics.utils.ConfigProvider.define_key(
+            utils.ConfigProvider.define_key(
                 self._configs.MARKER_MAPPING.left_meta_2,
-                gaitalytics.utils.PointDataType.MARKERS,
-                gaitalytics.utils.AxesNames.z,
-                gaitalytics.utils.GaitEventContext.LEFT,
+                model.PointDataType.MARKERS,
+                model.AxesNames.z,
+                model.GaitEventContext.LEFT,
             )
         ]
 
@@ -678,12 +714,12 @@ class MinimalClearingDifference(AbstractAnalysis):
         s_tc_hs_label = f"toe_clearance_heel_strike_{side}"
         toe_clearance = DataFrame(index=toe.index, columns=[s_mtc_label, s_mtc_cycle_label, s_tc_hs_label])
         for cycle_number in toe.index.to_series():
-            toe_off_frame = event_frames.loc[cycle_number][gaitalytics.utils.BasicCyclePoint.FOOT_OFF]
+            toe_off_frame = event_frames.loc[cycle_number][model.BasicCyclePoint.FOOT_OFF]
             swing_phase_data = toe.loc[cycle_number][toe_off_frame:-1]
             mid_swing_index = round(len(swing_phase_data) / 2)
             peaks = signal.find_peaks(swing_phase_data[0:mid_swing_index], distance=len(swing_phase_data))
-            toe_clear_min = min(swing_phase_data[peaks[0][0] : -1])
-            tc_percent = np.where(swing_phase_data[peaks[0][0] : -1] == toe_clear_min)[0] / len(swing_phase_data)
+            toe_clear_min = min(swing_phase_data[peaks[0][0]: -1])
+            tc_percent = np.where(swing_phase_data[peaks[0][0]: -1] == toe_clear_min)[0] / len(swing_phase_data)
             tc_clear_hs = max(swing_phase_data[mid_swing_index:-1])
             toe_clearance.loc[cycle_number][s_mtc_label] = toe_clear_min
             toe_clearance.loc[cycle_number][s_mtc_cycle_label] = tc_percent
@@ -707,7 +743,7 @@ class AbstractNormalisedAnalysis(ABC):
             result = self._do_analysis(table)
             result["metric"] = key
             result["event_frame"] = self.data_list[key].get_mean_event_frame()
-            result["data_type"] = self.data_list[key].data_type
+            result["data_type"] = self.data_list[key].point_type
             if results is None:
                 results = result
             else:

@@ -6,18 +6,19 @@ import scipy as sc
 from matplotlib import pyplot as plt
 
 import gaitalytics.c3d_reader
+import gaitalytics.model
 import gaitalytics.utils
 
 
 class BaseOutputModeller(ABC):
 
-    def __init__(self, label: str, point_type: gaitalytics.utils.PointDataType):
+    def __init__(self, label: str, point_type: gaitalytics.model.PointDataType):
         self._label = label
         self._type = point_type
 
     def create_point(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs):
         result = self._calculate_point(file_handler, **kwargs)
-        point = gaitalytics.utils.Point()
+        point = gaitalytics.model.Point()
         point.type = self._type
         point.values = result
         point.label = self._label
@@ -31,7 +32,7 @@ class BaseOutputModeller(ABC):
 class COMModeller(BaseOutputModeller):
 
     def __init__(self, configs: gaitalytics.utils.ConfigProvider):
-        super().__init__(configs.MARKER_MAPPING.com.value, gaitalytics.utils.PointDataType.MARKERS)
+        super().__init__(configs.MARKER_MAPPING.com.value, gaitalytics.model.PointDataType.MARKERS)
         self._configs = configs
 
     def _calculate_point(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs):
@@ -44,7 +45,7 @@ class COMModeller(BaseOutputModeller):
 
 class XCOMModeller(BaseOutputModeller):
     def __init__(self, configs: gaitalytics.utils.ConfigProvider):
-        super().__init__(configs.MARKER_MAPPING.xcom.value, gaitalytics.utils.PointDataType.MARKERS)
+        super().__init__(configs.MARKER_MAPPING.xcom.value, gaitalytics.model.PointDataType.MARKERS)
         self._configs = configs
 
     def _calculate_point(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs):
@@ -93,7 +94,7 @@ class CMoSModeller(BaseOutputModeller):
 
     def __init__(self, configs: gaitalytics.utils.ConfigProvider, **kwargs):
         self._configs = configs
-        super().__init__(configs.MARKER_MAPPING.cmos.value, gaitalytics.utils.PointDataType.MARKERS)
+        super().__init__(configs.MARKER_MAPPING.cmos.value, gaitalytics.model.PointDataType.MARKERS)
 
     def _calculate_point(self, file_handler: gaitalytics.c3d_reader.FileHandler, **kwargs) -> np.ndarray:
         x_com = file_handler.get_point(self._configs.MARKER_MAPPING.xcom.value).values
@@ -142,7 +143,7 @@ class CMoSModeller(BaseOutputModeller):
             x_com_frame = x_com_v[frame_index]
             left_boundary = lat_malleoli_left[frame_index, 0]
             right_boundary = lat_malleoli_right[frame_index, 0]
-            if side == gaitalytics.utils.GaitEventContext.LEFT:
+            if side == gaitalytics.model.GaitEventContext.LEFT:
                 front_boundary = foot_left[frame_index, 1]
                 back_boundary = heel_right[frame_index, 1]
             else:
@@ -156,7 +157,7 @@ class CMoSModeller(BaseOutputModeller):
 
         def mos_single_stance(x_com_v, frame_index, side):
             x_com_frame = x_com_v[frame_index]
-            if side == gaitalytics.utils.GaitEventContext.LEFT:
+            if side == gaitalytics.model.GaitEventContext.LEFT:
                 front_boundary = foot_right[frame_index, 1]
                 back_boundary = heel_right[frame_index, 1]
                 left_boundary = med_malleoli_right[frame_index, 0]
@@ -181,8 +182,8 @@ class CMoSModeller(BaseOutputModeller):
         for frame_i in range(len(x_com)):
 
             if frame_i == next_event.frame:
-                current_context = gaitalytics.utils.GaitEventContext(next_event.context)
-                if next_event.label == gaitalytics.utils.GaitEventLabel.FOOT_STRIKE.value:
+                current_context = gaitalytics.model.GaitEventContext(next_event.context)
+                if next_event.label == gaitalytics.model.GaitEventLabel.FOOT_STRIKE.value:
                     mos_function = mos_double_support
                 else:
                     mos_function = mos_single_stance
