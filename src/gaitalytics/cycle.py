@@ -74,6 +74,10 @@ class ToeOffToToeOffCycleBuilder(EventCycleBuilder):
         super().__init__(event_anomaly_checker, model.GaitEventLabel.FOOT_OFF)
 
 
+def _create_empty_table(n_axis: int, n_cycles: int, n_frames) -> np.ndarray:
+    return np.full((n_axis, n_cycles, n_frames), np.nan)
+
+
 # Cycle Extractor
 def extract_point_cycles(configs: utils.ConfigProvider, cycles: model.GaitCycleList,
                          file_handler: c3d_reader.FileHandler) -> model.ExtractedCycles:
@@ -84,25 +88,24 @@ def extract_point_cycles(configs: utils.ConfigProvider, cycles: model.GaitCycleL
     for point_index in range(file_handler.get_points_size()):
 
         # init nan numpy arrays
-        cycle_data_left = np.full(
-            (cycles.get_longest_cycle_length(model.GaitEventContext.LEFT), 3,
-             cycles.get_number_of_cycles(model.GaitEventContext.LEFT)), np.nan)
+        cycle_data_left = _create_empty_table(3, cycles.get_number_of_cycles(model.GaitEventContext.LEFT),
+                                              cycles.get_longest_cycle_length(model.GaitEventContext.LEFT))
 
-        cycle_data_right = np.full(
-            (cycles.get_longest_cycle_length(model.GaitEventContext.RIGHT), 3,
-             cycles.get_number_of_cycles(model.GaitEventContext.RIGHT)), np.nan)
+        cycle_data_right = _create_empty_table(3, cycles.get_number_of_cycles(model.GaitEventContext.RIGHT),
+                                               cycles.get_longest_cycle_length(model.GaitEventContext.RIGHT))
 
         point = file_handler.get_point(point_index)
         for cycle in cycles.cycles:
 
             # extract values in cycle
             cycle_data = point.values[cycle.start_frame: cycle.end_frame, :]
+            cycle_data = cycle_data.T
 
             # store it in the array of the context
             if cycle.context == model.GaitEventContext.LEFT:
-                cycle_data_left[:len(cycle_data), :, cycle.number - 1] = cycle_data
+                cycle_data_left[:, cycle.number - 1, :cycle_data.shape[1]] = cycle_data
             else:
-                cycle_data_right[:len(cycle_data), :, cycle.number - 1] = cycle_data
+                cycle_data_right[:, cycle.number - 1, :cycle_data.shape[1]] = cycle_data
         # split right and left cycles
         cycle_point_left = _create_cycle_point(configs,
                                                point,

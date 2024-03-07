@@ -1,5 +1,6 @@
 from gaitalytics import api
 from gaitalytics import utils
+from gaitalytics import c3d_reader
 
 
 def main():
@@ -10,7 +11,7 @@ def main():
     # load configs
     configs = utils.ConfigProvider(settings_file)
 
-    api.detect_gait_events(file_path, out_path, configs, show_plot=False)
+    api.detect_gait_events(file_path, out_path, configs, show_plot=False, file_handler_class=c3d_reader.EzC3dFileHandler)
 
 
 if __name__ == "__main__":

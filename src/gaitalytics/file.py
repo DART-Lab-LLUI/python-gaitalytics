@@ -105,5 +105,5 @@ class CSVFileStore(FileStore):
     def save_to_file(self, cycle_data: model.ExtractedContextCycles):
         pass
 
-    def read_from_file(self, key: str) -> model.ExtractedContextCycles:
+    def read_from_file(self) -> model.ExtractedContextCycles:
         pass

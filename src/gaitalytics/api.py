@@ -41,14 +41,14 @@ GAIT_EVENT_CHECKER_CONTEXT = "context"
 GAIT_EVENT_CHECKER_SPACING = "spacing"
 GAIT_EVENT_CHECKER_LIST = (GAIT_EVENT_CHECKER_CONTEXT, GAIT_EVENT_CHECKER_SPACING)
 
-ANALYSIS_MOMENTS = "moments"
-ANALYSIS_ANGLES = "angles"
-ANALYSIS_POWERS = "powers"
-ANALYSIS_FORCES = "forces"
-ANALYSIS_TOE_CLEARANCE = "toe_clearance"
-ANALYSIS_SPATIO_TEMP = "spatiotemporal"
-ANALYSIS_CMOS = "cmos"
-ANALYSIS_MOS = "mos"
+ANALYSIS_MOMENTS = analysis.JointMomentsCycleAnalysis
+ANALYSIS_ANGLES = analysis.JointAnglesCycleAnalysis
+ANALYSIS_POWERS = analysis.JointPowerCycleAnalysis
+ANALYSIS_FORCES = analysis.JointForcesCycleAnalysis
+ANALYSIS_TOE_CLEARANCE = analysis.MinimalClearingDifference
+ANALYSIS_SPATIO_TEMP = analysis.SpatioTemporalAnalysis
+ANALYSIS_CMOS = analysis.CMosAnalysis
+ANALYSIS_MOS = analysis.MosAnalysis
 ANALYSIS_LIST = (
     ANALYSIS_MOMENTS,
     ANALYSIS_ANGLES,
@@ -318,9 +318,9 @@ def normalise_cycles(
 
 
 def analyse_data(
-    cycle_data: dict[str, model.BasicCyclePoint],
+    cycle_data: dict[model.ExtractedCycleDataCondition: model.ExtractedCycles],
     config: utils.ConfigProvider,
-    methode: list[str] = ANALYSIS_LIST,
+    methods: list[type[analysis.AbstractAnalysis]] = ANALYSIS_LIST,
     **kwargs: dict,
 ) -> DataFrame:
     """
@@ -328,38 +328,19 @@ def analyse_data(
 
     :param cycle_data: full length cycle data
     :param config: configs from marker and model mapping
-    :param methode: list of methods
+    :param methods: list of methods classes
     :return: results of analysis
     """
     logger.info("analyse_data")
-    if not all(item in ANALYSIS_LIST for item in methode):
-        raise KeyError(f"{methode} are not a valid anomaly checker")
-
-    methods: list[analysis.AbstractAnalysis] = []
-    if ANALYSIS_ANGLES in methode:
-        methods.append(analysis.JointAnglesCycleAnalysis(cycle_data, config))
-    if ANALYSIS_MOMENTS in methode:
-        methods.append(analysis.JointMomentsCycleAnalysis(cycle_data, config))
-    if ANALYSIS_POWERS in methode:
-        methods.append(analysis.JointPowerCycleAnalysis(cycle_data, config))
-    if ANALYSIS_FORCES in methode:
-        methods.append(analysis.JointForcesCycleAnalysis(cycle_data, config))
-    if ANALYSIS_SPATIO_TEMP in methode:
-        methods.append(analysis.SpatioTemporalAnalysis(cycle_data, config))
-    if ANALYSIS_TOE_CLEARANCE in methode:
-        methods.append(analysis.MinimalClearingDifference(cycle_data, config))
-    if ANALYSIS_CMOS in methode:
-        methods.append(analysis.CMosAnalysis(cycle_data, config))
-    if ANALYSIS_MOS in methode:
-        methods.append(analysis.MosAnalysis(cycle_data, config))
 
     results = None
-    for methode in methods:
+    for methode_cls in methods:
+        methode = methode_cls(cycle_data, config)
         result = methode.analyse(**kwargs)
         if results is None:
             results = result
         else:
-            results = results.merge(result, on=model.BasicCyclePoint.CYCLE_NUMBER)
+            results = results.merge(result)
 
     return results
 

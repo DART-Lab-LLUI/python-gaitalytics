@@ -53,12 +53,12 @@ class TimeNormalisationAlgorithm(ABC):
 
     def _norm_point(self, point: model.ExtractedCyclePoint) -> model.ExtractedCyclePoint:
         shape = point.data_table.shape
-        data_table = np.full((self._number_frames, shape[1], shape[2]), np.nan)
+        data_table = np.full((shape[0], shape[1], self._number_frames), np.nan)
         new_point = copy.deepcopy(point)
-        for direction_index in range(point.data_table.shape[1]):
-            for cycle_number in range(point.data_table.shape[2]):
-                data_table[:, direction_index, cycle_number] = self._run_algorithm(
-                    point.data_table[:, direction_index, cycle_number], self._number_frames)
+        for direction_index in range(point.data_table.shape[0]):
+            for cycle_number in range(point.data_table.shape[1]):
+                data_table[direction_index, cycle_number, :] = self._run_algorithm(
+                    point.data_table[direction_index, cycle_number, :], self._number_frames)
         new_point.data_table = data_table
         return new_point
 

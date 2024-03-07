@@ -15,12 +15,11 @@ logger = logging.getLogger(__name__)
 
 class AbstractAnalysis(ABC):
     def __init__(self,
-                 data_condition: model.ExtractedCycleDataCondition,
                  data_list: dict[model.ExtractedCycleDataCondition, model.ExtractedCycles],
                  configs: utils.ConfigProvider):
         self._data_list: dict[model.ExtractedCycleDataCondition, model.ExtractedCycles] = data_list
-        self._configs = configs
-        self._data_condition: model.ExtractedCycleDataCondition = data_condition
+        self._configs: utils.ConfigProvider = configs
+        self._data_condition: model.ExtractedCycleDataCondition = self.get_data_condition()
 
     def get_point_data(self, label: model.TranslatedLabel, axis: model.AxesNames,
                        cycle_context: model.GaitEventContext):
@@ -47,40 +46,50 @@ class AbstractAnalysis(ABC):
     def analyse(self, **kwargs) -> DataFrame:
         pass
 
+    @abstractmethod
+    def get_data_condition(self) -> model.ExtractedCycleDataCondition:
+        pass
+
 
 class AbstractCycleAnalysis(AbstractAnalysis):
 
     def __init__(
         self,
-        data_condition: model.ExtractedCycleDataCondition,
-        data_list: dict[str, model.ExtractedCyclePoint],
+        data_list: dict[model.ExtractedCycleDataCondition, model.ExtractedCycles],
         configs: utils.ConfigProvider,
         data_type: model.PointDataType,
     ):
-        super().__init__(data_condition, data_list, configs)
+        super().__init__(data_list, configs)
         self._point_data_type = data_type
 
     @abstractmethod
     def _do_analysis(self, data: np.ndarray) -> DataFrame:
         pass
 
-    def _filter_keys(self, key: str) -> bool:
+    def _filter_points(self, point: model.ExtractedCyclePoint) -> bool:
         """Check if it's the right point data"""
-        return f".{self._point_data_type.name}." in key
+        return point.point_type == self._point_data_type.value
+
+    def get_data_condition(self) -> model.ExtractedCycleDataCondition:
+        return model.ExtractedCycleDataCondition.RAW_DATA
+
+    def _get_all_points(self) -> list[model.ExtractedCyclePoint]:
+        point_list = self._data_list[self._data_condition].left_cycle_points.points
+        point_list += self._data_list[self._data_condition].right_cycle_points.points
+        return point_list
 
     def analyse(self, **kwargs) -> DataFrame:
         logger.info(f"analyse: {self._point_data_type}")
         by_phase = kwargs.get("by_phase", True)
         results = None
 
-        for key in self._data_list:  # TODO change quick fix
+        for point in self._get_all_points(): 
 
-            if self._filter_keys(key):
-                raw_point = self._data_list[key]
-                data = raw_point.data_table
+            if self._filter_points(point):
+                data = point.data_table
                 if not by_phase:
                     result = self._do_analysis(data)
-                    result["metric"] = key
+                    result["metric"] = point.translated_label.name
                 else:
                     standing = data.copy()
                     swinging = data.copy()
@@ -106,8 +115,8 @@ class JointForcesCycleAnalysis(AbstractCycleAnalysis):
     def __init__(self, data_list: dict, configs: utils.ConfigProvider):
         super().__init__(data_list, configs, model.PointDataType.FORCES)
 
-    def _filter_keys(self, key: str) -> bool:
-        if super()._filter_keys(key):
+    def _filter_points(self, key: str) -> bool:
+        if super()._filter_points(key):
             splits = key.split(".")
             return splits[3].lower() in splits[0]
         return False
@@ -130,8 +139,8 @@ class JointMomentsCycleAnalysis(AbstractCycleAnalysis):
     def __init__(self, data_list: dict, configs: utils.ConfigProvider):
         super().__init__(data_list, configs, model.PointDataType.MOMENTS)
 
-    def _filter_keys(self, key: str) -> bool:
-        if super()._filter_keys(key):
+    def _filter_points(self, key: str) -> bool:
+        if super()._filter_points(key):
             splits = key.split(".")
             return splits[3].lower() in splits[0]
         return False
@@ -154,8 +163,8 @@ class JointPowerCycleAnalysis(AbstractCycleAnalysis):
     def __init__(self, data_list: dict, configs: utils.ConfigProvider):
         super().__init__(data_list, configs, model.PointDataType.POWERS)
 
-    def _filter_keys(self, key: str) -> bool:
-        if super()._filter_keys(key):
+    def _filter_points(self, key: str) -> bool:
+        if super()._filter_points(key):
             splits = key.split(".")
             if splits[3].lower() in splits[0]:
                 return model.AxesNames.z.name is splits[2]
@@ -179,8 +188,8 @@ class JointAnglesCycleAnalysis(AbstractCycleAnalysis):
     def __init__(self, data_list: dict, configs: utils.ConfigProvider):
         super().__init__(data_list, configs, model.PointDataType.ANGLES)
 
-    def _filter_keys(self, key: str) -> bool:
-        if super()._filter_keys(key):
+    def _filter_points(self, key: str) -> bool:
+        if super()._filter_points(key):
             splits = key.split(".")
             return splits[3].lower() in splits[0]
         return False
@@ -207,8 +216,8 @@ class CMosAnalysis(AbstractCycleAnalysis):
     def __init__(self, data_list: dict, configs: utils.ConfigProvider):
         super().__init__(data_list, configs, model.PointDataType.MARKERS)
 
-    def _filter_keys(self, key: str) -> bool:
-        if super()._filter_keys(key):
+    def _filter_points(self, key: str) -> bool:
+        if super()._filter_points(key):
             useful = self._configs.MARKER_MAPPING.cmos.name in key
             return useful
         return False
