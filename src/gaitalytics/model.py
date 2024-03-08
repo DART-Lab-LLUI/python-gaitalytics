@@ -58,7 +58,7 @@ class SubjectMeasures:
 
     def __init__(
         self, body_mass: float, body_height: float, left_leg_length: float, right_leg_length: float, subject: str,
-        start_frame: int
+        start_frame: int, mocap_frequency: float
     ):
         self.body_mass = body_mass
         self.body_height = body_height
@@ -66,6 +66,7 @@ class SubjectMeasures:
         self.right_leg_length = right_leg_length
         self.subject = subject
         self.start_frame = start_frame
+        self.mocap_frequency = mocap_frequency
 
 
 class Point:
@@ -268,8 +269,9 @@ class GaitCycle:
         if len(unused_events) <= 3:
             self.unused_events = {}
             for unused_event in unused_events:
+                key_postfix = "IPSI" if unused_event.context == self.context.value else "CONTRA"
                 self.unused_events[
-                    f"{unused_event.label}_{unused_event.context}"] = unused_event.frame - self.start_frame
+                    f"{unused_event.label}_{key_postfix}"] = unused_event.frame - self.start_frame
 
         else:
             raise ValueError(f"too much events in cycle nr. {self.number}")
@@ -330,12 +332,11 @@ class ExtractedCycleDataCondition(Enum):
 
 class ExtractedCycles:
 
-    def __init__(self, data_condition: ExtractedCycleDataCondition, subject: SubjectMeasures, left_cycle_points: ExtractedContextCycles,
-                 right_cycle_points: ExtractedContextCycles):
+    def __init__(self, data_condition: ExtractedCycleDataCondition, subject: SubjectMeasures,
+                 cycle_context_points: dict[GaitEventContext, ExtractedContextCycles]):
         self.data_condition: ExtractedCycleDataCondition = data_condition
         self.subject: SubjectMeasures = subject
-        self.left_cycle_points: ExtractedContextCycles = left_cycle_points
-        self.right_cycle_points: ExtractedContextCycles = right_cycle_points
+        self.cycle_points: dict[GaitEventContext, ExtractedContextCycles] = cycle_context_points
 
 
 class AutoEnum(Enum):

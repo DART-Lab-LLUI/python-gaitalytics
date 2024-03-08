@@ -5,6 +5,7 @@ import pathlib
 import sys
 from pathlib import Path
 
+import numpy as np
 from pandas import DataFrame
 
 import gaitalytics.analysis as analysis
@@ -41,22 +42,18 @@ GAIT_EVENT_CHECKER_CONTEXT = "context"
 GAIT_EVENT_CHECKER_SPACING = "spacing"
 GAIT_EVENT_CHECKER_LIST = (GAIT_EVENT_CHECKER_CONTEXT, GAIT_EVENT_CHECKER_SPACING)
 
-ANALYSIS_MOMENTS = analysis.JointMomentsCycleAnalysis
-ANALYSIS_ANGLES = analysis.JointAnglesCycleAnalysis
-ANALYSIS_POWERS = analysis.JointPowerCycleAnalysis
-ANALYSIS_FORCES = analysis.JointForcesCycleAnalysis
+
+ANALYSIS_TIMESERIES = analysis.TimeseriesAnalysis
 ANALYSIS_TOE_CLEARANCE = analysis.MinimalClearingDifference
 ANALYSIS_SPATIO_TEMP = analysis.SpatioTemporalAnalysis
 ANALYSIS_CMOS = analysis.CMosAnalysis
 ANALYSIS_MOS = analysis.MosAnalysis
 ANALYSIS_LIST = (
-    ANALYSIS_MOMENTS,
-    ANALYSIS_ANGLES,
-    ANALYSIS_POWERS,
-    ANALYSIS_FORCES,
+    ANALYSIS_TIMESERIES,
     ANALYSIS_SPATIO_TEMP,
-    ANALYSIS_TOE_CLEARANCE,
+   # ANALYSIS_TOE_CLEARANCE,
     ANALYSIS_CMOS,
+    ANALYSIS_MOS,
 )
 
 MODELLING_COM = "com"
@@ -256,7 +253,7 @@ def extract_cycles(
 
     # buffer cycles
     out_file = file.Hdf5FileStore(buffer_output_path_obj, configs)
-    out_file.save_to_file(cycle_data)
+    out_file.save_extracted_cycles(cycle_data)
 
     return cycle_data
 
@@ -278,7 +275,7 @@ def extract_cycles_buffered(
     # load cycles
     file_handler = file.Hdf5FileStore(buffer_output_path_obj, configs)
 
-    return file_handler.read_from_file()
+    return file_handler.read_extracted_cycles()
 
 
 def normalise_cycles(
@@ -312,7 +309,7 @@ def normalise_cycles(
 
     # buffer cycles
     out_file = file.Hdf5FileStore(buffer_output_path_obj, configs)
-    out_file.save_to_file(normalised_data)
+    out_file.save_extracted_cycles(normalised_data)
 
     return normalised_data
 
@@ -322,7 +319,7 @@ def analyse_data(
     config: utils.ConfigProvider,
     methods: list[type[analysis.AbstractAnalysis]] = ANALYSIS_LIST,
     **kwargs: dict,
-) -> DataFrame:
+) -> dict[str, np.ndarray]:
     """
     Runs specified analysis and concatenates into one Dataframe
 
@@ -340,7 +337,7 @@ def analyse_data(
         if results is None:
             results = result
         else:
-            results = results.merge(result)
+            results.update(result)
 
     return results
 

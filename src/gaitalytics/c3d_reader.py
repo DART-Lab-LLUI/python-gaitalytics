@@ -6,9 +6,9 @@ from pathlib import Path
 from statistics import mean
 from typing import Optional
 from typing import Union
-import ezc3d as ezc3d
 
 import numpy as np
+
 import gaitalytics.model as model
 
 ANALOG_VOLTAGE_PREFIX_LABEL = "Voltage."
@@ -125,7 +125,9 @@ class BtkFileHandler(FileHandler):
         right_leg_length = self._aqc.GetMetaData().GetChild("PROCESSING").GetChild("RLegLength").GetInfo().ToDouble()[0]
         name = self._aqc.GetMetaData().GetChild("SUBJECTS").GetChild("NAMES").GetInfo().ToString()[0].strip()
         start_frame = self._aqc.GetMetaData().GetChild("TRIAL").GetChild("ACTUAL_START_FIELD").GetInfo().ToInt()[0]
-        subject = model.SubjectMeasures(body_mass, body_height, left_leg_length, right_leg_length, name, start_frame)
+        frequency = self._aqc.GetMetaData().GetChild("TRIAL").GetChild("CAMERA_RATE").GetInfo().ToInt()[0]
+        subject = model.SubjectMeasures(body_mass, body_height, left_leg_length, right_leg_length, name, start_frame,
+                                        frequency)
         return subject
 
     def _write_file(self, out_file_path: str):
@@ -207,7 +209,7 @@ class BtkFileHandler(FileHandler):
         gait_event.label = btk_event.GetLabel()
         return gait_event
 
-    def map_event(self, gait_event: model.GaitEvent) :
+    def map_event(self, gait_event: model.GaitEvent):
         btk_event = self.btk.btkEvent()
         btk_event.SetTime(gait_event.time)
         btk_event.SetContext(gait_event.context)
@@ -295,9 +297,10 @@ class EzC3dFileHandler(FileHandler):
         left_leg_length = self._c3d["parameters"]["PROCESSING"]["LLegLength"]["value"]
         right_leg_length = self._c3d["parameters"]["PROCESSING"]["RLegLength"]["value"]
         name = self._c3d["parameters"]["SUBJECTS"]["NAMES"]["value"][0]
+        frequency = self._c3d["parameters"]["TRIAL"]["CAMERA_RATE"]["value"][0]
         start_frame = self.get_actual_start_frame()
         return model.SubjectMeasures(body_mass, body_height, left_leg_length,
-                                     right_leg_length, name, start_frame)
+                                     right_leg_length, name, start_frame, frequency)
 
     def get_points_size(self) -> int:
         return self._c3d["parameters"]["POINT"]["USED"]["value"].tolist()[0]

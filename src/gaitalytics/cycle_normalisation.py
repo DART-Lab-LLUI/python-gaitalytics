@@ -25,20 +25,26 @@ class TimeNormalisationAlgorithm(ABC):
     def normalise(self, raw_data: model.ExtractedCycles) -> model.ExtractedCycles:
         norm_data = copy.deepcopy(raw_data)
         norm_data.data_condition = model.ExtractedCycleDataCondition.NORM_DATA
-        norm_data.left_cycle_points = self._create_context_points(raw_data.left_cycle_points)
-        norm_data.right_cycle_points = self._create_context_points(raw_data.right_cycle_points)
+        norm_data.cycle_points = self._create_context_points(raw_data.cycle_points)
         return norm_data
 
     def _create_context_points(self,
-                               raw_cycle_list: model.ExtractedContextCycles) -> model.ExtractedContextCycles:
-        norm_cycle_list = copy.deepcopy(raw_cycle_list)
-        points: list[model.ExtractedCyclePoint] = []
-        for point in raw_cycle_list.points:
-            points.append(self._norm_point(point))
-        norm_cycle_list.points = points
+                               raw_cycles: dict[
+                                   model.GaitEventContext, model.ExtractedContextCycles]) -> dict[model.GaitEventContext, model.ExtractedContextCycles]:
+        norm_cycles = copy.deepcopy(raw_cycles)
+        for key in norm_cycles:
+            raw_cycle_list = raw_cycles[key]
+            norm_cycle_list = copy.deepcopy(raw_cycle_list)
 
-        norm_cycle_list.meta_data = self._norm_meta_data(raw_cycle_list.meta_data)
-        return norm_cycle_list
+            points: list[model.ExtractedCyclePoint] = []
+            for point in raw_cycle_list.points:
+                points.append(self._norm_point(point))
+            norm_cycle_list.points = points
+            norm_cycle_list.meta_data = self._norm_meta_data(raw_cycle_list.meta_data)
+            norm_cycles[key] = norm_cycle_list
+
+        return norm_cycles
+
 
     def _norm_meta_data(self, raw_meta_data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         norm_meta_data = {}
@@ -51,6 +57,7 @@ class TimeNormalisationAlgorithm(ABC):
                                                                     self._number_frames)
         return norm_meta_data
 
+
     def _norm_point(self, point: model.ExtractedCyclePoint) -> model.ExtractedCyclePoint:
         shape = point.data_table.shape
         data_table = np.full((shape[0], shape[1], self._number_frames), np.nan)
@@ -62,9 +69,11 @@ class TimeNormalisationAlgorithm(ABC):
         new_point.data_table = data_table
         return new_point
 
+
     @abstractmethod
     def _run_algorithm(self, data: np.array, number_frames: int = 100) -> np.array:
         pass
+
 
     @abstractmethod
     def _define_event_frame(self, event_frames: np.array, frame_number_cycle: np.array,

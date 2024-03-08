@@ -11,7 +11,7 @@ def main():
     # load configs
     configs = utils.ConfigProvider(settings_file)
 
-    api.detect_gait_events(file_path, out_path, configs, show_plot=False, file_handler_class=c3d_reader.EzC3dFileHandler)
+    api.detect_gait_events(file_path, out_path, configs, show_plot=False, file_handler_class=c3d_reader.BtkFileHandler)
 
 
 if __name__ == "__main__":

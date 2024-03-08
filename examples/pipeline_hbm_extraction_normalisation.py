@@ -16,7 +16,7 @@ def main():
     if not buffered_path_raw.exists():
         buffered_path_raw.parent.mkdir(parents=True, exist_ok=True)
         cycle_data = api.extract_cycles(file_path, configs, buffer_output_path=buffered_path_raw,
-                                        file_handler_class=c3d_reader.EzC3dFileHandler)
+                                        file_handler_class=c3d_reader.BtkFileHandler)
     else:
         cycle_data = api.extract_cycles_buffered(buffered_path_raw, configs)[model.ExtractedCycleDataCondition.RAW_DATA]
 
