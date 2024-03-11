@@ -70,7 +70,6 @@ class AbstractAnalysis(ABC):
     @staticmethod
     def split_by_phase(data: np.ndarray, meta_data: dict[str:any]) -> [np.ndarray, np.ndarray]:
         events = meta_data["Foot Off_IPSI"]
-        cycle_length = meta_data["end_frame"] - meta_data["start_frame"]
         standing = data.copy()
         swinging = data.copy()
         for cycle_index in range(len(events)):
@@ -166,10 +165,10 @@ class CMosAnalysis(AbstractAnalysis):
             result.update(calculate_stats(right_cmos, model.GaitEventContext.RIGHT.name, "cmos"))
         else:
             left_events = self.get_cycles_meta_data(model.GaitEventContext.LEFT)
-            right_events = self.get_cycles_meta_data(model.GaitEventContext.RIGHT)["Foot Off_IPSI"]
+            right_events = self.get_cycles_meta_data(model.GaitEventContext.RIGHT)
 
-            l_standing, l_swinging = self.split_by_phase(left_cmos, self.get_cycles_meta_data(model.GaitEventContext.LEFT))
-            r_standing, r_swinging = self.split_by_phase(right_cmos, self.get_cycles_meta_data(model.GaitEventContext.RIGHT))
+            l_standing, l_swinging = self.split_by_phase(left_cmos, left_events)
+            r_standing, r_swinging = self.split_by_phase(right_cmos, right_events)
 
             result = calculate_stats(l_swinging, model.GaitEventContext.LEFT.name, "cmos_swing")
             result.update(calculate_stats(l_standing, model.GaitEventContext.LEFT.name, "cmos_stand"))
