@@ -43,9 +43,9 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/gaitalytics
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/cereneo-foundation/python-gaitalytics/v0.1.0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/cereneo-foundation/python-gaitalytics/v0.1.1.svg
     :alt: Commits since latest release
-    :target: https://github.com/cereneo-foundation/python-gaitalytics/compare/v0.1.0...main
+    :target: https://github.com/cereneo-foundation/python-gaitalytics/compare/v0.1.1...main
 
 
 
