@@ -3,8 +3,6 @@ from abc import ABC
 from abc import abstractmethod
 
 import numpy as np
-from pandas import DataFrame
-from pandas import concat
 from scipy import signal
 
 import gaitalytics.model as model
@@ -451,51 +449,43 @@ class _CycleDurationAnalysis(AbstractAnalysis):
     # max_hip_vertical_amplitude = np.zeros(len(data))  # BH%
 
 
-class MinimalClearingDifference(AbstractAnalysis):
+class MinimalToeClearance(AbstractAnalysis):
+    logger.info(f"analyse: Minia")
 
-    def __init__(self, data_list: dict[str, model.ExtractedCyclePoint],
-                 configs: utils.ConfigProvider):
-        super().__init__(data_list, configs)
+    def get_data_condition(self) -> model.ExtractedCycleDataCondition:
+        return model.ExtractedCycleDataCondition.RAW_DATA
 
-    def analyse(self, **kwargs) -> DataFrame:
-        right_toe = self._data_list[
-            utils.ConfigProvider.define_key(
-                self._configs.MARKER_MAPPING.right_meta_2,
-                model.PointDataType.MARKERS,
-                model.AxesNames.z,
-                model.GaitEventContext.RIGHT,
-            )
-        ]
-        left_toe = self._data_list[
-            utils.ConfigProvider.define_key(
-                self._configs.MARKER_MAPPING.left_meta_2,
-                model.PointDataType.MARKERS,
-                model.AxesNames.z,
-                model.GaitEventContext.LEFT,
-            )
-        ]
-
-        right = self._calculate_minimal_clearance(right_toe.data_table, right_toe.event_frames, "right")
-        left = self._calculate_minimal_clearance(left_toe.data_table, left_toe.event_frames, "left")
-        result = concat([left, right], axis=1)
-        result["metric"] = "MinimalToeClearance"
-        return result.pivot(columns="metric")
+    def _analyse(self, by_phase: bool) -> dict:
+        right_toe_z = self.get_point_data(model.TranslatedLabel.RIGHT_META_2, model.GaitEventContext.RIGHT)
+        left_toe_z = self.get_point_data(model.TranslatedLabel.LEFT_META_2, model.GaitEventContext.LEFT)
+        right_toe_z = self.split_by_phase(right_toe_z, self.get_cycles_meta_data(model.GaitEventContext.RIGHT))[1][
+            model.AxesNames.z.value]
+        left_toe_z = self.split_by_phase(left_toe_z, self.get_cycles_meta_data(model.GaitEventContext.LEFT))[1][
+            model.AxesNames.z.value]
+        right = self._calculate_minimal_clearance(right_toe_z, model.GaitEventContext.RIGHT)
+        left = self._calculate_minimal_clearance(left_toe_z, model.GaitEventContext.LEFT)
+        right.update(left)
+        return right
 
     @staticmethod
-    def _calculate_minimal_clearance(toe: DataFrame, event_frames: DataFrame, side: str) -> DataFrame:
-        s_mtc_label = f"minimal_toe_clearance_{side}"
-        s_mtc_cycle_label = f"minimal_toe_clearance_swing_p_{side}"
-        s_tc_hs_label = f"toe_clearance_heel_strike_{side}"
-        toe_clearance = DataFrame(index=toe.index, columns=[s_mtc_label, s_mtc_cycle_label, s_tc_hs_label])
-        for cycle_number in toe.index.to_series():
-            toe_off_frame = event_frames.loc[cycle_number][model.BasicCyclePoint.FOOT_OFF]
-            swing_phase_data = toe.loc[cycle_number][toe_off_frame:-1]
-            mid_swing_index = round(len(swing_phase_data) / 2)
-            peaks = signal.find_peaks(swing_phase_data[0:mid_swing_index], distance=len(swing_phase_data))
-            toe_clear_min = min(swing_phase_data[peaks[0][0]: -1])
-            tc_percent = np.where(swing_phase_data[peaks[0][0]: -1] == toe_clear_min)[0] / len(swing_phase_data)
-            tc_clear_hs = max(swing_phase_data[mid_swing_index:-1])
-            toe_clearance.loc[cycle_number][s_mtc_label] = toe_clear_min
-            toe_clearance.loc[cycle_number][s_mtc_cycle_label] = tc_percent
-            toe_clearance.loc[cycle_number][s_tc_hs_label] = tc_clear_hs
-        return toe_clearance
+    def _calculate_minimal_clearance(toe: np.ndarray, side: model.GaitEventContext) -> dict[str, np.ndarray]:
+        min_tc_label = f"{side.name}_minimal_toe_clearance"
+        min_tc_perc_label = f"{side.name}_minimal_toe_clearance_swing_perc"
+        tc_at_heel_strike_label = f"{side.name}_toe_clearance_heel_strike"
+
+        results = {min_tc_label: np.ndarray(len(toe)),
+                   min_tc_perc_label: np.ndarray(len(toe)),
+                   tc_at_heel_strike_label: np.ndarray(len(toe))}
+        for cycle_number in range(len(toe)):
+            toe_cycle = toe[cycle_number]
+            toe_cycle = toe_cycle[~np.isnan(toe_cycle)]
+            peaks = signal.find_peaks(toe_cycle, distance=len(toe_cycle))
+            mid_late_swing = toe_cycle[peaks[0][0]:]
+            toe_clear_min = np.min(mid_late_swing)
+            toe_clear_min_pos = np.argmin(mid_late_swing) + peaks[0][0]
+            tc_percent = toe_clear_min_pos / len(toe_cycle)
+            tc_clear_hs = toe_cycle[-1]
+            results[min_tc_label][cycle_number] = toe_clear_min
+            results[min_tc_perc_label][cycle_number] = tc_percent
+            results[tc_at_heel_strike_label][cycle_number] = tc_clear_hs
+        return results
