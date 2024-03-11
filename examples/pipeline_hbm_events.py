@@ -1,6 +1,6 @@
 from gaitalytics import api
-from gaitalytics import utils
 from gaitalytics import c3d_reader
+from gaitalytics import utils
 
 
 def main():

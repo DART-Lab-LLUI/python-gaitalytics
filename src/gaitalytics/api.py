@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from pandas import DataFrame
 
 import gaitalytics.analysis as analysis
 import gaitalytics.c3d_reader as c3d_reader
@@ -315,7 +314,7 @@ def normalise_cycles(
 
 
 def analyse_data(
-    cycle_data: dict[model.ExtractedCycleDataCondition: model.ExtractedCycles],
+    cycle_data: dict[model.ExtractedCycleDataCondition : model.ExtractedCycles],
     config: utils.ConfigProvider,
     methods: list[type[analysis.AbstractAnalysis]] = ANALYSIS_LIST,
     **kwargs: dict,

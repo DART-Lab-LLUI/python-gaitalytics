@@ -49,8 +49,9 @@ class ConfigProvider:
             self._config = yaml.safe_load(f)
 
     @staticmethod
-    def define_key(translated_label: Enum, point_type: model.PointDataType, direction: model.AxesNames,
-                   side: model.GaitEventContext) -> str:
+    def define_key(
+        translated_label: Enum, point_type: model.PointDataType, direction: model.AxesNames, side: model.GaitEventContext
+    ) -> str:
         if translated_label is not None:
             return f"{translated_label.name}.{point_type.name}.{direction.name}.{side.value}"
 
@@ -68,5 +69,3 @@ def get_meta_data_filename(filename: str) -> [str, model.PointDataType, model.Ax
     context = model.GaitEventContext(meta_data[3])
     postfix = postfix.split(".")[0]
     return [label, data_type, direction, context, postfix, prefix]
-
-

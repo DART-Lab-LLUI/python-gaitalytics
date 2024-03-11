@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from enum import Enum, auto
+from enum import Enum
+from enum import auto
 
 import numpy as np
 
@@ -57,8 +58,14 @@ class GaitEventLabel(Enum):
 class SubjectMeasures:
 
     def __init__(
-        self, body_mass: float, body_height: float, left_leg_length: float, right_leg_length: float, subject: str,
-        start_frame: int, mocap_frequency: float
+        self,
+        body_mass: float,
+        body_height: float,
+        left_leg_length: float,
+        right_leg_length: float,
+        subject: str,
+        start_frame: int,
+        mocap_frequency: float,
     ):
         self.body_mass = body_mass
         self.body_height = body_height
@@ -255,8 +262,7 @@ class GaitEvent:
 
 class GaitCycle:
 
-    def __init__(self, number: int, context: GaitEventContext, start_frame: int, end_frame: int,
-                 unused_events: list[GaitEvent]):
+    def __init__(self, number: int, context: GaitEventContext, start_frame: int, end_frame: int, unused_events: list[GaitEvent]):
         self.number: int = number
         self.context: GaitEventContext = context
         self.start_frame: int = start_frame
@@ -270,8 +276,7 @@ class GaitCycle:
             self.unused_events = {}
             for unused_event in unused_events:
                 key_postfix = "IPSI" if unused_event.context == self.context.value else "CONTRA"
-                self.unused_events[
-                    f"{unused_event.label}_{key_postfix}"] = unused_event.frame - self.start_frame
+                self.unused_events[f"{unused_event.label}_{key_postfix}"] = unused_event.frame - self.start_frame
 
         else:
             raise ValueError(f"too much events in cycle nr. {self.number}")
@@ -332,8 +337,12 @@ class ExtractedCycleDataCondition(Enum):
 
 class ExtractedCycles:
 
-    def __init__(self, data_condition: ExtractedCycleDataCondition, subject: SubjectMeasures,
-                 cycle_context_points: dict[GaitEventContext, ExtractedContextCycles]):
+    def __init__(
+        self,
+        data_condition: ExtractedCycleDataCondition,
+        subject: SubjectMeasures,
+        cycle_context_points: dict[GaitEventContext, ExtractedContextCycles],
+    ):
         self.data_condition: ExtractedCycleDataCondition = data_condition
         self.subject: SubjectMeasures = subject
         self.cycle_points: dict[GaitEventContext, ExtractedContextCycles] = cycle_context_points

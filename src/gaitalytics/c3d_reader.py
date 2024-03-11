@@ -107,7 +107,7 @@ class FileHandler(ABC):
 class BtkFileHandler(FileHandler):
     def __init__(self, file_path: Path):
         self._aqc = None
-        self.btk = importlib.import_module('btk')
+        self.btk = importlib.import_module("btk")
         super().__init__(file_path)
 
     @property
@@ -126,8 +126,7 @@ class BtkFileHandler(FileHandler):
         name = self._aqc.GetMetaData().GetChild("SUBJECTS").GetChild("NAMES").GetInfo().ToString()[0].strip()
         start_frame = self._aqc.GetMetaData().GetChild("TRIAL").GetChild("ACTUAL_START_FIELD").GetInfo().ToInt()[0]
         frequency = self._aqc.GetMetaData().GetChild("TRIAL").GetChild("CAMERA_RATE").GetInfo().ToInt()[0]
-        subject = model.SubjectMeasures(body_mass, body_height, left_leg_length, right_leg_length, name, start_frame,
-                                        frequency)
+        subject = model.SubjectMeasures(body_mass, body_height, left_leg_length, right_leg_length, name, start_frame, frequency)
         return subject
 
     def _write_file(self, out_file_path: str):
@@ -235,7 +234,7 @@ class EzC3dFileHandler(FileHandler):
 
     def __init__(self, file_path: Path):
         self._c3d = None
-        self._ez = importlib.import_module('ezc3d')
+        self._ez = importlib.import_module("ezc3d")
         super().__init__(file_path)
 
     def read_file(self):
@@ -249,7 +248,7 @@ class EzC3dFileHandler(FileHandler):
 
     def get_events(self) -> list[model.GaitEvent]:
         events = []
-        for index in range(0, self.get_events_size()):
+        for index in range(self.get_events_size()):
             events.append(self.get_event(index=index))
         return events
 
@@ -299,8 +298,7 @@ class EzC3dFileHandler(FileHandler):
         name = self._c3d["parameters"]["SUBJECTS"]["NAMES"]["value"][0]
         frequency = self._c3d["parameters"]["TRIAL"]["CAMERA_RATE"]["value"][0]
         start_frame = self.get_actual_start_frame()
-        return model.SubjectMeasures(body_mass, body_height, left_leg_length,
-                                     right_leg_length, name, start_frame, frequency)
+        return model.SubjectMeasures(body_mass, body_height, left_leg_length, right_leg_length, name, start_frame, frequency)
 
     def get_points_size(self) -> int:
         return self._c3d["parameters"]["POINT"]["USED"]["value"].tolist()[0]
@@ -316,14 +314,9 @@ class EzC3dFileHandler(FileHandler):
     def add_point(self, new_point: model.Point):
         pass
 
-    def map_ez_event(self,
-                     time,
-                     context: str,
-                     label: str,
-                     description: str,
-                     subject: str,
-                     icon_id: int,
-                     generic_flag: int) -> model.GaitEvent:
+    def map_ez_event(
+        self, time, context: str, label: str, description: str, subject: str, icon_id: int, generic_flag: int
+    ) -> model.GaitEvent:
         event = model.GaitEvent(self.get_actual_start_frame(), self.get_point_frequency())
         event.time = time[0] * 60 + time[1]
         event.context = context
@@ -334,8 +327,7 @@ class EzC3dFileHandler(FileHandler):
         event.generic_flag = generic_flag
         return event
 
-    def map_ez_point(self,
-                     index: int) -> model.Point:
+    def map_ez_point(self, index: int) -> model.Point:
         label = self._c3d["parameters"]["POINT"]["LABELS"]["value"][index]
         values = self._c3d["data"]["points"][:, index].T
         residuals = self._c3d["data"]["meta_points"]["residuals"][:, index]
@@ -354,7 +346,6 @@ class EzC3dFileHandler(FileHandler):
         return point
 
     def _add_event(self, event: model.GaitEvent):
-
         """
         This function adds an event, warning two events can have the same name (it wont't override it)
 
@@ -396,8 +387,7 @@ class EzC3dFileHandler(FileHandler):
             icon_ids += [event.icon_id]
             generic_flags += [event.generic_flag]
 
-            self._set_events(contexts, descriptions, generic_flags, icon_ids, labels, subjects, times, used,
-                             param_names)
+            self._set_events(contexts, descriptions, generic_flags, icon_ids, labels, subjects, times, used, param_names)
 
     def _get_parameter_name(self, index: int) -> dict[str, str]:
         suffix = int(index / self._MAX_EVENTS_PER_SECTION)
@@ -412,13 +402,15 @@ class EzC3dFileHandler(FileHandler):
         ICON_IDS = "ICON_IDS"
         GENERIC_FLAGS = "GENERIC_FLAGS"
 
-        return {TIMES: TIMES + suffix,
-                CONTEXTS: CONTEXTS + suffix,
-                LABELS: LABELS + suffix,
-                DESCRIPTIONS: DESCRIPTIONS + suffix,
-                SUBJECTS: SUBJECTS + suffix,
-                ICON_IDS: ICON_IDS + suffix,
-                GENERIC_FLAGS: GENERIC_FLAGS + suffix}
+        return {
+            TIMES: TIMES + suffix,
+            CONTEXTS: CONTEXTS + suffix,
+            LABELS: LABELS + suffix,
+            DESCRIPTIONS: DESCRIPTIONS + suffix,
+            SUBJECTS: SUBJECTS + suffix,
+            ICON_IDS: ICON_IDS + suffix,
+            GENERIC_FLAGS: GENERIC_FLAGS + suffix,
+        }
 
     def _set_events(self, contexts, descriptions, generic_flags, icon_ids, labels, subjects, times, used, param_names):
         self._c3d.add_parameter("EVENT", "USED", used)

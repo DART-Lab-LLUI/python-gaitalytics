@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import copy
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 
 import numpy as np
 
@@ -28,9 +29,9 @@ class TimeNormalisationAlgorithm(ABC):
         norm_data.cycle_points = self._create_context_points(raw_data.cycle_points)
         return norm_data
 
-    def _create_context_points(self,
-                               raw_cycles: dict[
-                                   model.GaitEventContext, model.ExtractedContextCycles]) -> dict[model.GaitEventContext, model.ExtractedContextCycles]:
+    def _create_context_points(
+        self, raw_cycles: dict[model.GaitEventContext, model.ExtractedContextCycles]
+    ) -> dict[model.GaitEventContext, model.ExtractedContextCycles]:
         norm_cycles = copy.deepcopy(raw_cycles)
         for key in norm_cycles:
             raw_cycle_list = raw_cycles[key]
@@ -45,7 +46,6 @@ class TimeNormalisationAlgorithm(ABC):
 
         return norm_cycles
 
-
     def _norm_meta_data(self, raw_meta_data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         norm_meta_data = {}
         cycle_length = raw_meta_data["length"]
@@ -53,10 +53,8 @@ class TimeNormalisationAlgorithm(ABC):
             if meta_key == "end_frame" or meta_key == "start_frame":
                 norm_meta_data[meta_key] = raw_meta_data[meta_key]
             elif not meta_key == "length":
-                norm_meta_data[meta_key] = self._define_event_frame(raw_meta_data[meta_key], cycle_length,
-                                                                    self._number_frames)
+                norm_meta_data[meta_key] = self._define_event_frame(raw_meta_data[meta_key], cycle_length, self._number_frames)
         return norm_meta_data
-
 
     def _norm_point(self, point: model.ExtractedCyclePoint) -> model.ExtractedCyclePoint:
         shape = point.data_table.shape
@@ -65,26 +63,23 @@ class TimeNormalisationAlgorithm(ABC):
         for direction_index in range(point.data_table.shape[0]):
             for cycle_number in range(point.data_table.shape[1]):
                 data_table[direction_index, cycle_number, :] = self._run_algorithm(
-                    point.data_table[direction_index, cycle_number, :], self._number_frames)
+                    point.data_table[direction_index, cycle_number, :], self._number_frames
+                )
         new_point.data_table = data_table
         return new_point
-
 
     @abstractmethod
     def _run_algorithm(self, data: np.array, number_frames: int = 100) -> np.array:
         pass
 
-
     @abstractmethod
-    def _define_event_frame(self, event_frames: np.array, frame_number_cycle: np.array,
-                            number_frames: int = 100) -> int:
+    def _define_event_frame(self, event_frames: np.array, frame_number_cycle: np.array, number_frames: int = 100) -> int:
         pass
 
 
 class LinearTimeNormalisation(TimeNormalisationAlgorithm):
 
-    def _define_event_frame(self, event_frames: np.array, frame_number_cycle: np.array,
-                            number_frames: int = 100) -> int:
+    def _define_event_frame(self, event_frames: np.array, frame_number_cycle: np.array, number_frames: int = 100) -> int:
         events = event_frames / frame_number_cycle * number_frames
         return events.round()
 

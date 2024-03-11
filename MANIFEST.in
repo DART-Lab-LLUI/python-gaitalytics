@@ -17,4 +17,4 @@ include CONTRIBUTING.rst
 include LICENSE
 include README.rst
 
-global-exclude *.py[cod] __pycache__/* *.so *.dylib examples/* settings/* docs/* tests/data/*
+global-exclude *.py[cod] __pycache__/* *.so *.dylib examples/* settings/* tests/data/* docs/* docs/reference/*
