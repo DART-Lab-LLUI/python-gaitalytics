@@ -44,8 +44,7 @@ class EventCycleBuilder(CycleBuilder):
                     if end_event is not None:
                         numbers[context] = numbers[context] + 1
                         cycle = model.GaitCycle(
-                            numbers[context], model.GaitEventContext(context), start_event.frame, end_event.frame,
-                            unused_events
+                            numbers[context], model.GaitEventContext(context), start_event.frame, end_event.frame, unused_events
                         )
                         gait_cycles.add_cycle(cycle)
                 except IndexError:
@@ -79,20 +78,18 @@ def extract_point_cycles(
 
         # init nan numpy arrays
         cycle_data_left = _create_empty_table(
-            3, cycles.get_number_of_cycles(model.GaitEventContext.LEFT),
-            cycles.get_longest_cycle_length(model.GaitEventContext.LEFT)
+            3, cycles.get_number_of_cycles(model.GaitEventContext.LEFT), cycles.get_longest_cycle_length(model.GaitEventContext.LEFT)
         )
 
         cycle_data_right = _create_empty_table(
-            3, cycles.get_number_of_cycles(model.GaitEventContext.RIGHT),
-            cycles.get_longest_cycle_length(model.GaitEventContext.RIGHT)
+            3, cycles.get_number_of_cycles(model.GaitEventContext.RIGHT), cycles.get_longest_cycle_length(model.GaitEventContext.RIGHT)
         )
 
         point = file_handler.get_point(point_index)
         for cycle in cycles.cycles:
 
             # extract values in cycle
-            cycle_data = point.values[cycle.start_frame: cycle.end_frame, :]
+            cycle_data = point.values[cycle.start_frame : cycle.end_frame, :]
             cycle_data = cycle_data.T
 
             # store it in the array of the context
@@ -116,14 +113,13 @@ def extract_point_cycles(
     points_right.meta_data = meta_data
     points = {model.GaitEventContext.LEFT.value: points_left, model.GaitEventContext.RIGHT.value: points_right}
 
-    return model.ExtractedCycles(model.ExtractedCycleDataCondition.RAW_DATA, file_handler.get_subject_measures(),
-                                 points)
+    return model.ExtractedCycles(model.ExtractedCycleDataCondition.RAW_DATA, file_handler.get_subject_measures(), points)
 
 
 def _extract_general_cycle_data(cycles: model.GaitCycleList, context: model.GaitEventContext) -> dict[str, np.ndarray]:
     def add_to_dict(
         key: str, value: int, cycle_number: int, dictionary: dict[str, np.ndarray], max_cycle_length: int
-    ) -> dict[str: np.ndarray]:
+    ) -> dict[str : np.ndarray]:
 
         if key not in meta_data:
             dictionary[key] = np.full(max_cycle_length, np.nan)
@@ -145,8 +141,7 @@ def _extract_general_cycle_data(cycles: model.GaitCycleList, context: model.Gait
     return meta_data
 
 
-def _create_cycle_point(configs: utils.ConfigProvider, point: model.Point,
-                        cycle_data: np.ndarray) -> model.ExtractedCyclePoint:
+def _create_cycle_point(configs: utils.ConfigProvider, point: model.Point, cycle_data: np.ndarray) -> model.ExtractedCyclePoint:
     translated_label = configs.get_translated_label(point.label, point.type)
     cycle_point = model.ExtractedCyclePoint(translated_label, point.type)
     cycle_point.data_table = cycle_data

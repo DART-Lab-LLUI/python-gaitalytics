@@ -41,7 +41,6 @@ GAIT_EVENT_CHECKER_CONTEXT = "context"
 GAIT_EVENT_CHECKER_SPACING = "spacing"
 GAIT_EVENT_CHECKER_LIST = (GAIT_EVENT_CHECKER_CONTEXT, GAIT_EVENT_CHECKER_SPACING)
 
-
 ANALYSIS_TIMESERIES = analysis.TimeseriesAnalysis
 ANALYSIS_TOE_CLEARANCE = analysis.MinimalToeClearance
 ANALYSIS_SPATIO_TEMP = analysis.SpatioTemporalAnalysis
@@ -226,8 +225,6 @@ def extract_cycles(
 
     if methode not in [CYCLE_METHOD_HEEL_STRIKE, CYCLE_METHOD_TOE_OFF]:
         raise KeyError(f"{methode} is not a valid methode")
-
-
 
     # read c3d
     motion_file = file_handler_class(c3d_file_path_obj)
