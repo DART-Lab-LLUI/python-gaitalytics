@@ -204,7 +204,6 @@ def extract_cycles(
     configs: utils.ConfigProvider,
     buffer_output_path: str | Path,
     methode: str = CYCLE_METHOD_HEEL_STRIKE,
-    anomaly_checker: list[str] = GAIT_EVENT_CHECKER_LIST,
     file_handler_class: type[c3d_reader.FileHandler] = c3d_reader.BtkFileHandler,
 ) -> model.ExtractedCycles:
     """
@@ -228,21 +227,19 @@ def extract_cycles(
     if methode not in [CYCLE_METHOD_HEEL_STRIKE, CYCLE_METHOD_TOE_OFF]:
         raise KeyError(f"{methode} is not a valid methode")
 
-    if not all(item in GAIT_EVENT_CHECKER_LIST for item in anomaly_checker):
-        raise KeyError(f"{anomaly_checker} are not a valid anomaly checker")
+
 
     # read c3d
     motion_file = file_handler_class(c3d_file_path_obj)
 
     # get anomaly detection
-    checker = _get_anomaly_checker(anomaly_checker)
 
     # choose cut method
     cycle_builder = None
     if methode == CYCLE_METHOD_TOE_OFF:
-        cycle_builder = cycle.ToeOffToToeOffCycleBuilder(checker)
+        cycle_builder = cycle.ToeOffToToeOffCycleBuilder()
     elif methode == CYCLE_METHOD_HEEL_STRIKE:
-        cycle_builder = cycle.HeelStrikeToHeelStrikeCycleBuilder(checker)
+        cycle_builder = cycle.HeelStrikeToHeelStrikeCycleBuilder()
 
     # get cycles
     cycles = cycle_builder.build_cycles(motion_file)

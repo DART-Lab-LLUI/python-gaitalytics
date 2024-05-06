@@ -339,9 +339,9 @@ class _StepLengthAnalysis(AbstractAnalysis):
         logger.info("analyse: _Step Length")
 
         left_heel_y_left = self.get_point_data(model.TranslatedLabel.LEFT_HEEL, model.GaitEventContext.LEFT)[model.AxesNames.y.value]
-        right_heel_y_left = self.get_point_data(model.TranslatedLabel.RIGHT_HEEL, model.GaitEventContext.RIGHT)[model.AxesNames.y.value]
+        right_heel_y_left = self.get_point_data(model.TranslatedLabel.RIGHT_HEEL, model.GaitEventContext.LEFT)[model.AxesNames.y.value]
 
-        left_heel_y_right = self.get_point_data(model.TranslatedLabel.LEFT_HEEL, model.GaitEventContext.LEFT)[model.AxesNames.y.value]
+        left_heel_y_right = self.get_point_data(model.TranslatedLabel.LEFT_HEEL, model.GaitEventContext.RIGHT)[model.AxesNames.y.value]
         right_heel_y_right = self.get_point_data(model.TranslatedLabel.RIGHT_HEEL, model.GaitEventContext.RIGHT)[model.AxesNames.y.value]
 
         left = self._calculate_step_length(left_heel_y_left, right_heel_y_left, model.GaitEventContext.LEFT)
