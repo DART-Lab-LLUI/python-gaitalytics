@@ -18,7 +18,7 @@ def main():
         methode=api.MODELLING_CMOS,
         belt_speed=0.8,
         dominant_leg_length=998,
-        file_handler_class=c3d_reader.EzC3dFileHandler,
+        file_handler_class=c3d_reader.BtkFileHandler,
     )
 
 

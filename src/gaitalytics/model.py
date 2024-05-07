@@ -55,26 +55,6 @@ class GaitEventLabel(Enum):
         return 2
 
 
-class SubjectMeasures:
-
-    def __init__(
-        self,
-        body_mass: float,
-        body_height: float,
-        left_leg_length: float,
-        right_leg_length: float,
-        subject: str,
-        start_frame: int,
-        mocap_frequency: float,
-    ):
-        self.body_mass = body_mass
-        self.body_height = body_height
-        self.left_leg_length = left_leg_length
-        self.right_leg_length = right_leg_length
-        self.subject = subject
-        self.start_frame = start_frame
-        self.mocap_frequency = mocap_frequency
-
 
 class Point:
     """
@@ -340,11 +320,9 @@ class ExtractedCycles:
     def __init__(
         self,
         data_condition: ExtractedCycleDataCondition,
-        subject: SubjectMeasures,
         cycle_context_points: dict[GaitEventContext, ExtractedContextCycles],
     ):
         self.data_condition: ExtractedCycleDataCondition = data_condition
-        self.subject: SubjectMeasures = subject
         self.cycle_points: dict[GaitEventContext, ExtractedContextCycles] = cycle_context_points
 
 

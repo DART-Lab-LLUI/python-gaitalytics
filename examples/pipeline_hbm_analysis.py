@@ -7,7 +7,7 @@ from gaitalytics import utils
 
 def main():
     settings_file = "settings/hbm_pig.yaml"
-    buffered_path = Path("./out/processed.h5")
+    buffered_path = Path("./out/raw.h5")
     out_path = Path("./out/analysis.h5")
 
     configs = utils.ConfigProvider(settings_file)

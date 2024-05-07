@@ -337,10 +337,7 @@ def analyse_data(
 
 def _create_path_object(file_path: str | Path) -> Path:
     logger.debug("_create_path_object")
-    path_obj = Path(file_path)
-    if not path_obj.exists():
-        raise FileExistsError(f"{path_obj} does not exists")
-    return path_obj
+    return Path(file_path)
 
 
 def _get_anomaly_checker(anomaly_checker: list[str]) -> events.AbstractEventAnomalyChecker:

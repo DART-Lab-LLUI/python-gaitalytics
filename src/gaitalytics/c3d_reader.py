@@ -88,10 +88,6 @@ class FileHandler(ABC):
         pass
 
     @abstractmethod
-    def get_subject_measures(self) -> model.SubjectMeasures:
-        pass
-
-    @abstractmethod
     def get_points_size(self) -> int:
         pass
 
@@ -117,17 +113,6 @@ class BtkFileHandler(FileHandler):
     @aqc.setter
     def aqc(self, aqc):
         self._aqc = aqc
-
-    def get_subject_measures(self) -> model.SubjectMeasures:
-        body_mass = self._aqc.GetMetaData().GetChild("PROCESSING").GetChild("Bodymass").GetInfo().ToDouble()[0]
-        body_height = self._aqc.GetMetaData().GetChild("PROCESSING").GetChild("Height").GetInfo().ToDouble()[0]
-        left_leg_length = self._aqc.GetMetaData().GetChild("PROCESSING").GetChild("LLegLength").GetInfo().ToDouble()[0]
-        right_leg_length = self._aqc.GetMetaData().GetChild("PROCESSING").GetChild("RLegLength").GetInfo().ToDouble()[0]
-        name = self._aqc.GetMetaData().GetChild("SUBJECTS").GetChild("NAMES").GetInfo().ToString()[0].strip()
-        start_frame = self._aqc.GetMetaData().GetChild("TRIAL").GetChild("ACTUAL_START_FIELD").GetInfo().ToInt()[0]
-        frequency = self._aqc.GetMetaData().GetChild("TRIAL").GetChild("CAMERA_RATE").GetInfo().ToInt()[0]
-        subject = model.SubjectMeasures(body_mass, body_height, left_leg_length, right_leg_length, name, start_frame, frequency)
-        return subject
 
     def _write_file(self, out_file_path: str):
         """
@@ -290,16 +275,6 @@ class EzC3dFileHandler(FileHandler):
     def get_actual_start_frame(self) -> int:
         return self._c3d["parameters"]["TRIAL"]["ACTUAL_START_FIELD"]["value"][0]
 
-    def get_subject_measures(self) -> model.SubjectMeasures:
-        body_mass = self._c3d["parameters"]["PROCESSING"]["Bodymass"]["value"]
-        body_height = self._c3d["parameters"]["PROCESSING"]["Height"]["value"]
-        left_leg_length = self._c3d["parameters"]["PROCESSING"]["LLegLength"]["value"]
-        right_leg_length = self._c3d["parameters"]["PROCESSING"]["RLegLength"]["value"]
-        name = self._c3d["parameters"]["SUBJECTS"]["NAMES"]["value"][0]
-        frequency = self._c3d["parameters"]["TRIAL"]["CAMERA_RATE"]["value"][0]
-        start_frame = self.get_actual_start_frame()
-        return model.SubjectMeasures(body_mass, body_height, left_leg_length, right_leg_length, name, start_frame, frequency)
-
     def get_points_size(self) -> int:
         return self._c3d["parameters"]["POINT"]["USED"]["value"].tolist()[0]
 
@@ -347,7 +322,7 @@ class EzC3dFileHandler(FileHandler):
 
     def _add_event(self, event: model.GaitEvent):
         """
-        This function adds an event, warning two events can have the same name (it wont't override it)
+        This function adds an event, warning two events can have the same name (it won't override it)
 
         """
         used = 0
@@ -387,7 +362,8 @@ class EzC3dFileHandler(FileHandler):
             icon_ids += [event.icon_id]
             generic_flags += [event.generic_flag]
 
-            self._set_events(contexts, descriptions, generic_flags, icon_ids, labels, subjects, times, used, param_names)
+            self._set_events(contexts, descriptions, generic_flags, icon_ids, labels, subjects, times, used,
+                             param_names)
 
     def _get_parameter_name(self, index: int) -> dict[str, str]:
         suffix = int(index / self._MAX_EVENTS_PER_SECTION)

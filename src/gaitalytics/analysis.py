@@ -28,7 +28,8 @@ def calculate_stats(data: np.ndarray, context: str, label: str):
 
 
 class AbstractAnalysis(ABC):
-    def __init__(self, data_list: dict[model.ExtractedCycleDataCondition, model.ExtractedCycles], configs: utils.ConfigProvider):
+    def __init__(self, data_list: dict[model.ExtractedCycleDataCondition, model.ExtractedCycles],
+                 configs: utils.ConfigProvider):
         self._data_list: dict[model.ExtractedCycleDataCondition, model.ExtractedCycles] = data_list
         self._configs: utils.ConfigProvider = configs
         self._data_condition: model.ExtractedCycleDataCondition = self.get_data_condition()
@@ -61,9 +62,6 @@ class AbstractAnalysis(ABC):
         context_cycle = extracted_cycles.cycle_points[cycle_context]
         return context_cycle.points
 
-    def get_subject_data(self) -> model.SubjectMeasures:
-        return self._data_list[self._data_condition].subject
-
     def get_cycles_meta_data(self, cycle_context: model.GaitEventContext) -> dict[str, any]:
         return self._data_list[self._data_condition].cycle_points[cycle_context].meta_data
 
@@ -73,7 +71,7 @@ class AbstractAnalysis(ABC):
         standing = data.copy()
         swinging = data.copy()
         for cycle_index in range(len(events)):
-            standing[:, cycle_index, int(events[cycle_index]) :] = np.nan
+            standing[:, cycle_index, int(events[cycle_index]):] = np.nan
             swinging[:, cycle_index, : int(events[cycle_index])] = np.nan
 
         return standing, swinging
@@ -103,7 +101,8 @@ class AbstractTimeseriesAnalysis(AbstractAnalysis):
                 if self._filter_points(point):
                     data = point.data_table
                     if not by_phase:
-                        result = self._do_analysis(data, point.translated_label.name, context_cycles.context, point.point_type)
+                        result = self._do_analysis(data, point.translated_label.name, context_cycles.context,
+                                                   point.point_type)
                     else:
 
                         standing, swinging = self.split_by_phase(data, context_cycles.meta_data)
@@ -123,7 +122,8 @@ class AbstractTimeseriesAnalysis(AbstractAnalysis):
         return results
 
     @abstractmethod
-    def _do_analysis(self, data: np.ndarray, label: str, context: model.GaitEventContext, point_type: model.PointDataType) -> dict:
+    def _do_analysis(self, data: np.ndarray, label: str, context: model.GaitEventContext,
+                     point_type: model.PointDataType) -> dict:
         pass
 
     def _filter_points(self, point: model.ExtractedCyclePoint) -> bool:
@@ -137,10 +137,12 @@ class TimeseriesAnalysis(AbstractTimeseriesAnalysis):
         super().__init__(
             data_list,
             configs,
-            [model.PointDataType.FORCES, model.PointDataType.ANGLES, model.PointDataType.POWERS, model.PointDataType.MOMENTS],
+            [model.PointDataType.FORCES, model.PointDataType.ANGLES, model.PointDataType.POWERS,
+             model.PointDataType.MOMENTS],
         )
 
-    def _do_analysis(self, data: np.ndarray, label: str, context: model.GaitEventContext, point_type: model.PointDataType) -> dict:
+    def _do_analysis(self, data: np.ndarray, label: str, context: model.GaitEventContext,
+                     point_type: model.PointDataType) -> dict:
         logger.info(f"analyse: Timeseries {label}")
         results = calculate_stats(data, context.name, label)
         if point_type == model.PointDataType.ANGLES:
@@ -235,7 +237,8 @@ class MosAnalysis(AbstractAnalysis):
 
 class SpatioTemporalAnalysis(AbstractAnalysis):
 
-    def __init__(self, data_list: dict[model.ExtractedCycleDataCondition, model.ExtractedCycles], configs: utils.ConfigProvider):
+    def __init__(self, data_list: dict[model.ExtractedCycleDataCondition, model.ExtractedCycles],
+                 configs: utils.ConfigProvider):
         self._sub_analysis_list: list[type[AbstractAnalysis]] = [
             _StepWidthAnalysis,
             _LimbCircumductionAnalysis,
@@ -266,9 +269,10 @@ class _StepWidthAnalysis(AbstractAnalysis):
     def _analyse(self, by_phase: bool) -> dict:
         logger.info("analyse: _Step Width")
 
-        right_heel_x_right = self.get_point_data(model.TranslatedLabel.RIGHT_MED_MALLEOLI, model.GaitEventContext.RIGHT)[
-            model.AxesNames.x.value
-        ]
+        right_heel_x_right = \
+            self.get_point_data(model.TranslatedLabel.RIGHT_MED_MALLEOLI, model.GaitEventContext.RIGHT)[
+                model.AxesNames.x.value
+            ]
         left_heel_x_right = self.get_point_data(model.TranslatedLabel.LEFT_MED_MALLEOLI, model.GaitEventContext.RIGHT)[
             model.AxesNames.x.value
         ]
@@ -289,7 +293,7 @@ class _StepWidthAnalysis(AbstractAnalysis):
         width = np.ndarray(len(context_position_x))
         for cycle_number in range(len(context_position_x)):
             width_c = abs(context_position_x[cycle_number][0] - contra_position_x[cycle_number][0])
-            width[cycle_number] = width_c / self.get_subject_data().body_height
+            width[cycle_number] = width_c
         return {f"{context.name}_step_width": width}
 
 
@@ -301,7 +305,8 @@ class _LimbCircumductionAnalysis(AbstractAnalysis):
     def _analyse(self, by_phase: bool) -> dict:
         logger.info("analyse: _Circumduction")
 
-        right_malleoli_right = self.get_point_data(model.TranslatedLabel.RIGHT_MED_MALLEOLI, model.GaitEventContext.RIGHT)
+        right_malleoli_right = self.get_point_data(model.TranslatedLabel.RIGHT_MED_MALLEOLI,
+                                                   model.GaitEventContext.RIGHT)
         right_meta_data = self.get_cycles_meta_data(model.GaitEventContext.RIGHT)
         left_malleoli_left = self.get_point_data(model.TranslatedLabel.LEFT_MED_MALLEOLI, model.GaitEventContext.LEFT)
         left_meta_data = self.get_cycles_meta_data(model.GaitEventContext.LEFT)
@@ -312,10 +317,10 @@ class _LimbCircumductionAnalysis(AbstractAnalysis):
         results.update(self._calculate_limb_circumduction_side(left_malleoli_x_left, model.GaitEventContext.LEFT))
         return results
 
-    def _calculate_limb_circumduction_side(self, data_malleoli_x: np.ndarray, context: model.GaitEventContext) -> dict[str, np.ndarray]:
+    def _calculate_limb_circumduction_side(self, data_malleoli_x: np.ndarray, context: model.GaitEventContext) -> dict[
+        str, np.ndarray]:
         column_label = f"{context.name}_limb_circumduction"
         limb_circum = np.ndarray(len(data_malleoli_x))
-        body_height = self.get_subject_data().body_height
         if np.nanmean(data_malleoli_x) < 0:
             data_malleoli_x = data_malleoli_x * -1
 
@@ -325,7 +330,7 @@ class _LimbCircumductionAnalysis(AbstractAnalysis):
             max_value = np.nanmax(data)
             start_value = data[0]
             limb_circum[cycle_number] = max_value - start_value
-        limb_circum = limb_circum / body_height
+        limb_circum = limb_circum
 
         return {column_label: limb_circum}
 
@@ -338,11 +343,15 @@ class _StepLengthAnalysis(AbstractAnalysis):
     def _analyse(self, by_phase: bool) -> dict:
         logger.info("analyse: _Step Length")
 
-        left_heel_y_left = self.get_point_data(model.TranslatedLabel.LEFT_HEEL, model.GaitEventContext.LEFT)[model.AxesNames.y.value]
-        right_heel_y_left = self.get_point_data(model.TranslatedLabel.RIGHT_HEEL, model.GaitEventContext.LEFT)[model.AxesNames.y.value]
+        left_heel_y_left = self.get_point_data(model.TranslatedLabel.LEFT_HEEL, model.GaitEventContext.LEFT)[
+            model.AxesNames.y.value]
+        right_heel_y_left = self.get_point_data(model.TranslatedLabel.RIGHT_HEEL, model.GaitEventContext.LEFT)[
+            model.AxesNames.y.value]
 
-        left_heel_y_right = self.get_point_data(model.TranslatedLabel.LEFT_HEEL, model.GaitEventContext.RIGHT)[model.AxesNames.y.value]
-        right_heel_y_right = self.get_point_data(model.TranslatedLabel.RIGHT_HEEL, model.GaitEventContext.RIGHT)[model.AxesNames.y.value]
+        left_heel_y_right = self.get_point_data(model.TranslatedLabel.LEFT_HEEL, model.GaitEventContext.RIGHT)[
+            model.AxesNames.y.value]
+        right_heel_y_right = self.get_point_data(model.TranslatedLabel.RIGHT_HEEL, model.GaitEventContext.RIGHT)[
+            model.AxesNames.y.value]
 
         left = self._calculate_step_length(left_heel_y_left, right_heel_y_left, model.GaitEventContext.LEFT)
         right = self._calculate_step_length(left_heel_y_right, right_heel_y_right, model.GaitEventContext.RIGHT)
@@ -367,20 +376,22 @@ class _StepHeightAnalysis(AbstractAnalysis):
     def _analyse(self, by_phase: bool) -> dict:
         logger.info("analyse: _Step Height")
 
-        right_heel_z_right = self.get_point_data(model.TranslatedLabel.RIGHT_HEEL, model.GaitEventContext.RIGHT)[model.AxesNames.z.value]
-        left_heel_z_left = self.get_point_data(model.TranslatedLabel.LEFT_HEEL, model.GaitEventContext.LEFT)[model.AxesNames.z.value]
+        right_heel_z_right = self.get_point_data(model.TranslatedLabel.RIGHT_HEEL, model.GaitEventContext.RIGHT)[
+            model.AxesNames.z.value]
+        left_heel_z_left = self.get_point_data(model.TranslatedLabel.LEFT_HEEL, model.GaitEventContext.LEFT)[
+            model.AxesNames.z.value]
 
         right = self._calculate_step_height(right_heel_z_right, model.GaitEventContext.RIGHT)
         left = self._calculate_step_height(left_heel_z_left, model.GaitEventContext.LEFT)
         right.update(left)
         return right
 
-    def _calculate_step_height(self, context_position_x: np.ndarray, context: model.GaitEventContext) -> dict[str, np.ndarray]:
-        body_height = self.get_subject_data().body_height
+    def _calculate_step_height(self, context_position_x: np.ndarray, context: model.GaitEventContext) -> dict[
+        str, np.ndarray]:
         height = np.ndarray(len(context_position_x))
         for cycle_number in range(len(context_position_x)):
-            height[cycle_number] = np.nanmax(context_position_x[cycle_number]) - np.nanmin(context_position_x[cycle_number])
-        height = height / body_height
+            height[cycle_number] = np.nanmax(context_position_x[cycle_number]) - np.nanmin(
+                context_position_x[cycle_number])
 
         return {f"{context.name}_step_height": height}
 
@@ -400,8 +411,9 @@ class _CycleDurationAnalysis(AbstractAnalysis):
         right.update(left)
         return right
 
-    def _calculate_cycle_duration(self, meta_data: dict[str, any], context: model.GaitEventContext) -> dict[str, np.ndarray]:
-        frequency = self.get_subject_data().mocap_frequency
+    def _calculate_cycle_duration(self, meta_data: dict[str, any], context: model.GaitEventContext) -> dict[
+        str, np.ndarray]:
+        frequency = 100
         cycle_length = meta_data["end_frame"] - meta_data["start_frame"]
         cycle_duration = cycle_length / frequency
         step_duration = meta_data["Foot Off_IPSI"] - meta_data["start_frame"] / frequency
@@ -434,7 +446,7 @@ class _CycleDurationAnalysis(AbstractAnalysis):
 
 
 class MinimalToeClearance(AbstractAnalysis):
-    logger.info("analyse: Minia")
+    logger.info("analyse: Minimal Toe Clearance")
 
     def get_data_condition(self) -> model.ExtractedCycleDataCondition:
         return model.ExtractedCycleDataCondition.RAW_DATA
@@ -442,8 +454,10 @@ class MinimalToeClearance(AbstractAnalysis):
     def _analyse(self, by_phase: bool) -> dict:
         right_toe_z = self.get_point_data(model.TranslatedLabel.RIGHT_META_2, model.GaitEventContext.RIGHT)
         left_toe_z = self.get_point_data(model.TranslatedLabel.LEFT_META_2, model.GaitEventContext.LEFT)
-        right_toe_z = self.split_by_phase(right_toe_z, self.get_cycles_meta_data(model.GaitEventContext.RIGHT))[1][model.AxesNames.z.value]
-        left_toe_z = self.split_by_phase(left_toe_z, self.get_cycles_meta_data(model.GaitEventContext.LEFT))[1][model.AxesNames.z.value]
+        right_toe_z = self.split_by_phase(right_toe_z, self.get_cycles_meta_data(model.GaitEventContext.RIGHT))[1][
+            model.AxesNames.z.value]
+        left_toe_z = self.split_by_phase(left_toe_z, self.get_cycles_meta_data(model.GaitEventContext.LEFT))[1][
+            model.AxesNames.z.value]
         right = self._calculate_minimal_clearance(right_toe_z, model.GaitEventContext.RIGHT)
         left = self._calculate_minimal_clearance(left_toe_z, model.GaitEventContext.LEFT)
         right.update(left)
@@ -464,7 +478,7 @@ class MinimalToeClearance(AbstractAnalysis):
             toe_cycle = toe[cycle_number]
             toe_cycle = toe_cycle[~np.isnan(toe_cycle)]
             peaks = signal.find_peaks(toe_cycle, distance=len(toe_cycle))
-            mid_late_swing = toe_cycle[peaks[0][0] :]
+            mid_late_swing = toe_cycle[peaks[0][0]:]
             toe_clear_min = np.min(mid_late_swing)
             toe_clear_min_pos = np.argmin(mid_late_swing) + peaks[0][0]
             tc_percent = toe_clear_min_pos / len(toe_cycle)

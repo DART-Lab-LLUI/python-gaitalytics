@@ -113,7 +113,7 @@ def extract_point_cycles(
     points_right.meta_data = meta_data
     points = {model.GaitEventContext.LEFT.value: points_left, model.GaitEventContext.RIGHT.value: points_right}
 
-    return model.ExtractedCycles(model.ExtractedCycleDataCondition.RAW_DATA, file_handler.get_subject_measures(), points)
+    return model.ExtractedCycles(model.ExtractedCycleDataCondition.RAW_DATA, points)
 
 
 def _extract_general_cycle_data(cycles: model.GaitCycleList, context: model.GaitEventContext) -> dict[str, np.ndarray]:

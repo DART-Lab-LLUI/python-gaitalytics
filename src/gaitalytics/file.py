@@ -38,9 +38,8 @@ class Hdf5FileStore(FileStore):
 
     def save_extracted_cycles(self, cycle_data: model.ExtractedCycles):
         with h5py.File(self.out_path, "a") as h5_file:
-            subject = cycle_data.subject
             data_con_group = h5_file.create_group(cycle_data.data_condition.value)
-            data_con_group.attrs.update(subject.__dict__)
+            # data_con_group.attrs.update(subject.__dict__)
             for cycle_points in cycle_data.cycle_points.values():
                 self._save_datatables(cycle_points, data_con_group)
 
@@ -48,14 +47,14 @@ class Hdf5FileStore(FileStore):
         with h5py.File(self.out_path, "r") as h5_file:
             extracted_cycles = {}
             for h5_group_key in h5_file:
-                subject = self._create_subject(h5_file[h5_group_key])
-
                 points = {
-                    model.GaitEventContext.LEFT: self._create_context_points(h5_file[h5_group_key], model.GaitEventContext.LEFT),
-                    model.GaitEventContext.RIGHT: self._create_context_points(h5_file[h5_group_key], model.GaitEventContext.RIGHT),
+                    model.GaitEventContext.LEFT: self._create_context_points(h5_file[h5_group_key],
+                                                                             model.GaitEventContext.LEFT),
+                    model.GaitEventContext.RIGHT: self._create_context_points(h5_file[h5_group_key],
+                                                                              model.GaitEventContext.RIGHT),
                 }
                 condition = model.ExtractedCycleDataCondition(h5_group_key)
-                extracted_cycles[condition] = model.ExtractedCycles(condition, subject, points)
+                extracted_cycles[condition] = model.ExtractedCycles(condition, points)
         return extracted_cycles
 
     def save_analysis(self, analysis: dict[str, np.ndarray]) -> None:
@@ -64,7 +63,8 @@ class Hdf5FileStore(FileStore):
             for key, value in analysis.items():
                 analysis_group.create_dataset(key, data=value)
 
-    def _create_context_points(self, h5_group: h5py.Group, context: model.GaitEventContext) -> model.ExtractedContextCycles:
+    def _create_context_points(self, h5_group: h5py.Group,
+                               context: model.GaitEventContext) -> model.ExtractedContextCycles:
         h5_context_group = h5_group[context.name]
         cycle_points = model.ExtractedContextCycles(context)
         meta_data: dict[str, np.ndarray] = {}
@@ -94,15 +94,3 @@ class Hdf5FileStore(FileStore):
         point = model.ExtractedCyclePoint(label, point_type)
         point.data_table = h5_point[:]
         return point
-
-    @staticmethod
-    def _create_subject(h5_group: h5py.Group) -> model.SubjectMeasures:
-        body_height = h5_group.attrs["body_height"]
-        body_mass = h5_group.attrs["body_mass"]
-        left_leg_length = h5_group.attrs["left_leg_length"]
-        right_leg_length = h5_group.attrs["right_leg_length"]
-        start_frame = h5_group.attrs["start_frame"]
-        subject = h5_group.attrs["subject"]
-        frequency = h5_group.attrs["mocap_frequency"]
-        subject_measure = model.SubjectMeasures(body_mass, body_height, left_leg_length, right_leg_length, subject, start_frame, frequency)
-        return subject_measure

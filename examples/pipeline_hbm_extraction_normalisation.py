@@ -9,8 +9,8 @@ from gaitalytics import utils
 def main():
     settings_file = "settings/hbm_pig.yaml"
     file_path = "./tests/data/Baseline.5.c3d"
-    buffered_path_raw = Path("./out/processed.h5")
-    buffered_path_norm = Path("./out/processed.h5")
+    buffered_path_raw = Path("./out/raw.h5")
+    buffered_path_norm = Path("./out/raw.h5")
 
     configs = utils.ConfigProvider(settings_file)
     if not buffered_path_raw.exists():
