@@ -55,7 +55,6 @@ class GaitEventLabel(Enum):
         return 2
 
 
-
 class Point:
     """
     Class representing a point with various attributes.

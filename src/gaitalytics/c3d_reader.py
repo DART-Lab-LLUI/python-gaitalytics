@@ -362,8 +362,7 @@ class EzC3dFileHandler(FileHandler):
             icon_ids += [event.icon_id]
             generic_flags += [event.generic_flag]
 
-            self._set_events(contexts, descriptions, generic_flags, icon_ids, labels, subjects, times, used,
-                             param_names)
+            self._set_events(contexts, descriptions, generic_flags, icon_ids, labels, subjects, times, used, param_names)
 
     def _get_parameter_name(self, index: int) -> dict[str, str]:
         suffix = int(index / self._MAX_EVENTS_PER_SECTION)
