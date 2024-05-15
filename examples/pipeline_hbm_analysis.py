@@ -14,7 +14,7 @@ def main():
 
     loaded_cycles = api.extract_cycles_buffered(buffered_path, configs)
 
-    results = api.analyse_data(loaded_cycles, configs)
+    results = api.analyse_data(loaded_cycles, configs, methods=[api.ANALYSIS_SPATIO_TEMP])
 
     storage = file.Hdf5FileStore(out_path, configs)
     storage.save_analysis(results)
