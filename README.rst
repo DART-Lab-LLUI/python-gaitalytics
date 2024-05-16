@@ -51,9 +51,21 @@ Overview
 
 .. end-badges
 
-Python package to extract gait analytic parameters for different kind of recordings (i.e. MOCAP, Force Plate)
+Gaitalytics
+===========
+.. image:: https://github.com/DART-Lab-LLUI/gaitalytics/blob/27ff8401295c3a05537409deb3982129ed78222c/resources/logos/Gaitalytics_noBackground.png
+This Python package provides a comprehensive set of tools and advanced algorithms for analyzing 3D motion capture data.
+It is specifically designed to process gait data stored in c3d format. Prior to utilizing the features of gaitalytics,
+it is necessary to perform data labeling, modeling, and filtering procedures.
 
-* Free software: MIT license
+The library's versatility allows it to be adaptable to various marker sets and modeling algorithms,
+offering high configurability.
+
+.. note::
+    Current pre-release is only tested with data acquired with Motek Caren, HBM2 Lower Body Trunk and PIG.
+
+
+Free software: MIT license
 
 Installation
 ============
@@ -65,6 +77,11 @@ Installation
 You can also install the in-development version with::
 
     pip install https://github.com/cereneo-foundation/python-gaitalytics/archive/main.zip
+
+Features
+========
+
+
 
 
 Documentation
