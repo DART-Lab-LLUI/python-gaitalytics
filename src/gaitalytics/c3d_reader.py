@@ -4,8 +4,6 @@ from abc import ABC
 from abc import abstractmethod
 from pathlib import Path
 from statistics import mean
-from typing import Optional
-from typing import Union
 
 import numpy as np
 
@@ -46,7 +44,7 @@ class FileHandler(ABC):
     def read_file(self):
         pass
 
-    def write_file(self, out_file_path: Optional[Union[str, Path]] = None):
+    def write_file(self, out_file_path: str | Path | None = None):
         if out_file_path is None:
             out_file_path = self._file_path
         self._write_file(str(out_file_path))
@@ -92,7 +90,7 @@ class FileHandler(ABC):
         pass
 
     @abstractmethod
-    def get_point(self, marker_index: Union[int, str]) -> model.Point:
+    def get_point(self, marker_index: int | str) -> model.Point:
         pass
 
     @abstractmethod
@@ -170,7 +168,7 @@ class BtkFileHandler(FileHandler):
     def get_actual_start_frame(self) -> int:
         return self._aqc.GetMetaData().GetChild("TRIAL").GetChild("ACTUAL_START_FIELD").GetInfo().ToInt()[0] - 1
 
-    def get_point(self, marker_index: Union[int, str]) -> model.Point:
+    def get_point(self, marker_index: int | str) -> model.Point:
         return self.map_btk_point(self._aqc.GetPoint(marker_index))
 
     def get_points_size(self) -> int:
@@ -278,7 +276,7 @@ class EzC3dFileHandler(FileHandler):
     def get_points_size(self) -> int:
         return self._c3d["parameters"]["POINT"]["USED"]["value"].tolist()[0]
 
-    def get_point(self, marker_index: Union[int, str]) -> model.Point:
+    def get_point(self, marker_index: int | str) -> model.Point:
 
         if isinstance(marker_index, str):
             index = self._c3d["parameters"]["POINT"]["LABELS"]["value"].index(marker_index)
