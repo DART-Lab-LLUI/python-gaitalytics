@@ -16,5 +16,6 @@ include CHANGELOG.rst
 include CONTRIBUTING.rst
 include LICENSE
 include README.rst
+include resources/logo/Gaitalytics_noBackground.png
 
 global-exclude *.py[cod] __pycache__/* *.so *.dylib examples/* settings/* tests/data/* docs/* docs/reference/*
