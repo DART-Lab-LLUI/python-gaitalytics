@@ -42,11 +42,9 @@ Gaitalytics
     :alt: Commits since latest release
     :target: https://github.com/DART-Lab-LLUI/python-gaitalytics/compare/v0.1.0...main
 
-
-
 .. end-badges
 
-.. image:: https://github.com/DART-Lab-LLUI/gaitalytics/blob/27ff8401295c3a05537409deb3982129ed78222c/resources/logos/Gaitalytics_noBackground.png
+.. image:: https://github.com/DART-Lab-LLUI/python-gaitalytics/blob/738061ef8662d1fccac9d57a0ff8a1cdc4466e34/resources/logo/Gaitalytics_noBackground.png
     :alt: Gaitalytics Logo
     :align: center
     :width: 200px
@@ -58,9 +56,7 @@ it is necessary to perform data labeling, modeling, and filtering procedures.
 The library's versatility allows it to be adaptable to various marker sets and modeling algorithms,
 offering high configurability.
 
-> Current pre-release is only tested with data acquired with Motek Caren, HBM2 Lower Body Trunk and PIG.
-
-
+  Current pre-release is only tested with data acquired with Motek Caren, HBM2 Lower Body Trunk and PIG.
 
 Free software: MIT license
 
