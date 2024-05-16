@@ -52,6 +52,7 @@ Gaitalytics
 .. end-badges
 
 .. image:: https://github.com/DART-Lab-LLUI/gaitalytics/blob/27ff8401295c3a05537409deb3982129ed78222c/resources/logos/Gaitalytics_noBackground.pngtox
+
 This Python package provides a comprehensive set of tools and advanced algorithms for analyzing 3D motion capture data.
 It is specifically designed to process gait data stored in c3d format. Prior to utilizing the features of gaitalytics,
 it is necessary to perform data labeling, modeling, and filtering procedures.
@@ -111,12 +112,12 @@ spacing Checks Frames between same event on same context
 Modelling
 ---------
 
-======= =========================================================
+====== =========================================================
 Method Description
-======= =========================================================
-com     creates Center of Mass Marker in c3d
-cmos    create Continuous Margin of Stability AP ML Marker in c3d
-======= =========================================================
+====== =========================================================
+com    creates Center of Mass Marker in c3d
+cmos   create Continuous Margin of Stability AP ML Marker in c3d
+====== =========================================================
 
 Analysis
 --------
@@ -247,13 +248,18 @@ Fast install with anaconda:
 
 .. code:: shell
 
-   pip install gaitalytics
-   conda install -c conda-forge btk
+    pip install gaitalytics
+    conda install -c conda-forge btk
+..
 
-You can also install the in-development version with::
+
+You can also install the in-development version with:
+
 .. code:: shell
+
     pip install https://github.com/DART-Lab-LLUI/python-gaitalytics/archive/main.zip
     conda install -c conda-forge btk
+..
 
 Configuration
 -------------
