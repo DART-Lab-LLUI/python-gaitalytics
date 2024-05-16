@@ -150,16 +150,16 @@ Analysis
 |                 | - Mos at TO                                                |                                       |         |
 |                 | - Mos at contra HS                                         |                                       |         |
 +-----------------+------------------------------------------------------------+---------------------------------------+---------+
-| Spatio-temporal | - step_length                                              |                                       | X       |
+| Spatio-temporal | - step_length                                              |                                       | - X     |
 |                 | - stride_length                                            |                                       |         |
-|                 | - cycle_duration                                           |                                       | X       |
-|                 | - swing_duration_perc                                      |                                       | X       |
-|                 | - stance_duration_perc                                     |                                       | X       |
+|                 | - cycle_duration                                           |                                       | - X     |
+|                 | - swing_duration_perc                                      |                                       | - X     |
+|                 | - stance_duration_perc                                     |                                       | - X     |
 |                 | - step_height                                              |                                       |         |
 |                 | - step_width                                               |                                       |         |
 |                 | - limb_circumduction [1]                                   |                                       |         |
-|                 | - single_support_duration_percent [2]                      |                                       | X       |
-|                 | - double_support_duration_percent [2]                      |                                       | X       |
+|                 | - single_support_duration_percent [2]                      |                                       | - X     |
+|                 | - double_support_duration_percent [2]                      |                                       | - X     |
 +-----------------+------------------------------------------------------------+---------------------------------------+---------+
 | Toe Clearance   | - minimal toe clearance                                    |                                       |         |
 |                 | - Percentage in cycle where minimal toe clearance happened |                                       |         |
