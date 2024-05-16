@@ -11,7 +11,6 @@ Gaitalytics
       - |docs|
     * - tests
       - | |github-actions|
-        | |codecov|
     * - package
       - | |version| |wheel| |supported-versions| |supported-implementations|
         | |commits-since|
@@ -19,13 +18,9 @@ Gaitalytics
     :target: https://python-gaitalytics.readthedocs.io/
     :alt: Documentation Status
 
-.. |github-actions| image:: https://github.com/cereneo-foundation/python-gaitalytics/actions/workflows/github-actions.yml/badge.svg
+.. |github-actions| image:: https://github.com/DART-Lab-LLUI/python-gaitalytics/actions/workflows/github-actions.yml/badge.svg
     :alt: GitHub Actions Build Status
-    :target: https://github.com/cereneo-foundation/python-gaitalytics/actions
-
-.. |codecov| image:: https://codecov.io/gh/cereneo-foundation/python-gaitalytics/branch/main/graphs/badge.svg?branch=main
-    :alt: Coverage Status
-    :target: https://app.codecov.io/github/cereneo-foundation/python-gaitalytics
+    :target: https://github.com/DART-Lab-LLUI/python-gaitalytics/actions
 
 .. |version| image:: https://img.shields.io/pypi/v/gaitalytics.svg
     :alt: PyPI Package latest release
@@ -43,15 +38,18 @@ Gaitalytics
     :alt: Supported implementations
     :target: https://pypi.org/project/gaitalytics
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/cereneo-foundation/python-gaitalytics/v0.1.1.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/DART-Lab-LLUI/python-gaitalytics/v0.1.0.svg
     :alt: Commits since latest release
-    :target: https://github.com/cereneo-foundation/python-gaitalytics/compare/v0.1.1...main
+    :target: https://github.com/DART-Lab-LLUI/python-gaitalytics/compare/v0.1.0...main
 
 
 
 .. end-badges
 
-.. image:: https://github.com/DART-Lab-LLUI/gaitalytics/blob/27ff8401295c3a05537409deb3982129ed78222c/resources/logos/Gaitalytics_noBackground.pngtox
+.. image:: https://github.com/DART-Lab-LLUI/gaitalytics/blob/27ff8401295c3a05537409deb3982129ed78222c/resources/logos/Gaitalytics_noBackground.png
+    :alt: Gaitalytics Logo
+    :align: center
+    :width: 200px
 
 This Python package provides a comprehensive set of tools and advanced algorithms for analyzing 3D motion capture data.
 It is specifically designed to process gait data stored in c3d format. Prior to utilizing the features of gaitalytics,
@@ -60,9 +58,7 @@ it is necessary to perform data labeling, modeling, and filtering procedures.
 The library's versatility allows it to be adaptable to various marker sets and modeling algorithms,
 offering high configurability.
 
-.. note::
-
-    Current pre-release is only tested with data acquired with Motek Caren, HBM2 Lower Body Trunk and PIG.
+> Current pre-release is only tested with data acquired with Motek Caren, HBM2 Lower Body Trunk and PIG.
 
 
 
@@ -104,7 +100,10 @@ Modelling
 +============+============================================+===============================+=========+
 | com        | creates Center of Mass Marker              |                               |         |
 +------------+--------------------------------------------+-------------------------------+---------+
-| xcom       | creates extrapolated Center of Mass Marker |                               |         |
+| xcom       | creates extrapolated Center of Mass Marker | - belt_speed = 1 :            |         |
+|            |                                            |   speed of treadmill          |         |
+|            |                                            | - dominant_leg_length = 0.1 : |         |
+|            |                                            |   length of dominant leg (mm) |         |
 +------------+--------------------------------------------+-------------------------------+---------+
 | cmos       | create Continuous Margin of Stability      |                               |         |
 +------------+--------------------------------------------+-------------------------------+---------+
@@ -171,14 +170,14 @@ Analysis
 References
 ~~~~~~~~~~
 
-[1] Michael D. Lewek et al. (2012), “The influence of mechanically and
+[1] Michael D. Lewek et al. (2012), “The influence of mechanically and
 physiologically imposed stiff-knee gait patterns on the energy cost of
-walking”, vol. 93, no.1, pp. 123-128. Publisher: Archives of Physical
+walking”, vol. 93, no.1, pp. 123-128. Publisher: Archives of Physical
 Medicine and Rehabilitation.
 
 [2] A. Gouelle and F. Mégrot (2017), “Interpreting spatiotemporal
 parameters, symmetry, and variability in clinical gait analysis”,
-Handbook of Human Motion pp. 1-20, Publisher: Springer International
+Handbook of Human Motion pp. 1-20, Publisher: Springer International
 Publishing.
 
 Usage
@@ -248,7 +247,6 @@ Minimal requirements would look like this:
      right_cmos: cmos_right
 
    model_mapping:
-
 ..
 
    **Warning** Do not rename keys of the minimal setting
@@ -258,15 +256,10 @@ Pipeline
 
 Please take the resources in the `example
 folder <https://github.com/DART-Lab-LLUI/python-gaitalytics/tree/defc453f95940db55f6875ae7568949daa1b67d4/examples>`__
-for advice. ###
-
-
-
-
+for advice.
 
 Documentation
 =============
-
 
 https://python-gaitalytics.readthedocs.org
 
