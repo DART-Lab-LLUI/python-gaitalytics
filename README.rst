@@ -61,7 +61,9 @@ The library's versatility allows it to be adaptable to various marker sets and m
 offering high configurability.
 
 .. note::
+
     Current pre-release is only tested with data acquired with Motek Caren, HBM2 Lower Body Trunk and PIG.
+
 
 
 Free software: MIT license
@@ -150,16 +152,16 @@ Analysis
 |                 | - Mos at TO                                                |                                       |         |
 |                 | - Mos at contra HS                                         |                                       |         |
 +-----------------+------------------------------------------------------------+---------------------------------------+---------+
-| Spatio-temporal | - step_length                                              |                                       | - X     |
+| Spatio-temporal | - step_length                                              |                                       | X       |
 |                 | - stride_length                                            |                                       |         |
-|                 | - cycle_duration                                           |                                       | - X     |
-|                 | - swing_duration_perc                                      |                                       | - X     |
-|                 | - stance_duration_perc                                     |                                       | - X     |
+|                 | - cycle_duration                                           |                                       |         |
+|                 | - swing_duration_perc                                      |                                       |         |
+|                 | - stance_duration_perc                                     |                                       |         |
 |                 | - step_height                                              |                                       |         |
 |                 | - step_width                                               |                                       |         |
 |                 | - limb_circumduction [1]                                   |                                       |         |
-|                 | - single_support_duration_percent [2]                      |                                       | - X     |
-|                 | - double_support_duration_percent [2]                      |                                       | - X     |
+|                 | - single_support_duration_percent [2]                      |                                       |         |
+|                 | - double_support_duration_percent [2]                      |                                       |         |
 +-----------------+------------------------------------------------------------+---------------------------------------+---------+
 | Toe Clearance   | - minimal toe clearance                                    |                                       |         |
 |                 | - Percentage in cycle where minimal toe clearance happened |                                       |         |
