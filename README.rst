@@ -72,152 +72,99 @@ Functionalities
 Event Detection
 ---------------
 
-+---+----+-------------------------------------------------------------+
-| M | D  | options                                                     |
-| e | es |                                                             |
-| t | cr |                                                             |
-| h | ip |                                                             |
-| o | ti |                                                             |
-| d | on |                                                             |
-+===+====+=============================================================+
-| M | Z  | min_distance = 100: minimum of frames between same event on |
-| a | en | same contextfoot_strike_offset = 0: Amount of frames to     |
-| r | is | offset foot strikefoot_off_offset = 0: Amount of frames to  |
-| k | 20 | offset foot off                                             |
-| e | 06 |                                                             |
-| r |    |                                                             |
-+---+----+-------------------------------------------------------------+
-| F | S  | -                                                           |
-| o | pl |                                                             |
-| r | it |                                                             |
-| c | Fo |                                                             |
-| e | rc |                                                             |
-| P | eP |                                                             |
-| l | la |                                                             |
-| a | te |                                                             |
-| t |    |                                                             |
-| e |    |                                                             |
-+---+----+-------------------------------------------------------------+
++------------+--------------+----------------------------------------------------------------------------+---------+
+| Method     | Description  | options                                                                    | checked |
++============+==============+============================================================================+=========+
+| Marker     | Zenis 2006   | - min_distance = 100: minimum of frames between same event on same context |    X    |
+|            |              | - foot_strike_offset = 0: Amount of frames to offset foot strike           |         |
+|            |              | - foot_off_offset = 0: Amount of frames to offset foot off                 |         |
++------------+--------------+----------------------------------------------------------------------------+---------+
+| Forceplate | Split-Belt   |                                                                            |         |
++------------+--------------+----------------------------------------------------------------------------+---------+
 
 Event Detection Check
 ---------------------
 
-======= ================================================
-Method  Description
-======= ================================================
-context Checks Event Sequence HS TO HS TO
-spacing Checks Frames between same event on same context
-======= ================================================
++------------+--------------------------------------------------+-------------------------+---------+
+| Method     | Description                                      | options                 | checked |
++============+==================================================+=========================+=========+
+| context    | Checks gait event sequences                      |                         |         |
+|            | HS->TO-HS-TO                                     |                         |         |
++------------+--------------------------------------------------+-------------------------+---------+
+| spacing    | Checks Frames between same event on same context |                         |         |
++------------+--------------------------------------------------+-------------------------+---------+
 
 Modelling
 ---------
 
-====== =========================================================
-Method Description
-====== =========================================================
-com    creates Center of Mass Marker in c3d
-cmos   create Continuous Margin of Stability AP ML Marker in c3d
-====== =========================================================
++------------+--------------------------------------------+-------------------------------+---------+
+| Method     | Description                                | options                       | checked |
++============+============================================+===============================+=========+
+| com        | creates Center of Mass Marker              |                               |         |
++------------+--------------------------------------------+-------------------------------+---------+
+| xcom       | creates extrapolated Center of Mass Marker |                               |         |
++------------+--------------------------------------------+-------------------------------+---------+
+| cmos       | create Continuous Margin of Stability      |                               |         |
++------------+--------------------------------------------+-------------------------------+---------+
 
 Analysis
 --------
 
-+---+-----------------------------------------------+------------------+
-| M | Description                                   | options          |
-| e |                                               |                  |
-| t |                                               |                  |
-| h |                                               |                  |
-| o |                                               |                  |
-| d |                                               |                  |
-| e |                                               |                  |
-+===+===============================================+==================+
-| a | min, max, mean, sd, amplitude,min velocity,   | by_phase = True  |
-| n | max velocity, sd velocity                     | : If metrics     |
-| g |                                               | should be        |
-| l |                                               | calculated by    |
-| e |                                               | standing and     |
-| s |                                               | swinging phase   |
-+---+-----------------------------------------------+------------------+
-| f | min, max, mean, sd, amplitude                 | by_phase = True  |
-| o |                                               | : If metrics     |
-| r |                                               | should be        |
-| c |                                               | calculated by    |
-| e |                                               | standing and     |
-| s |                                               | swinging phase   |
-+---+-----------------------------------------------+------------------+
-| m | min, max, mean, sd, amplitude                 | by_phase = True  |
-| o |                                               | : If metrics     |
-| m |                                               | should be        |
-| e |                                               | calculated by    |
-| n |                                               | standing and     |
-| t |                                               | swinging phase   |
-| s |                                               |                  |
-+---+-----------------------------------------------+------------------+
-| p | min, max, mean, sd, amplitude                 | by_phase = True  |
-| o |                                               | : If metrics     |
-| w |                                               | should be        |
-| e |                                               | calculated by    |
-| r |                                               | standing and     |
-| s |                                               | swinging phase   |
-+---+-----------------------------------------------+------------------+
-| c | min, max, mean, sd, amplitude                 | by_phase = True  |
-| m |                                               | : If metrics     |
-| o |                                               | should be        |
-| s |                                               | calculated by    |
-|   |                                               | standing and     |
-|   |                                               | swinging phase   |
-+---+-----------------------------------------------+------------------+
-| m | HS mos, TO mos, HS contra mos,TO contra mos   | -                |
-| o | for both sides                                |                  |
-| s |                                               |                  |
-+---+-----------------------------------------------+------------------+
-| t | minimal toe clearance, percent swing phase    |                  |
-| o | when min toe clearance happened,toe clearance |                  |
-| e | HS,                                           |                  |
-| _ |                                               |                  |
-| c |                                               |                  |
-| l |                                               |                  |
-| e |                                               |                  |
-| a |                                               |                  |
-| r |                                               |                  |
-| a |                                               |                  |
-| n |                                               |                  |
-| c |                                               |                  |
-| e |                                               |                  |
-+---+-----------------------------------------------+------------------+
-| s | step_length,stride length, cycle              |                  |
-| p | duration,step duration percent, swing         |                  |
-| a | duration percent, stance duration             |                  |
-| t | percent,step height, step width, limb         |                  |
-| i | circumduction, single/double support duration |                  |
-| o |                                               |                  |
-| t |                                               |                  |
-| e |                                               |                  |
-| m |                                               |                  |
-| p |                                               |                  |
-| o |                                               |                  |
-| r |                                               |                  |
-| a |                                               |                  |
-| l |                                               |                  |
-+---+-----------------------------------------------+------------------+
-
-+---------+------------------------------------------------------------+
-| Method  | Definition                                                 |
-+=========+============================================================+
-| limb    | maximum lateral excursion of the foot during the swing     |
-| circum  | phase with respect to the position of the foot during the  |
-| duction | preceding stance phase [1]                                 |
-+---------+------------------------------------------------------------+
-| double  | duration of the stance phase when the two feet are in      |
-| support | contact with the ground. Both initial and terminal double  |
-| d       | support duration were computed [2]                         |
-| uration |                                                            |
-+---------+------------------------------------------------------------+
-| single  | duration during which one foot is in contact with the      |
-| support | ground while the other foot is in the swing phase [2]      |
-| d       |                                                            |
-| uration |                                                            |
-+---------+------------------------------------------------------------+
++-----------------+------------------------------------------------------------+---------------------------------------+---------+
+| Method          | Description                                                | options                               | checked |
++=================+============================================================+=======================================+=========+
+| angels          | - min                                                      | - by_phase = True                     |         |
+|                 | - max                                                      |   If metrics should be calculated by  |         |
+|                 | - mean                                                     |   standing and swinging phase         |         |
+|                 | - sd                                                       |                                       |         |
+|                 | - amplitude                                                |                                       |         |
+|                 | - min velocity                                             |                                       |         |
+|                 | - max velocity                                             |                                       |         |
+|                 | - sd velocity                                              |                                       |         |
++-----------------+------------------------------------------------------------+---------------------------------------+---------+
+| forces          | - min                                                      | - by_phase = True                     |         |
+|                 | - max                                                      |   If metrics should be calculated by  |         |
+|                 | - mean                                                     |   standing and swinging phase         |         |
+|                 | - sd                                                       |                                       |         |
+|                 | - amplitude                                                |                                       |         |
++-----------------+------------------------------------------------------------+---------------------------------------+---------+
+| moments         | - min                                                      | - by_phase = True                     |         |
+|                 | - max                                                      |   If metrics should be calculated by  |         |
+|                 | - mean                                                     |   standing and swinging phase         |         |
+|                 | - sd                                                       |                                       |         |
+|                 | - amplitude                                                |                                       |         |
++-----------------+------------------------------------------------------------+---------------------------------------+---------+
+| powers          | - min                                                      | - by_phase = True                     |         |
+|                 | - max                                                      |   If metrics should be calculated by  |         |
+|                 | - mean                                                     |   standing and swinging phase         |         |
+|                 | - sd                                                       |                                       |         |
+|                 | - amplitude                                                |                                       |         |
++-----------------+------------------------------------------------------------+---------------------------------------+---------+
+| cmos            | - min                                                      | - by_phase = True                     |         |
+|                 | - max                                                      |   If metrics should be calculated by  |         |
+|                 | - mean                                                     |   standing and swinging phase         |         |
+|                 | - sd                                                       |                                       |         |
+|                 | - amplitude                                                |                                       |         |
++-----------------+------------------------------------------------------------+---------------------------------------+---------+
+| mos             | - Mos at FS                                                |                                       |         |
+|                 | - Mos at TO                                                |                                       |         |
+|                 | - Mos at contra HS                                         |                                       |         |
++-----------------+------------------------------------------------------------+---------------------------------------+---------+
+| Spatio-temporal | - step_length                                              |                                       |    X    |
+|                 | - stride_length                                            |                                       |         |
+|                 | - cycle_duration                                           |                                       |    X    |
+|                 | - swing_duration_perc                                      |                                       |    X    |
+|                 | - stance_duration_perc                                     |                                       |    X    |
+|                 | - step_height                                              |                                       |         |
+|                 | - step_width                                               |                                       |         |
+|                 | - limb_circumduction [1]                                   |                                       |         |
+|                 | - single_support_duration_percent [2]                      |                                       |    X    |
+|                 | - double_support_duration_percent [2]                      |                                       |    X    |
++-----------------+------------------------------------------------------------+---------------------------------------+---------+
+| Toe Clearance   | - minimal toe clearance                                    |                                       |         |
+|                 | - Percentage in cycle where minimal toe clearance happened |                                       |         |
+|                 | - minimal toe clearance at FS                              |                                       |         |
++-----------------+------------------------------------------------------------+---------------------------------------+---------+
 
 References
 ~~~~~~~~~~
