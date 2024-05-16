@@ -13,7 +13,7 @@ def read(*names, **kwargs):
 
 setup(
     name="gaitalytics",
-    version="0.1.1",
+    version="0.1.2",
     license="MIT",
     description="Python package to extract gait analytic parameters for different kind of recordings (i.e. MOCAP, Force Plate)",
     long_description="{}\n{}".format(
