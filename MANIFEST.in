@@ -8,6 +8,7 @@ include .editorconfig
 include .github/workflows/github-actions.yml
 include .pre-commit-config.yaml
 include .readthedocs.yml
+include environment.yml
 include pytest.ini
 include tox.ini
 

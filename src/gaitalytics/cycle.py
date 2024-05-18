@@ -53,7 +53,6 @@ class CycleBuilder(ABC):
         Returns:
             model.GaitCycleList: A list of gait cycles.
         """
-        pass
 
 
 class EventCycleBuilder(CycleBuilder):
