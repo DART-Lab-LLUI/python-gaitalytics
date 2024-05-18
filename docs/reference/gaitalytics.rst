@@ -2,8 +2,9 @@ gaitalytics
 ===========
 
 
-.. automodule:: gaitalytics.cycle
+.. automodule:: gaitalytics.api
     :members:
+
 
 .. toctree::
    :maxdepth: 2

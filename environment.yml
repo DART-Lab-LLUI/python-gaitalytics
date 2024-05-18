@@ -1,0 +1,13 @@
+name: python-gaitalytics
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pandas==2.1.4
+  - scipy==1.11.3
+  - pyyaml
+  - matplotlib==3.8.0
+  - btk
+  - click
+  - h5py==3.10.0
