@@ -29,7 +29,7 @@ extlinks = {
 # if not on_rtd:  # only set the theme if we are building docs locally
 #     html_theme = "sphinx_rtd_theme"
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "classic"
 
 html_use_smartypants = True
 html_last_updated_fmt = "%b %d, %Y"
