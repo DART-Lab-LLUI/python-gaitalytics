@@ -22,14 +22,16 @@ version = release = "0.1.2"
 pygments_style = "trac"
 templates_path = ["."]
 extlinks = {
-    "issue": ("https://github.com/cereneo-foundation/python-gaitalytics/issues/%s", "#"),
-    "pr": ("https://github.com/cereneo-foundation/python-gaitalytics/pull/%s", "PR #"),
+    "issue": ("https://github.com/DART-Lab-LLUI/python-gaitalytics/issues/%s", "#"),
+    "pr": ("https://github.com/DART-Lab-LLUI/python-gaitalytics/pull/%s", "PR #"),
 }
 # on_rtd is whether we are on readthedocs.org
-on_rtd = os.environ.get("READTHEDOCS", None) == "True"
+# on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 
-if not on_rtd:  # only set the theme if we are building docs locally
-    html_theme = "sphinx_rtd_theme"
+# if not on_rtd:  # only set the theme if we are building docs locally
+#     html_theme = "sphinx_rtd_theme"
+
+html_theme = "sphinx_rtd_theme"
 
 html_use_smartypants = True
 html_last_updated_fmt = "%b %d, %Y"
