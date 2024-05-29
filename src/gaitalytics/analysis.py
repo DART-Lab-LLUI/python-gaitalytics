@@ -638,7 +638,9 @@ class MinimalToeClearance(AbstractAnalysis):
 
         for cycle_number in range(len(toe)):
             toe_cycle = toe[cycle_number]
+            toe_cycle = toe_cycle[~np.isnan(toe_cycle)]
             heel_cycle = hee[cycle_number]
+            heel_cycle = heel_cycle[~np.isnan(heel_cycle)]
             usr = uniform_speed_region[cycle_number]
 
             Z_meta_2 = toe_cycle[usr[0] : usr[1]]
