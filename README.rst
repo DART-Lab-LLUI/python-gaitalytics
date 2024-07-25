@@ -11,7 +11,7 @@ Gaitalytics
     * - tests
       - | |github-actions|
     * - package
-      - | |version| |wheel| |supported-versions| |supported-implementations|
+      - | |pixi-badge|
         | |commits-since|
 .. |docs| image:: https://readthedocs.org/projects/python-gaitalytics/badge/?style=flat
     :target: https://python-gaitalytics.readthedocs.io/
@@ -23,8 +23,11 @@ Gaitalytics
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/DART-Lab-LLUI/python-gaitalytics/v0.1.2.svg
     :alt: Commits since latest release
-    :target: https://github.com/DART-Lab-LLUI/python-gaitalytics/compare/v0.1.2...main
+    :target: https://github.com/DART-Lab-LLUI/python-gaitalytics/compare/
 
+.. |pixi-badge| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json
+    :alt: Pixi Badge
+    :target: https://pixi.sh
 .. end-badges
 
 .. image:: ./_static/images/Gaitalytics_noBackground.png
