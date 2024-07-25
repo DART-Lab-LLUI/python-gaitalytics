@@ -293,7 +293,8 @@ def trial_from_hdf5(file_path: Path) -> Trial | TrialCycles:
 
     Following structure is expected:
     Trial:
-    - file_path (hdf5 file)
+
+    - file_path (folder)
         - Left (context)
             - markers
                 - xarray.DataArray
@@ -302,9 +303,10 @@ def trial_from_hdf5(file_path: Path) -> Trial | TrialCycles:
             - events
                 - xarray.Dataset
         - Right (context)
-            ...
+            - ...
 
     TrialCycles:
+
     - file_path (folder)
         - 0.h5 (cycle_id)
             - Left (context)
@@ -315,8 +317,7 @@ def trial_from_hdf5(file_path: Path) -> Trial | TrialCycles:
                 - events
                     - xarray.Dataset
             - Right (context)
-                ...
-        - ...
+                - ...
 
     Args:
         file_path: The path to the HDF5 file or folder with the expected structure.
