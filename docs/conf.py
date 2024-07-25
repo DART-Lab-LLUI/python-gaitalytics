@@ -1,44 +1,39 @@
-extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.coverage",
-    "sphinx.ext.doctest",
-    "sphinx.ext.extlinks",
-    "sphinx.ext.ifconfig",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.todo",
-    "sphinx.ext.viewcode",
-]
-source_suffix = ".rst"
-master_doc = "index"
-project = "gaitalytics"
-year = "2024"
-author = "André Böni"
-copyright = f"{year}, {author}"
-version = release = "0.1.2"
+# Configuration file for the Sphinx documentation builder.
+#
+# For the full list of built-in configuration values, see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-pygments_style = "trac"
-templates_path = ["."]
-extlinks = {
-    "issue": ("https://github.com/DART-Lab-LLUI/python-gaitalytics/issues/%s", "#"),
-    "pr": ("https://github.com/DART-Lab-LLUI/python-gaitalytics/pull/%s", "PR #"),
+# -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+from importlib.metadata import version
+release = version("gaitalytics")
+#version = ".".join(release.split(".")[:2])
+version = release
+
+project = 'gaitalytics'
+copyright = '2024, André Böni'
+author = 'André Böni'
+
+# -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+
+extensions = ['sphinx.ext.autodoc']
+
+templates_path = ['_templates']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
+html_theme = 'sphinx_rtd_theme'
+html_static_path = ['_static']
+
+html_theme_options = {
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
 }
-# on_rtd is whether we are on readthedocs.org
-# on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 
-# if not on_rtd:  # only set the theme if we are building docs locally
-#     html_theme = "sphinx_rtd_theme"
-
-html_theme = "classic"
-
-html_use_smartypants = True
-html_last_updated_fmt = "%b %d, %Y"
-html_split_index = False
-html_sidebars = {
-    "**": ["searchbox.html", "globaltoc.html", "sourcelink.html"],
-}
-html_short_title = f"{project}-{version}"
-
-napoleon_use_ivar = True
-napoleon_use_rtype = False
-napoleon_use_param = False
+html_favicon = '_static/favicon.png'

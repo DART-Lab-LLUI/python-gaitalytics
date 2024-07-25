@@ -1,22 +1,18 @@
-graft src
-graft ci
+exclude *
 
-include .bumpversion.cfg
-include .cookiecutterrc
-include .coveragerc
-include .editorconfig
-include .github/workflows/github-actions.yml
-include .pre-commit-config.yaml
-include .readthedocs.yml
-include environment.yml
-include pytest.ini
-include tox.ini
-
-include AUTHORS.rst
-include CHANGELOG.rst
-include CONTRIBUTING.rst
-include LICENSE
 include README.rst
-include resources/logo/Gaitalytics_noBackground.png
+include CHANGELOG.rst
+include AUTHORS.rst
+include LICENSE
 
-global-exclude *.py[cod] __pycache__/* *.so *.dylib examples/* settings/* tests/data/* docs/* docs/reference/*
+include pyproject.toml
+recursive-include gaitalytics *.py
+
+include ./tests/test_api.py
+include ./tests/test_small.c3d
+include ./tests/pig_config.yaml
+
+
+prune tests/full
+prune conda.recipe
+

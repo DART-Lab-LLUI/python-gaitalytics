@@ -1,0 +1,6 @@
+# Markers to analyse
+
+analysis:
+  analogs:
+    - "LHipAngles"
+

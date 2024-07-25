@@ -1,0 +1,51 @@
+name: Library Tests
+on:
+  workflow_dispatch:
+
+run-name: ${{ github.actor }} is testing the code
+jobs:
+  Windows-Tests:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Setup pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: v0.25.0
+          cache: false
+      - run: pixi run -e py311 test-api
+  Mac64-Tests:
+    runs-on: macOS-13
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Setup pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: v0.25.0
+          cache: false
+      - run: pixi run -e py311 test-api
+  MacArm-Tests:
+    runs-on: macOS-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Setup pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: v0.25.0
+          cache: false
+      - run: pixi run -e py311 test-api
+  Linux-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Setup pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: v0.25.0
+          cache: false
+      - run: pixi run -e py311 test-api
+

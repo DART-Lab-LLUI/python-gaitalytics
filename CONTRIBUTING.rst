@@ -49,9 +49,11 @@ To set up `python-gaitalytics` for local development:
 
    Now you can make your changes locally.
 
-4. When you're done making changes run all the checks and docs builder with one command::
+4. When you're done making changes run all the checks and tests and fix issues ::
 
-    tox
+    pixi install --all
+    pixi run check-code
+    pixi run -e py311 test
 
 5. Commit your changes and push your branch to GitHub::
 
@@ -68,18 +70,8 @@ If you need some code review or feedback while you're developing the code just m
 
 For merging, you should:
 
-1. Include passing tests (run ``tox``).
+1. Include passing tests (run ``pixi run -e py311 test``).
 2. Update documentation when there's new API, functionality etc.
 3. Add a note to ``CHANGELOG.rst`` about the changes.
 4. Add yourself to ``AUTHORS.rst``.
 
-Tips
-----
-
-To run a subset of tests::
-
-    tox -e envname -- pytest -k test_myfeature
-
-To run all the test environments in *parallel*::
-
-    tox -p auto

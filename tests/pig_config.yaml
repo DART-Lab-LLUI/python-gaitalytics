@@ -1,0 +1,66 @@
+# Markers to analyse
+
+analysis:
+  markers:
+    # Left side
+    - "LHipAngles"
+    - "LKneeAngles"
+    - "LAnkleAngles"
+    - "LPelvisAngles"
+    - "LThoraxAngles"
+    - "LSpineAngles"
+    - "LFootProgressAngles"
+    - "LHipPower"
+    - "LKneePower"
+    - "LAnklePower"
+    - "LWaistPower"
+    - "LNormalisedGRF"
+    - "LHipForce"
+    - "LKneeForce"
+    - "LAnkleForce"
+    - "LWaistForce"
+    - "LGroundReactionMoment"
+    - "LHipMoment"
+    - "LKneeMoment"
+    - "LAnkleMoment"
+    - "LWaistMoment"
+    # Right side
+    - "RHipAngles"
+    - "RKneeAngles"
+    - "RAnkleAngles"
+    - "RPelvisAngles"
+    - "RThoraxAngles"
+    - "RSpineAngles"
+    - "RFootProgressAngles"
+    - "RHipPower"
+    - "RKneePower"
+    - "RAnklePower"
+    - "RWaistPower"
+    - "RNormalisedGRF"
+    - "RHipForce"
+    - "RKneeForce"
+    - "RAnkleForce"
+    - "RWaistForce"
+    - "RGroundReactionMoment"
+    - "RHipMoment"
+    - "RKneeMoment"
+    - "RAnkleMoment"
+    - "RWaistMoment"
+mapping:
+  markers:
+    # Foot
+    l_heel: "LHEE"
+    r_heel: "RHEE"
+    l_toe: "LTOE"
+    r_toe: "RTOE"
+
+    # Hip
+    l_ant_hip: "LASI"
+    r_ant_hip: "RASI"
+    l_post_hip: "LPSI"
+    r_post_hip: "RPSI"
+    sacrum: "SACR"
+
+
+
+

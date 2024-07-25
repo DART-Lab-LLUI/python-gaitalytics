@@ -1,3 +1,12 @@
+.pixi
+out
+/gaitalytics/__pycache__
+/tests/__pycache__
+_build
+
+/output/
+/playground/
+
 *.py[cod]
 __pycache__
 
@@ -44,7 +53,6 @@ pip-log.txt
 .coverage.*
 .pytest
 .pytest_cache/
-.tox
 coverage.xml
 htmlcov
 nosetests.xml
@@ -79,3 +87,5 @@ docs/_build
 /gaitalytics-0.0.0/
 /.pypirc
 /out/
+/output/bld/rattler-build_gaitalytics_1721919576/work/build_env.bat
+/output/bld/rattler-build_gaitalytics_1721919576/work/conda_build.bat

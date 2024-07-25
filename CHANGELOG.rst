@@ -2,7 +2,7 @@
 Changelog
 =========
 
-0.0.0 (2024-02-09)
+0.2.0
 ------------------
-
-* First release on PyPI.
+Breaking changes:
+The whole library was rewritten. File formats from older version will not be compatible

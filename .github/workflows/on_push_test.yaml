@@ -1,0 +1,17 @@
+on: push
+
+name: Code Tests
+run-name: ${{ github.actor }} is testing the code
+jobs:
+  Linux-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Setup pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: v0.25.0
+          cache: false
+      - run: pixi run -e py311 test-api
+
