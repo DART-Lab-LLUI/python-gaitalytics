@@ -3256,9 +3256,9 @@ packages:
   timestamp: 1694616398888
 - kind: pypi
   name: gaitalytics
-  version: 0.2.1.dev0+g524461a.d20240729
+  version: 0.1.3.dev36+gae61a70
   path: .
-  sha256: 85d90c019ff41d470a003a6a8a51befc17e76e5149e0d5ce724f09473838e6a9
+  sha256: 7c7bc3186072a35a5f02fc5d824ba1f035b70a392685c7a5871d8226cc7d4340
   requires_dist:
   - h5netcdf<1.4,>=1.3.0
   - pandas<2.3,>=1.5
