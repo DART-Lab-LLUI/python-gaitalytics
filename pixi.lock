@@ -253,45 +253,38 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/freetype-2.12.1-hdaf720e_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/intel-openmp-2024.2.0-h57928b3_980.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/kiwisolver-1.4.5-py311h005e61a_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/lcms2-2.16-h67d730c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/lcms2-2.15-h3e3b177_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/lerc-4.0.0-h63175ca_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/libblas-3.9.0-23_win64_mkl.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libbrotlicommon-1.1.0-hcfcfb64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libbrotlidec-1.1.0-hcfcfb64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libbrotlienc-1.1.0-hcfcfb64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libcblas-3.9.0-23_win64_mkl.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/libdeflate-1.20-hcfcfb64_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/libdeflate-1.18-hcfcfb64_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libexpat-2.6.2-h63175ca_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libffi-3.4.2-h8ffe710_5.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/libhwloc-2.11.1-default_h8125262_1000.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libiconv-1.17-hcfcfb64_2.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/libjpeg-turbo-3.0.0-hcfcfb64_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/libjpeg-turbo-2.1.5.1-hcfcfb64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/liblapack-3.9.0-23_win64_mkl.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libpng-1.6.43-h19919ed_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libsqlite-3.46.0-h2466b09_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/libtiff-4.6.0-hddb2be6_3.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/libtiff-4.5.1-h6c8260b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libwebp-base-1.4.0-hcfcfb64_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/libxcb-1.16-hcd874cb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/libxcb-1.13-0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/libxml2-2.12.7-h0f24e4e_4.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libzlib-1.3.1-h2466b09_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/m2w64-gcc-libgfortran-5.3.0-6.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/win-64/m2w64-gcc-libs-5.3.0-7.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/win-64/m2w64-gcc-libs-core-5.3.0-7.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/win-64/m2w64-gmp-6.1.0-2.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/win-64/m2w64-libwinpthread-git-5.0.0.4634.697f757-2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/matplotlib-base-3.9.1-py311h8f1b1e4_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/mkl-2024.1.0-h66d3029_694.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/msys2-conda-epoch-20160418-1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/munkres-1.1.4-pyh9f0ad1d_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/numpy-2.0.0-py311h35ffc71_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/openjpeg-2.5.2-h3d672ee_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/openjpeg-2.5.0-ha2aaf27_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/openpyxl-3.1.4-py311ha68e1ae_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/openssl-3.3.1-h2466b09_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/packaging-24.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pandas-2.2.2-py311hcf9f919_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/pillow-10.4.0-py311h5592be9_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/pillow-9.5.0-py311hc67b2de_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pixi-pycharm-0.0.6-win_1234567_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/pthread-stubs-0.4-hcd874cb_1001.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/pthreads-win32-2.9.1-hfa6e2cd_3.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyomeca-2021.0.1-pyh44b312d_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.1.2-pyhd8ed1ab_0.conda
@@ -311,8 +304,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/vc14_runtime-14.40.33810-ha82c5b3_20.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/vs2015_runtime-14.40.33810-h3bf8584_20.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/xarray-2024.6.0-pyhd8ed1ab_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/xorg-libxau-1.0.11-hcd874cb_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/xorg-libxdmcp-1.1.3-hcd874cb_0.tar.bz2
+      - conda: https://conda.anaconda.org/conda-forge/win-64/xorg-libxau-1.0.8-2.tar.bz2
+      - conda: https://conda.anaconda.org/conda-forge/win-64/xorg-libxdmcp-1.1.2-2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/xz-5.2.6-h8d14728_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
       - pypi: https://files.pythonhosted.org/packages/e2/03/f3c8ba0a6b6e30d7d18c40faab90807c9bb5e9a1e3b2fe2008af624a9c97/build-1.2.1-py3-none-any.whl
@@ -3263,9 +3256,35 @@ packages:
   timestamp: 1694616398888
 - kind: pypi
   name: gaitalytics
-  version: 0.2.1.dev0+gc4c0253.d20240725
+  version: 0.2.1.dev0+ge612490.d20240729
   path: .
-  sha256: f4fc5e57264ce8870216f30bb797d5d25af40f669fc2595bad3ccfe29cb929e4
+  sha256: bfbcac67d4274a5531094365c353dc3286762de60175ad2d9cc2c4a456c6c715
+  requires_dist:
+  - h5netcdf<1.4,>=1.3.0
+  - pandas<2.3,>=1.5
+  - pyyaml<6.1,>=6.0.1
+  - scipy<1.15,>=1.13
+  - numpy<2.1,>=1.23
+  - xarray<2024.7,>=2024.6.0
+  - build ; extra == 'build'
+  - setuptools>=64 ; extra == 'build'
+  - setuptools-scm>=8 ; extra == 'build'
+  - ruff ; extra == 'dev'
+  - mypy ; extra == 'dev'
+  - pip ; extra == 'dev'
+  - sphinx ; extra == 'docs'
+  - sphinx-rtd-theme ; extra == 'docs'
+  - sphinx-autodoc-typehints ; extra == 'docs'
+  - sphinx-github-changelog ; extra == 'docs'
+  - pytest ; extra == 'test'
+  - pytest-cov ; extra == 'test'
+  requires_python: '>=3.11'
+  editable: true
+- kind: pypi
+  name: gaitalytics
+  version: 0.2.1.dev0+ge612490.d20240729
+  path: .
+  sha256: bfbcac67d4274a5531094365c353dc3286762de60175ad2d9cc2c4a456c6c715
   requires_dist:
   - h5netcdf<1.4,>=1.3.0
   - pandas<2.3,>=1.5
@@ -3563,6 +3582,26 @@ packages:
   - pkg:pypi/kiwisolver?source=conda-forge-mapping
   size: 72099
   timestamp: 1695380122482
+- kind: conda
+  name: lcms2
+  version: '2.15'
+  build: h3e3b177_1
+  build_number: 1
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/lcms2-2.15-h3e3b177_1.conda
+  sha256: 24179aae324bcfa65ec983a389c5e048bd6b174f63afedf4cdd654da78cf9558
+  md5: a76c36ad1b4b87f038d67890122d08ec
+  depends:
+  - libjpeg-turbo >=2.1.5.1,<3.0a0
+  - libtiff >=4.5.0,<4.6.0a0
+  - ucrt >=10.0.20348.0
+  - vc >=14.2,<15
+  - vs2015_runtime >=14.29.30139
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 499079
+  timestamp: 1678213836010
 - kind: conda
   name: lcms2
   version: '2.16'
@@ -4106,6 +4145,23 @@ packages:
   timestamp: 1720589431855
 - kind: conda
   name: libdeflate
+  version: '1.18'
+  build: hcfcfb64_0
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/libdeflate-1.18-hcfcfb64_0.conda
+  sha256: 9a9a1a6e47777c9bf6086d88f6567ed3fc32d4f849b3d42b51bbf0b9fa4727f7
+  md5: 493acc14c556ef6f1d13ba00b099c679
+  depends:
+  - ucrt >=10.0.20348.0
+  - vc >=14.2,<15
+  - vs2015_runtime >=14.29.30139
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 152345
+  timestamp: 1679647873728
+- kind: conda
+  name: libdeflate
   version: '1.20'
   build: h49d49c5_0
   subdir: osx-64
@@ -4455,6 +4511,25 @@ packages:
   purls: []
   size: 636146
   timestamp: 1702682547199
+- kind: conda
+  name: libjpeg-turbo
+  version: 2.1.5.1
+  build: hcfcfb64_1
+  build_number: 1
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/libjpeg-turbo-2.1.5.1-hcfcfb64_1.conda
+  sha256: 27e49e07f2129cd39c1c34ac882a0e89f55d597d54c35fab362bcd0a37b532a2
+  md5: 9503c6648d5692f1f26aabca7156f809
+  depends:
+  - ucrt >=10.0.20348.0
+  - vc >=14.2,<15
+  - vc14_runtime >=14.29.30139
+  constrains:
+  - jpeg <0.0.0a
+  license: IJG AND BSD-3-Clause AND Zlib
+  purls: []
+  size: 688116
+  timestamp: 1694566907689
 - kind: conda
   name: libjpeg-turbo
   version: 3.0.0
@@ -4816,6 +4891,29 @@ packages:
   timestamp: 1719538923443
 - kind: conda
   name: libtiff
+  version: 4.5.1
+  build: h6c8260b_1
+  build_number: 1
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/libtiff-4.5.1-h6c8260b_1.conda
+  sha256: 46cd425318c5318c9c78c985776fa64746d1812c19f14284876f1aad4f9ee044
+  md5: 5faa8734cee2590b6d3615e06bfce4f8
+  depends:
+  - lerc >=4.0.0,<5.0a0
+  - libdeflate >=1.18,<1.19.0a0
+  - libjpeg-turbo >=2.1.5.1,<3.0a0
+  - libzlib >=1.2.13,<2.0.0a0
+  - ucrt >=10.0.20348.0
+  - vc >=14.2,<15
+  - vc14_runtime >=14.29.30139
+  - xz >=5.2.6,<6.0a0
+  - zstd >=1.5.2,<1.6.0a0
+  license: HPND
+  purls: []
+  size: 952982
+  timestamp: 1692897566567
+- kind: conda
+  name: libtiff
   version: 4.6.0
   build: h07db509_3
   build_number: 3
@@ -4985,6 +5083,23 @@ packages:
   purls: []
   size: 438953
   timestamp: 1713199854503
+- kind: conda
+  name: libxcb
+  version: '1.13'
+  build: '0'
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/libxcb-1.13-0.tar.bz2
+  sha256: f5ff08c291ebc0d9b76826a844e32c2fa92c0bff312745e903a4155552eff68e
+  md5: 6a1b49c7676520be18f7b74c4fdb87d6
+  depends:
+  - xorg-libxau
+  - xorg-libxdmcp
+  arch: x86_64
+  platform: win
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 2349546
 - kind: conda
   name: libxcb
   version: '1.16'
@@ -5911,6 +6026,27 @@ packages:
   timestamp: 1718615501795
 - kind: conda
   name: openjpeg
+  version: 2.5.0
+  build: ha2aaf27_2
+  build_number: 2
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/openjpeg-2.5.0-ha2aaf27_2.conda
+  sha256: 1fb72db47e9b1cdb4980a1fd031e31fad2c6a4a632fc602e7d6fa74f4f491608
+  md5: db0490689232e8e38c312281df6f31a2
+  depends:
+  - libpng >=1.6.39,<1.7.0a0
+  - libtiff >=4.5.0,<4.6.0a0
+  - libzlib >=1.2.13,<2.0.0a0
+  - ucrt >=10.0.20348.0
+  - vc >=14.2,<15
+  - vs2015_runtime >=14.29.30139
+  license: BSD-2-Clause
+  license_family: BSD
+  purls: []
+  size: 237111
+  timestamp: 1671435754860
+- kind: conda
+  name: openjpeg
   version: 2.5.2
   build: h3d672ee_0
   subdir: win-64
@@ -6430,6 +6566,34 @@ packages:
   - pkg:pypi/pandas?source=conda-forge-mapping
   size: 14476760
   timestamp: 1715898136109
+- kind: conda
+  name: pillow
+  version: 9.5.0
+  build: py311hc67b2de_0
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/pillow-9.5.0-py311hc67b2de_0.conda
+  sha256: 9855e155864d503da9f75dc0e1f5486dcfe4b065548844f28e1a1dccd62a2e7f
+  md5: d06a743a739141a5b90a63a43b3d174f
+  depends:
+  - freetype >=2.12.1,<3.0a0
+  - lcms2 >=2.15,<3.0a0
+  - libjpeg-turbo >=2.1.5.1,<3.0a0
+  - libtiff >=4.5.0,<4.6.0a0
+  - libwebp-base >=1.3.0,<2.0a0
+  - libxcb >=1.13,<1.14.0a0
+  - libzlib >=1.2.13,<2.0.0a0
+  - openjpeg >=2.5.0,<3.0a0
+  - python >=3.11,<3.12.0a0
+  - python_abi 3.11.* *_cp311
+  - tk >=8.6.12,<8.7.0a0
+  - ucrt >=10.0.20348.0
+  - vc >=14.2,<15
+  - vs2015_runtime >=14.29.30139
+  license: LicenseRef-PIL
+  purls:
+  - pkg:pypi/pillow?source=conda-forge-mapping
+  size: 47042064
+  timestamp: 1680694926799
 - kind: conda
   name: pillow
   version: 10.4.0
@@ -8178,6 +8342,21 @@ packages:
   timestamp: 1718302275503
 - kind: conda
   name: xorg-libxau
+  version: 1.0.8
+  build: '2'
+  build_number: 2
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/xorg-libxau-1.0.8-2.tar.bz2
+  sha256: cdf80b42730beb9540d736e39000359f92f8f91969473b56a5ebabc7974946dd
+  md5: e81a941abbd5ac1288cd6591ae36af67
+  arch: x86_64
+  platform: win
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 18666
+- kind: conda
+  name: xorg-libxau
   version: 1.0.11
   build: h0dc2134_0
   subdir: osx-64
@@ -8233,6 +8412,21 @@ packages:
   purls: []
   size: 14468
   timestamp: 1684637984591
+- kind: conda
+  name: xorg-libxdmcp
+  version: 1.1.2
+  build: '2'
+  build_number: 2
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/xorg-libxdmcp-1.1.2-2.tar.bz2
+  sha256: 6f939f0e937a36ca15bee76ea22efdc77c083a9c07a26503b61d81762441b05a
+  md5: 3731fde21be52090799204adce6ae86c
+  arch: x86_64
+  platform: win
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 31448
 - kind: conda
   name: xorg-libxdmcp
   version: 1.1.3
