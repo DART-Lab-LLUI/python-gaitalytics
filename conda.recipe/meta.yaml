@@ -15,6 +15,11 @@ build:
   number: 0
 
 requirements:
+  build:
+    - pip
+    - python >=3.11
+    - setuptools
+    - setuptools_scm
   host:
     - python >=3.11
     - pip

@@ -89,3 +89,4 @@ docs/_build
 /out/
 /output/bld/rattler-build_gaitalytics_1721919576/work/build_env.bat
 /output/bld/rattler-build_gaitalytics_1721919576/work/conda_build.bat
+/conda-build/

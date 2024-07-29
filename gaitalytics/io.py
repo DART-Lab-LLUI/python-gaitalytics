@@ -254,8 +254,7 @@ class _PyomecaInputFileReader(_BaseFileHandler, ABC):
     """
 
     def __init__(
-            self, file_path: Path,
-            pyomeca_class: type[pyomeca.Markers | pyomeca.Analogs]
+        self, file_path: Path, pyomeca_class: type[pyomeca.Markers | pyomeca.Analogs]
     ):
         """Initializes a new instance of the MarkersInputFileReader class.
 
@@ -270,7 +269,7 @@ class _PyomecaInputFileReader(_BaseFileHandler, ABC):
         """
         file_ext = file_path.suffix
         if file_ext == ".c3d" and (
-                pyomeca_class == pyomeca.Analogs or pyomeca_class == pyomeca.Markers
+            pyomeca_class == pyomeca.Analogs or pyomeca_class == pyomeca.Markers
         ):
             data = pyomeca_class.from_c3d(file_path)
         elif file_ext == ".trc" and pyomeca_class == pyomeca.Markers:
@@ -296,7 +295,7 @@ class _PyomecaInputFileReader(_BaseFileHandler, ABC):
 
     @staticmethod
     def _to_absolute_time(
-            data: xr.DataArray, first_frame: int, rate: float
+        data: xr.DataArray, first_frame: int, rate: float
     ) -> xr.DataArray:
         """Converts the time to absolute time.
 
@@ -455,7 +454,6 @@ class AnalysisInputReader(_PyomecaInputFileReader):
 
 
 class _TrialExporter(_BaseFileHandler):
-
     @abstractmethod
     def export_trial(self, trial: model.Trial | model.TrialCycles):
         """Export the trial to the output folder.
@@ -530,4 +528,3 @@ class NetCDFTrialExporter(_TrialExporter):
                 file_path = folder_path / f"{category.value}.nc"
                 full_data = xr.Dataset(context_structs).to_dataarray("context")
                 full_data.to_netcdf(file_path, mode="w", engine="h5netcdf")
-

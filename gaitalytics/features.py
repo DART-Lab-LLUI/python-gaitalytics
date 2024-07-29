@@ -361,7 +361,7 @@ class PhaseTimeSeriesFeatures(TimeSeriesFeatures):
 
         context = analysis_data.attrs["context"]
 
-        event_ipsi = event_table.loc[
+        event_ipsi = event_table.loc[  # type: ignore
             event_table[io.C3dEventInputFileReader.COLUMN_CONTEXT] == context  # type: ignore
         ]
         event_ipsi_fo = event_ipsi.loc[

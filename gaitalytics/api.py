@@ -64,7 +64,7 @@ def load_config(config_path: Path | str) -> mapping.MappingConfigs:
 
 @_PathConverter
 def load_c3d_trial(
-        c3d_file: Path | str, configs: mapping.MappingConfigs
+    c3d_file: Path | str, configs: mapping.MappingConfigs
 ) -> model.Trial:
     """Loads a Trial from a c3d file.
 
@@ -93,8 +93,7 @@ def load_c3d_trial(
 
 
 def detect_events(
-        trial: model.Trial, config: mapping.MappingConfigs, method: str = "Marker",
-        **kwargs
+    trial: model.Trial, config: mapping.MappingConfigs, method: str = "Marker", **kwargs
 ) -> pd.DataFrame:
     """Detects the events in the trial.
 
@@ -144,9 +143,9 @@ def check_events(event_table: pd.DataFrame, method: str = "sequence"):
 
 @_PathConverter
 def write_events_to_c3d(
-        c3d_path: Path | str,
-        event_table: pd.DataFrame,
-        output_path: Path | str | None = None,
+    c3d_path: Path | str,
+    event_table: pd.DataFrame,
+    output_path: Path | str | None = None,
 ):
     """Writes the events to the c3d file.
 
@@ -156,8 +155,7 @@ def write_events_to_c3d(
         output_path: The path to write the c3d file with the events.
         If None, the original file will be overwritten.
     """
-    io.C3dEventFileWriter(c3d_path).write_events(event_table,
-                                                 output_path)  # type: ignore
+    io.C3dEventFileWriter(c3d_path).write_events(event_table, output_path)  # type: ignore
 
 
 def segment_trial(trial: model.Trial, method: str = "HS") -> model.TrialCycles:
@@ -185,7 +183,7 @@ def segment_trial(trial: model.Trial, method: str = "HS") -> model.TrialCycles:
 
 
 def time_normalise_trial(
-        trial: model.Trial | model.TrialCycles, method: str = "linear", **kwargs
+    trial: model.Trial | model.TrialCycles, method: str = "linear", **kwargs
 ) -> model.Trial | model.TrialCycles:
     """Normalises the time in the trial.
 
@@ -208,15 +206,15 @@ def time_normalise_trial(
 
 
 def calculate_features(
-        trial: model.TrialCycles,
-        config: mapping.MappingConfigs,
-        methods: list | tuple = (
-                features.TimeSeriesFeatures,
-                features.PhaseTimeSeriesFeatures,
-                features.TemporalFeatures,
-                features.SpatialFeatures,
-        ),
-        **kwargs,
+    trial: model.TrialCycles,
+    config: mapping.MappingConfigs,
+    methods: list | tuple = (
+        features.TimeSeriesFeatures,
+        features.PhaseTimeSeriesFeatures,
+        features.TemporalFeatures,
+        features.SpatialFeatures,
+    ),
+    **kwargs,
 ) -> xr.DataArray:
     """Calculates the features of the trial.
 
@@ -237,7 +235,7 @@ def calculate_features(
 
 
 def _create_feature_methods(
-        methods: list[type] | tuple[type], config: mapping.MappingConfigs, **kwargs
+    methods: list[type] | tuple[type], config: mapping.MappingConfigs, **kwargs
 ) -> list[features.FeatureCalculation]:
     """Checks the feature calculation methods.
 
@@ -258,8 +256,11 @@ def _create_feature_methods(
 
 
 @_PathConverter
-def export_trial(trial: model.Trial | model.TrialCycles, output_path: Path | str,
-                 method: str ="netcdf"):
+def export_trial(
+    trial: model.Trial | model.TrialCycles,
+    output_path: Path | str,
+    method: str = "netcdf",
+):
     """Exports the trial to a c3d file.
 
     This function will create a folder and save the trial as NetCDF files.
@@ -281,7 +282,6 @@ def export_trial(trial: model.Trial | model.TrialCycles, output_path: Path | str
     """
     match method:
         case "netcdf":
-            io.NetCDFTrialExporter(output_path).export_trial(trial)
+            io.NetCDFTrialExporter(output_path).export_trial(trial)  # type: ignore
         case _:
             raise ValueError(f"Unsupported method: {method}")
-    io.NetCDFTrialExporter(output_path).export_trial(trial)
