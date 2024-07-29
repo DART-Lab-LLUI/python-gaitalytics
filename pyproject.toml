@@ -94,7 +94,6 @@ wheel = "python -m build --wheel -n"
 packages = ["gaitalytics", "gaitalytics.utils"]
 
 [tool.setuptools_scm]
-version_file = "gaitalytics/_version.py"
 
 [tool.ruff-lint]
 select = [
