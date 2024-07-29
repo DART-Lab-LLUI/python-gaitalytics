@@ -1,7 +1,7 @@
 """This module provides classes for reading biomechanical file-types."""
 
 import math
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from pathlib import Path
 
 import ezc3d
@@ -11,12 +11,13 @@ import pyomeca
 import xarray as xr
 
 import gaitalytics.mapping as mapping
+import gaitalytics.model as model
 
 _MAX_EVENTS_PER_SECTION = 255
 
 
 # Input Section
-class _BaseFileHandler:
+class _BaseFileHandler(ABC):
     """Base class for file handler.
 
     This class provides a common interface for file handlers.
@@ -34,7 +35,7 @@ class _BaseFileHandler:
         self.file_path = file_path
 
 
-class _EventFileWriter(_BaseFileHandler):
+class _EventFileWriter(_BaseFileHandler, ABC):
     @abstractmethod
     def write_events(self, events: pd.DataFrame, file_path: Path | None = None):
         """Write the events to the output file.
@@ -97,7 +98,7 @@ class C3dEventFileWriter(_EventFileWriter):
         c3d.write(str(path))
 
 
-class _EventInputFileReader(_BaseFileHandler):
+class _EventInputFileReader(_BaseFileHandler, ABC):
     """Abstract base class for reading event input files.
 
     This class defines the interface for reading event input files
@@ -246,14 +247,15 @@ class C3dEventInputFileReader(_EventInputFileReader):
         return values
 
 
-class _PyomecaInputFileReader(_BaseFileHandler):
+class _PyomecaInputFileReader(_BaseFileHandler, ABC):
     """Base class for handling input files using pyomeca.
 
     This class provides a common interface for reading input files with pyomeca.
     """
 
     def __init__(
-        self, file_path: Path, pyomeca_class: type[pyomeca.Markers | pyomeca.Analogs]
+            self, file_path: Path,
+            pyomeca_class: type[pyomeca.Markers | pyomeca.Analogs]
     ):
         """Initializes a new instance of the MarkersInputFileReader class.
 
@@ -268,7 +270,7 @@ class _PyomecaInputFileReader(_BaseFileHandler):
         """
         file_ext = file_path.suffix
         if file_ext == ".c3d" and (
-            pyomeca_class == pyomeca.Analogs or pyomeca_class == pyomeca.Markers
+                pyomeca_class == pyomeca.Analogs or pyomeca_class == pyomeca.Markers
         ):
             data = pyomeca_class.from_c3d(file_path)
         elif file_ext == ".trc" and pyomeca_class == pyomeca.Markers:
@@ -294,7 +296,7 @@ class _PyomecaInputFileReader(_BaseFileHandler):
 
     @staticmethod
     def _to_absolute_time(
-        data: xr.DataArray, first_frame: int, rate: float
+            data: xr.DataArray, first_frame: int, rate: float
     ) -> xr.DataArray:
         """Converts the time to absolute time.
 
@@ -450,3 +452,82 @@ class AnalysisInputReader(_PyomecaInputFileReader):
             An xarray DataArray containing the analysis data.
         """
         return self._data
+
+
+class _TrialExporter(_BaseFileHandler):
+
+    @abstractmethod
+    def export_trial(self, trial: model.Trial | model.TrialCycles):
+        """Export the trial to the output folder.
+
+        Args:
+            trial: The trial to export.
+            folder_path: The path to the output folder.
+        """
+        raise NotImplementedError
+
+
+class NetCDFTrialExporter(_TrialExporter):
+    """A class for exporting trial data to NetCDF files."""
+
+    def export_trial(self, trial: model.Trial | model.TrialCycles):
+        """Export the trial to the output folder.
+
+        Args:
+            trial: The trial to export.
+            folder_path: The path to the output folder.
+        """
+        if not self.file_path.exists():
+            self.file_path.mkdir(parents=True)
+
+        if isinstance(trial, model.Trial):
+            self._export_trial(trial, self.file_path)
+        elif isinstance(trial, model.TrialCycles):
+            self._export_trial_cycles(trial, self.file_path)
+
+    @staticmethod
+    def _export_trial(trial: model.Trial, folder_path: Path):
+        """Export the trial to the output folder.
+
+        Args:
+            trial: The trial to export.
+            folder_path: The path to the output folder.
+        """
+
+        for category, data in trial.get_all_data().items():
+            file_path = folder_path / f"{category.value}.nc"
+            data.to_netcdf(file_path, mode="w", engine="h5netcdf")
+        if trial.events is not None:
+            file_path = folder_path / "events.nc"
+            trial.events.to_xarray().to_netcdf(file_path, mode="w", engine="h5netcdf")
+
+    @staticmethod
+    def _export_trial_cycles(trial: model.TrialCycles, folder_path: Path):
+        """Export the trial cycles to the output folder.
+
+        Args:
+            trial: The trial cycles to export.
+            folder_path: The path to the output folder.
+        """
+        for category in model.DataCategory:
+            context_structs = {}
+            category_exists = True
+            for context, cont_segments in trial.get_all_cycles().items():
+                cycle_struct: dict[int, xr.DataArray] = {}
+                for cycle_id, cycle in cont_segments.items():
+                    try:
+                        cycle_data = cycle.get_data(category)
+                        cycle_struct[cycle_id] = cycle_data
+                    except KeyError:
+                        category_exists = False
+                        break
+                if not category_exists:
+                    break
+                cycle_data = xr.Dataset(cycle_struct).to_dataarray("cycle")
+                context_structs[context] = cycle_data
+
+            if category_exists:
+                file_path = folder_path / f"{category.value}.nc"
+                full_data = xr.Dataset(context_structs).to_dataarray("context")
+                full_data.to_netcdf(file_path, mode="w", engine="h5netcdf")
+

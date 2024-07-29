@@ -3,6 +3,7 @@
    :maxdepth: 2
 
    readme
+   api
    reference/index
    contributing
    authors

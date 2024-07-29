@@ -1,13 +1,13 @@
 {% set name = "gaitalytics" %}
-{% set version = GIT_DESCRIBE_TAG %}
+{% set version = '0.2.0' %}
 
 
 package:
   name: {{ name|lower }}
-  version: {{ GIT_DESCRIBE_TAG }}
+  version: {{ version }}
 
 source:
-  git_url: https://github.com/DART-Lab-LLUI/python-gaitalytics.git
+  url: https://github.com/DART-Lab-LLUI/python-gaitalytics/releases/download/{{ version }}/gaitalytics-{{ version }}.tar.gz
 
 build:
   noarch: python

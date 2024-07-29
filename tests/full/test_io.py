@@ -4,12 +4,14 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import xarray as xr
 
 from gaitalytics.events import MarkerEventDetection
 from gaitalytics.io import C3dEventInputFileReader, MarkersInputFileReader, \
-    AnalogsInputFileReader, AnalysisInputReader, C3dEventFileWriter
+    AnalogsInputFileReader, AnalysisInputReader, C3dEventFileWriter, NetCDFTrialExporter
 from gaitalytics.mapping import MappingConfigs
 from gaitalytics.model import Trial, DataCategory
+from gaitalytics.segmentation import GaitEventsSegmentation
 
 INPUT_C3D_SMALL: Path = Path('./tests/full/data/test_small.c3d')
 INPUT_TRC_SMALL: Path = Path('./tests/full/data/test_small.trc')
@@ -18,6 +20,22 @@ INPUT_STO_SMALL: Path = Path('./tests/full/data/test_small.sto')
 
 INPUT_C3D_BIG: Path = Path('./tests/full/data/test_big.c3d')
 INPUT_C3D_BIG_NO_EVENTS: Path = Path('./tests/full/data/test_big_no_events.c3d')
+
+
+@pytest.fixture()
+def trial_small(request):
+    configs = MappingConfigs(Path('./tests/full/config/pig_config.yaml'))
+    markers = MarkersInputFileReader(INPUT_C3D_SMALL).get_markers()
+    analogs = AnalogsInputFileReader(INPUT_C3D_SMALL).get_analogs()
+    analysis = AnalysisInputReader(INPUT_C3D_SMALL, configs).get_analysis()
+    events = C3dEventInputFileReader(INPUT_C3D_SMALL).get_events()
+
+    trial = Trial()
+    trial.add_data(DataCategory.MARKERS, markers)
+    trial.add_data(DataCategory.ANALOGS, analogs)
+    trial.add_data(DataCategory.ANALYSIS, analysis)
+    trial.events = events
+    return trial
 
 
 @pytest.fixture()
@@ -30,6 +48,17 @@ def out_path(request):
     elif not out.parent.exists():
         out.parent.mkdir(parents=True)
     shutil.copy(input_file, out)
+    return out
+
+
+@pytest.fixture()
+def out_folder(request):
+    out = Path('out/export')
+
+    if out.exists():
+        shutil.rmtree(out)
+    elif not out.parent.exists():
+        out.parent.mkdir(parents=True)
     return out
 
 
@@ -47,7 +76,7 @@ class TestWriteEvents:
 
         assert len(rec_events) == len(events)
         for i in range(len(events)):
-            assert rec_events['time'].iloc[i] == pytest.approx(events['time'].iloc[ i])
+            assert rec_events['time'].iloc[i] == pytest.approx(events['time'].iloc[i])
             assert rec_events['label'].iloc[i] == events['label'].iloc[i]
             assert rec_events['context'].iloc[i] == events['context'].iloc[i]
             assert rec_events['icon_id'].iloc[i] == events['icon_id'].iloc[i]
@@ -90,6 +119,7 @@ class TestMarkers:
         assert (markers.loc['x', 'RTOE'][0:5].data == exp_x_values).all()
 
         assert markers.coords['time'][0] == 2.48
+
     def test_c3d_markers_big(self):
         c3d_markers = MarkersInputFileReader(INPUT_C3D_BIG)
         markers = c3d_markers.get_markers()
@@ -189,3 +219,29 @@ class TestAnalysis:
                     rec_value = analysis.loc[new_label, time]
                     exp_value = markers.loc[old_axis, old_label, time]
                     assert rec_value == exp_value
+
+
+class TestNetCDFExport:
+
+    def test_trial(self, trial_small, out_folder):
+        exporter = NetCDFTrialExporter(out_folder)
+        exporter.export_trial(trial_small)
+        assert (out_folder / "markers.nc").exists()
+        assert (out_folder / "analogs.nc").exists()
+        assert (out_folder / "analysis.nc").exists()
+        assert (out_folder / "events.nc").exists()
+
+    def test_segment_trial(self, trial_small, out_folder):
+        trial_segments = GaitEventsSegmentation().segment(trial_small)
+        exporter = NetCDFTrialExporter(out_folder)
+        exporter.export_trial(trial_segments)
+        assert (out_folder / "markers.nc").exists()
+        assert (out_folder / "analogs.nc").exists()
+        assert (out_folder / "analysis.nc").exists()
+        markers = xr.load_dataset(out_folder / "markers.nc")
+        markers = markers.to_dataarray()
+        assert markers.coords['context'].shape == (2, )
+        assert markers.coords['cycle'].shape == (2, )
+
+
+

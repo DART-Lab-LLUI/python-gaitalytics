@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -16,6 +17,17 @@ def out_path(request):
         out.unlink()
     elif not out.parent.exists():
         out.parent.mkdir(parents=True)
+    return out
+
+
+@pytest.fixture()
+def out_folder(request):
+    out = Path('out/test_small')
+
+    if out.exists():
+        shutil.rmtree(out)
+    elif not out.exists():
+        out.mkdir(parents=True)
     return out
 
 
@@ -116,3 +128,22 @@ def test_calculate_features():
     trial_cycles = api.segment_trial(trial)
     features = api.calculate_features(trial_cycles, config)
     assert features.shape == (2, 2, 2278)
+
+
+def test_export_trial(out_folder):
+    config = api.load_config("./tests/pig_config.yaml")
+    trial = api.load_c3d_trial("./tests/test_small.c3d", config)
+    api.export_trial(trial, out_folder)
+    assert (out_folder / "markers.nc").exists()
+    assert (out_folder / "analogs.nc").exists()
+    assert (out_folder / "analysis.nc").exists()
+    assert (out_folder / "events.nc").exists()
+
+def test_export_segmented_trial(out_folder):
+    config = api.load_config("./tests/pig_config.yaml")
+    trial = api.load_c3d_trial("./tests/test_small.c3d", config)
+    trial_cycles = api.segment_trial(trial)
+    api.export_trial(trial_cycles, out_folder)
+    assert (out_folder / "markers.nc").exists()
+    assert (out_folder / "analogs.nc").exists()
+    assert (out_folder / "analysis.nc").exists()
