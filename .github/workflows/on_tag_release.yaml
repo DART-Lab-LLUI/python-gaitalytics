@@ -11,7 +11,7 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
-      - run: echo "version=$(echo ${{ github.ref }} | sed 's|refs/tags/v||')" >> "$GITHUB_ENV"
+      - run: echo "version=$(echo ${{ github.ref }} | sed 's|refs/tags||')" >> "$GITHUB_ENV"
       - name: Checkout code
         uses: actions/checkout@master
       - name: Create Release

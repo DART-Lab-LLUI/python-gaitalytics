@@ -4,7 +4,7 @@
 
 package:
   name: {{ name|lower }}
-  version: {{ GIT_DESCRIBE_TAG | replace('v', '') }}
+  version: {{ GIT_DESCRIBE_TAG }}
 
 source:
   git_url: https://github.com/DART-Lab-LLUI/python-gaitalytics.git
