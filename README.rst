@@ -236,14 +236,14 @@ Simple Pipeline
     # Detect events
     events = api.detect_events(trial, config)
     try:
-        # detect events (marker based)
-        events = api.check_events(events, config)
-
         # check events
-        api.check_events(events, config)
+        api.check_events(events)
 
         # write events to c3d in the same file
-        api.write_events_to_c3d(trial, events)
+        api.write_events_to_c3d("./test_small.c3d", events, './test.c3d')
+
+        # add events to trial
+        trial.events = events
 
         # segment trial to gait cycles. (Events are already existing in the c3d file)
         trial_segmented = api.segment_trial(trial)
@@ -251,13 +251,16 @@ Simple Pipeline
         # calculate features
         features = api.calculate_features(trial_segmented, config)
 
+        # normalise time
+        trial_normalized = api.time_normalise_trial(trial_segmented)
+
         # save features
-        faetures.to_netcdf("features.nc")
+        features.to_netcdf("features.nc")
 
         # export segmented trial to netcdf
-        api.export_trial(trial_segmented, config, "output.nc")
+        api.export_trial(trial_segmented, "output_segments")
+        api.export_trial(trial_normalized, "output_norm")
 
-    api.export_trial(trial_segmented, config, "output.c3d")
     except ValueError as e:
         print(e)
 
