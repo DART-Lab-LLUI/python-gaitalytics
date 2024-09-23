@@ -6,10 +6,14 @@ import yaml
 
 class MappedMarkers(Enum):
     # Foot
+################# MODIFIED #################
     L_HEEL = "l_heel"
     R_HEEL = "r_heel"
-    L_TOE = "l_toe"
-    R_TOE = "r_toe"
+    L_META_2 = "left_meta_2"    #L_TOE = "l_toe"                       
+    R_META_2 = "right_meta_2"   #R_TOE = "r_toe"
+    L_META_5 = "left_meta_5"
+    R_META_5 = "right_meta_5"  
+############### END MODIFIED ###############
 
     # Hip
     L_ANT_HIP = "l_ant_hip"

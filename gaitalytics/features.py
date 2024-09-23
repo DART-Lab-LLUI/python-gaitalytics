@@ -10,6 +10,7 @@ import gaitalytics.mapping as mapping
 import gaitalytics.model as model
 import gaitalytics.utils.linalg as linalg
 import gaitalytics.utils.mocap as mocap
+import gaitalytics.utils.math as math
 
 
 class FeatureCalculation(ABC):
@@ -500,15 +501,22 @@ class SpatialFeatures(_PointDependentFeature):
             raise ValueError("Trial does not have events.")
 
         if trial.events.attrs["context"] == "Right":
-            ipsi_marker = mapping.MappedMarkers.R_TOE
-            contra_marker = mapping.MappedMarkers.L_TOE
+            ipsi_meta_2_marker = mapping.MappedMarkers.R_META_2
+            ipsi_meta_5_marker = mapping.MappedMarkers.R_META_5
+            ipsi_heel_marker = mapping.MappedMarkers.R_HEEL
+            contra_meta_2_marker = mapping.MappedMarkers.L_META_2   
         else:
-            ipsi_marker = mapping.MappedMarkers.L_TOE
-            contra_marker = mapping.MappedMarkers.R_TOE
-
-        results_dict = self._calculate_step_length(trial, ipsi_marker, contra_marker)
+            ipsi_meta_2_marker = mapping.MappedMarkers.L_META_2
+            ipsi_meta_5_marker = mapping.MappedMarkers.L_META_5
+            ipsi_heel_marker = mapping.MappedMarkers.L_HEEL
+            contra_meta_2_marker = mapping.MappedMarkers.R_META_2
+        
+        results_dict = self._calculate_step_length(trial, ipsi_meta_2_marker, contra_meta_2_marker)
         results_dict.update(
-            self._calculate_step_width(trial, ipsi_marker, contra_marker)
+            self._calculate_step_width(trial, ipsi_meta_2_marker, contra_meta_2_marker)
+        )
+        results_dict.update(
+            self._calculate_minimal_toe_clearance(trial, ipsi_meta_2_marker, ipsi_meta_5_marker, ipsi_heel_marker)
         )
         return self._create_result_from_dict(results_dict)
 
@@ -524,7 +532,6 @@ class SpatialFeatures(_PointDependentFeature):
             trial: The trial for which to calculate the step length.
             ipsi_marker: The ipsi-lateral heel marker.
             contra_marker: The contra-lateral heel marker.
-
 
         Returns:
             The calculated step length.
@@ -544,6 +551,7 @@ class SpatialFeatures(_PointDependentFeature):
         projected_contra = linalg.project_point_on_vector(contra_heel, progress_axis)
         distance = linalg.calculate_distance(projected_ipsi, projected_contra).values
         return {"step_length": distance}
+
 
     def _calculate_step_width(
         self,
@@ -577,3 +585,84 @@ class SpatialFeatures(_PointDependentFeature):
         distance = linalg.calculate_distance(ipsi_heel, projected_ipsi).values
 
         return {"step_width": distance}
+    
+
+    def _calculate_minimal_toe_clearance(
+            self,
+            trial: model.Trial,
+            ipsi_meta_2_marker: mapping.MappedMarkers,
+            ipsi_meta_5_marker: mapping.MappedMarkers,
+            ipsi_heel_marker: mapping.MappedMarkers,
+        ) -> dict[str, np.ndarray]:
+            """Calculate the minimal toe clearance for a trial.
+
+            Args:
+                trial: The trial for which to calculate the minimal toe clearance.
+                ipsi_meta_2_marker: The ipsi-lateral 2nd metatarsal
+                ipsi_meta_5_marker: The ipsi-lateral 5th metatarsal
+                ipsi_heel_marker: The ipsi-lateral heel marker.
+
+            Returns:
+                The calculated minimal toe clearance in a dict.
+            """
+    
+            event_times = self.get_event_times(trial.events)
+            
+            ipsi_heel = self._get_marker_data(trial, ipsi_heel_marker)
+            ipsi_heel = ipsi_heel.sel(time=slice(event_times[3], event_times[4]))
+            #ipsi_heel = ipsi_heel.sel(time=[event_times[3], event_times[4]],
+            #                          method="nearest")
+            
+            ipsi_meta_2 = self._get_marker_data(trial, ipsi_meta_2_marker)
+            ipsi_meta_2 = ipsi_meta_2.sel(time=slice(event_times[3], event_times[4]))
+            
+            ipsi_meta_5 = self._get_marker_data(trial, ipsi_meta_5_marker)
+            ipsi_meta_5 = ipsi_meta_5.sel(time=slice(event_times[3], event_times[4]))
+            
+            toes_vel = (linalg.calculate_speed_norm(ipsi_meta_2) + 
+                        linalg.calculate_speed_norm(ipsi_meta_5)
+                          )/2
+            toes_vel_up_quart = np.quantile(toes_vel, .5)
+            
+            mtc2_i = self._find_mtc_index(ipsi_meta_2, ipsi_heel, toes_vel, toes_vel_up_quart)
+            mtc5_i = self._find_mtc_index(ipsi_meta_5, ipsi_heel, toes_vel, toes_vel_up_quart)
+            
+            if np.isnan(mtc2_i) & np.isnan(mtc5_i):
+                return {"minimal_toe_clearance": np.NaN}
+            elif np.isnan(mtc2_i):
+                return {"minimal_toe_clearance": ipsi_meta_5.sel(axis='z')[mtc5_i]}
+            elif np.isnan(mtc5_i):
+                return {"minimal_toe_clearance": ipsi_meta_2.sel(axis='z')[mtc2_i]}
+            else:
+                mtc = min(ipsi_meta_2.sel(axis='z')[mtc2_i], ipsi_meta_5.sel(axis='z')[mtc5_i])
+                return {"minimal_toe_clearance": mtc}
+        
+    def _find_mtc_index(self,
+                        toe_position: xr.DataArray, 
+                        heel_position: xr.DataArray, 
+                        toes_vel: xr.DataArray, 
+                        toes_vel_up_quart: float):
+            """Find the time corresponding to minimal toe clearance of a specific toe
+
+            Args:
+                toe_position: A DataArray containing positions of the toe
+                heel_position: A DataArray containing positions of the heel
+                toes_vel: A DataArray containing the mean toes velocity at each timepoint
+                toes_vel_up_quart: The upper quartil of toes mean velocity
+            Returns:
+                The time corresponding to minimal toe clearance for the input toe.
+            """
+            #print(toe_position.sel(axis='z'))
+            mtc_i = math.find_local_minimas(toe_position.sel(axis='z'))
+            #print(f'value: {toes_vel[mtc_i[0]]}')
+            #print(f'value to overcome: {toes_vel_up_quart}')
+            mtc_i = [i for i in mtc_i if toes_vel[i] >= toes_vel_up_quart]
+            #print(mtc_i)
+
+            mtc_i = [i for i in mtc_i if toe_position.sel(axis='z')[i] <= heel_position.sel(axis='z')[i]]
+
+            # If no min toe clearance can be found
+            if not mtc_i:
+                return np.NaN
+            else:
+                return min(mtc_i, key=lambda i: toe_position.sel(axis='z')[i])
