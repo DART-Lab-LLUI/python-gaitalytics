@@ -303,3 +303,4 @@ class TestSpatialFeatures:
         rec_value = features.loc["Right", 0, "step_length"]
         exp_value = 565.24
         assert rec_value == pytest.approx(exp_value, rel=1e-1)
+

@@ -30,6 +30,23 @@ def project_point_on_vector(point: xr.DataArray, vector: xr.DataArray) -> xr.Dat
     """
     return vector * point.dot(vector, dim="axis")
 
+def get_normal_vector(vector1: xr.DataArray, vector2: xr.DataArray):
+    """Create a vector with norm = 1 normal to two other vectors.
+
+    Args:
+        vector1: The first vector to be normal to.
+        vector2: The second vector to be normal to.
+
+    Returns:
+        An xarray DataArray containing the normal vector.
+    """
+    normal_vector = xr.DataArray(
+        np.cross(vector1.values, vector2.values),
+        dims=vector1.dims,  
+        coords=vector1.coords
+    )
+    return normalize_vector(normal_vector)
+
 
 def normalize_vector(vector: xr.DataArray) -> xr.DataArray:
     """Normalize a vector.

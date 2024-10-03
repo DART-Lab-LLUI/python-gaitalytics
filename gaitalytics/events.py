@@ -242,7 +242,7 @@ class MarkerEventDetection(_BaseEventDetection):
         l_ant_hip = mocap.get_marker_data(
             trial, self._configs, mapping.MappedMarkers.L_ANT_HIP
         )
-        r_ant_hip = mocap.get_marker_data(
+        r_ant_hip = mocap._data(
             trial, self._configs, mapping.MappedMarkers.R_ANT_HIP
         )
         ant_hip = (l_ant_hip + r_ant_hip) / 2

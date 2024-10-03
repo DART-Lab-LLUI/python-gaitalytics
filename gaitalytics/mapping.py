@@ -13,6 +13,8 @@ class MappedMarkers(Enum):
     R_META_2 = "right_meta_2"   #R_TOE = "r_toe"
     L_META_5 = "left_meta_5"
     R_META_5 = "right_meta_5"  
+    L_ANKLE = "left_lat_malleoli"
+    R_ANKLE = "right_lat_malleoli"
 ############### END MODIFIED ###############
 
     # Hip
@@ -21,6 +23,10 @@ class MappedMarkers(Enum):
     L_POST_HIP = "l_post_hip"
     R_ANT_HIP = "r_ant_hip"
     SACRUM = "sacrum"
+    
+    # CoM
+    COM = "com"
+    XCOM = "xcom"
 
 
 class MappingConfigs:
