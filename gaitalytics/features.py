@@ -530,7 +530,7 @@ class SpatialFeatures(_PointDependentFeature):
 
             contra_meta_2_marker = mapping.MappedMarkers.R_META_2
             contra_ankle_marker = mapping.MappedMarkers.R_ANKLE 
-
+            
         xcom_marker = mapping.MappedMarkers.XCOM
         
         results_dict = self._calculate_step_length(trial, ipsi_meta_2_marker, contra_meta_2_marker)
@@ -568,10 +568,10 @@ class SpatialFeatures(_PointDependentFeature):
         event_times = self.get_event_times(trial.events)
 
         ipsi_heel = self._get_marker_data(trial, ipsi_marker).sel(
-            time=event_times[-1], method="nearest"
+            time=event_times[0], method="nearest"
         )
         contra_heel = self._get_marker_data(trial, contra_marker).sel(
-            time=event_times[-1], method="nearest"
+            time=event_times[0], method="nearest"
         )
         progress_axis = self._get_progression_vector(trial)
         progress_axis = linalg.normalize_vector(progress_axis)
@@ -742,8 +742,8 @@ class SpatialFeatures(_PointDependentFeature):
                             trial: model.Trial,
                             ipsi_ankle_marker: mapping.MappedMarkers,
                             contra_ankle_marker: mapping.MappedMarkers,
-                            xcom_marker: mapping.MappedMarkers,
-                        ) -> dict[str, np.ndarray]:
+                            xcom_marker: mapping.MappedMarkers
+                            ) -> dict[str, np.ndarray]:
         """Calculate 
             Calculate the medio-lateral margin of stability
         Args:
@@ -766,7 +766,7 @@ class SpatialFeatures(_PointDependentFeature):
         xcom = self._get_marker_data(trial, xcom_marker).sel(
             time=event_times[0], method="nearest"
         )
-        
+
         sagittal_axis = self._get_sagittal_vector(trial)
         sagittal_axis = linalg.normalize_vector(sagittal_axis)
 
