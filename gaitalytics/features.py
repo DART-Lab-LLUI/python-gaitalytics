@@ -528,7 +528,7 @@ class SpatialFeatures(_PointDependentFeature):
             self._calculate_stride_length(trial,  marker_dict["ipsi_heel"], marker_dict["contra_heel"])
         )
         results_dict.update(
-            self._calculate_minimal_toe_clearance_v2(trial, marker_dict["ipsi_toe_2"], marker_dict["ipsi_heel"], marker_dict["ipsi_toe_5"])
+            self._calculate_minimal_toe_clearance(trial, marker_dict["ipsi_toe_2"], marker_dict["ipsi_heel"], marker_dict["ipsi_toe_5"])
         )
         if marker_dict["xcom"] is not None:
             results_dict.update(
