@@ -1,5 +1,3 @@
-import sys
-sys.path.append(r"C:\Users\adrien.sizaret\Desktop\PBT\python-gaitalytics")
 import shutil
 from pathlib import Path
 
