@@ -491,14 +491,19 @@ class SpatialFeatures(_PointDependentFeature):
     This class calculates following spatial features for a trial.
     - step_length
     - step_width
+    - minimal_toe_clearance
+    - AP_margin_of_stability
+    - ML_margin_of_stability
     """
 
     def _calculate(self, trial: model.Trial) -> xr.DataArray:
         
         """Calculate the spatial features for a trial.
 
-        Definitions of the spatial features
-        Hollmann et al. 2011 (doi: 10.1016/j.gaitpost.2011.03.024)
+        Definitions of the spatial features:
+        Step length & Step width: Hollmann et al. 2011 (doi: 10.1016/j.gaitpost.2011.03.024)
+        Margin of stability: Jinfeng et al. 2021 (doi: 10.1152/jn.00091.2021)
+        Minimal toe clearance: Schulz 2017 (doi: 10.1016/j.jbiomech.2017.02.024)
 
         Args:
             trial: The trial for which to calculate the features.
@@ -513,40 +518,83 @@ class SpatialFeatures(_PointDependentFeature):
         if trial.events is None:
             raise ValueError("Trial does not have events.")
 
-        if trial.events.attrs["context"] == "Right":
-            ipsi_meta_2_marker = mapping.MappedMarkers.R_META_2
-            ipsi_meta_5_marker = mapping.MappedMarkers.R_META_5
-            ipsi_heel_marker = mapping.MappedMarkers.R_HEEL
-            ipsi_ankle_marker = mapping.MappedMarkers.R_ANKLE
-            
-            contra_meta_2_marker = mapping.MappedMarkers.L_META_2
-            contra_ankle_marker = mapping.MappedMarkers.L_ANKLE 
-               
-        else:
-            ipsi_meta_2_marker = mapping.MappedMarkers.L_META_2
-            ipsi_meta_5_marker = mapping.MappedMarkers.L_META_5
-            ipsi_heel_marker = mapping.MappedMarkers.L_HEEL
-            ipsi_ankle_marker = mapping.MappedMarkers.L_ANKLE
-
-            contra_meta_2_marker = mapping.MappedMarkers.R_META_2
-            contra_ankle_marker = mapping.MappedMarkers.R_ANKLE 
-            
-        xcom_marker = mapping.MappedMarkers.XCOM
+        marker_dict = self.select_markers_for_spatial_features(trial)
         
-        results_dict = self._calculate_step_length(trial, ipsi_meta_2_marker, contra_meta_2_marker)
+        results_dict = self._calculate_step_length(trial, marker_dict["ipsi_heel"], marker_dict["contra_heel"])
         results_dict.update(
-            self._calculate_step_width(trial, ipsi_meta_2_marker, contra_meta_2_marker)
+            self._calculate_step_width(trial, marker_dict["ipsi_heel"], marker_dict["contra_heel"])
         )
         results_dict.update(
-            self._calculate_minimal_toe_clearance(trial, ipsi_meta_2_marker, ipsi_meta_5_marker, ipsi_heel_marker)
+            self._calculate_stride_length(trial,  marker_dict["ipsi_heel"], marker_dict["contra_heel"])
         )
         results_dict.update(
-            self._calculate_AP_margin_of_stability(trial, ipsi_meta_2_marker, contra_meta_2_marker, xcom_marker)
+            self._calculate_minimal_toe_clearance_v2(trial, marker_dict["ipsi_toe_2"], marker_dict["ipsi_heel"], marker_dict["ipsi_toe_5"])
         )
-        results_dict.update(
-            self._calculate_ML_margin_of_stability(trial, ipsi_ankle_marker, contra_ankle_marker, xcom_marker)
-        )
+        if marker_dict["xcom"] is not None:
+            results_dict.update(
+                self._calculate_AP_margin_of_stability(trial, marker_dict["ipsi_toe_2"], marker_dict["contra_toe_2"], marker_dict["xcom"])
+            )
+            if (marker_dict['ipsi_ankle'] is not None) and (marker_dict['contra_ankle'] is not None):
+                results_dict.update(
+                    self._calculate_ML_margin_of_stability(trial, marker_dict['ipsi_ankle'], marker_dict['contra_ankle'], marker_dict["xcom"])
+                )
+                
         return self._create_result_from_dict(results_dict)
+    
+    
+    def select_markers_for_spatial_features(self, 
+                                        trial: model.Trial
+                                        ) -> dict[str, mapping.MappedMarkers]:
+        """Select markers based on the trial's context (Right or Left). If some markers are missing, return them as None
+
+        Args:
+            trial: The trial object containing event attributes.
+
+        Returns:
+            A dictionary of markers based on context
+        """
+        if trial.events.attrs["context"] == "Right":
+            ipsi_heel_marker = mapping.MappedMarkers.R_HEEL
+            ipsi_toe_2_marker = mapping.MappedMarkers.R_TOE
+            ipsi_toe_5_marker = self.get_optional_marker('R_TOE_5')
+            ipsi_ankle_marker = self.get_optional_marker('R_ANKLE')
+
+            contra_toe_2_marker = mapping.MappedMarkers.L_TOE
+            contra_heel_marker = mapping.MappedMarkers.L_HEEL
+            contra_ankle_marker = self.get_optional_marker('L_ANKLE')
+                
+        else:
+            ipsi_heel_marker = mapping.MappedMarkers.L_HEEL
+            ipsi_toe_2_marker = mapping.MappedMarkers.L_TOE
+            ipsi_toe_5_marker = self.get_optional_marker('L_TOE_5')
+            ipsi_ankle_marker = self.get_optional_marker('L_ANKLE')
+
+            contra_toe_2_marker = mapping.MappedMarkers.R_TOE
+            contra_heel_marker = mapping.MappedMarkers.R_HEEL
+            contra_ankle_marker = self.get_optional_marker('R_ANKLE')
+
+        xcom_marker = self.get_optional_marker('XCOM')
+        
+        return {
+            "ipsi_toe_2": ipsi_toe_2_marker,
+            "ipsi_toe_5": ipsi_toe_5_marker,
+            "ipsi_heel": ipsi_heel_marker,
+            "ipsi_ankle": ipsi_ankle_marker,
+            "contra_toe_2": contra_toe_2_marker,
+            "contra_heel": contra_heel_marker,
+            "contra_ankle": contra_ankle_marker,
+            "xcom": xcom_marker
+        }
+    
+    
+    def get_optional_marker(self, marker_name: str) -> mapping.MappedMarkers | None:
+        """ Returns the marker if exists, else returns None
+
+        Args:
+            marker_name (str): The marker name
+        """
+        return getattr(mapping.MappedMarkers, marker_name, None)
+    
 
     def _calculate_step_length(
         self,
@@ -568,10 +616,10 @@ class SpatialFeatures(_PointDependentFeature):
         event_times = self.get_event_times(trial.events)
 
         ipsi_heel = self._get_marker_data(trial, ipsi_marker).sel(
-            time=event_times[0], method="nearest"
+            time=event_times[-1], method="nearest"
         )
         contra_heel = self._get_marker_data(trial, contra_marker).sel(
-            time=event_times[0], method="nearest"
+            time=event_times[-1], method="nearest"
         )
         progress_axis = self._get_progression_vector(trial)
         progress_axis = linalg.normalize_vector(progress_axis)
@@ -614,86 +662,124 @@ class SpatialFeatures(_PointDependentFeature):
 
         return {"step_width": distance}
     
+    
+    def _calculate_stride_length(
+        self,
+        trial: model.Trial,
+        ipsi_marker: mapping.MappedMarkers,
+        contra_marker: mapping.MappedMarkers,
+    ) -> dict[str, np.ndarray]:
+        """Calculate the stride length for a trial.
 
+        Args:
+            trial: The trial for which to calculate the stride length.
+            ipsi_marker: The ipsi-lateral heel marker.
+            contra_marker: The contra-lateral heel marker.
+
+        Returns:
+            The calculated stride length.
+        """
+
+        event_times = self.get_event_times(trial.events)
+        progress_axis = self._get_progression_vector(trial)
+        progress_axis = linalg.normalize_vector(progress_axis)
+
+        total_distance = 0
+
+        for event_time in [event_times[2], event_times[-1]]:
+            ipsi_heel = self._get_marker_data(trial, ipsi_marker).sel(time=event_time, method="nearest")
+            contra_heel = self._get_marker_data(trial, contra_marker).sel(time=event_time, method="nearest")
+            print(f'ipsi heel: {ipsi_heel}')
+            
+            projected_ipsi = linalg.project_point_on_vector(ipsi_heel, progress_axis)
+            projected_contra = linalg.project_point_on_vector(contra_heel, progress_axis)
+            print(f'projected ipsi: {projected_ipsi}')
+
+            distance = linalg.calculate_distance(projected_ipsi, projected_contra).values
+            print(f'distance: {distance}')
+            total_distance += distance
+        
+            
+        return {"stride_length": total_distance}
+        
+        
     def _calculate_minimal_toe_clearance(
             self,
             trial: model.Trial,
-            ipsi_meta_2_marker: mapping.MappedMarkers,
-            ipsi_meta_5_marker: mapping.MappedMarkers,
+            ipsi_toe_marker: mapping.MappedMarkers,
             ipsi_heel_marker: mapping.MappedMarkers,
+            *opt_ipsi_toe_markers: mapping.MappedMarkers
         ) -> dict[str, np.ndarray]:
-            """Calculate the minimal toe clearance for a trial.
+        """Calculate the minimal toe clearance for a trial. Toe clearance is computed for all toe markers passed, only the minimal is returned
 
-            Args:
-                trial: The trial for which to calculate the minimal toe clearance.
-                ipsi_meta_2_marker: The ipsi-lateral 2nd metatarsal
-                ipsi_meta_5_marker: The ipsi-lateral 5th metatarsal
-                ipsi_heel_marker: The ipsi-lateral heel marker.
+        Args:
+            trial (model.Trial): The trial to compute the minimal toe clearance for
+            ipsi_toe_marker (mapping.MappedMarkers): The ipsilateral toe marker
+            ipsi_heel_marker (mapping.MappedMarkers): The ipsilateral heel marker
 
-            Returns:
-                The calculated minimal toe clearance in a dict.
-            """
-    
-            event_times = self.get_event_times(trial.events)
-            
-            ipsi_heel = self._get_marker_data(trial, ipsi_heel_marker)
-            ipsi_heel = ipsi_heel.sel(time=slice(event_times[3], event_times[4]))
-            #ipsi_heel = ipsi_heel.sel(time=[event_times[3], event_times[4]],
-            #                          method="nearest")
-            
-            ipsi_meta_2 = self._get_marker_data(trial, ipsi_meta_2_marker)
-            ipsi_meta_2 = ipsi_meta_2.sel(time=slice(event_times[3], event_times[4]))
-            
-            ipsi_meta_5 = self._get_marker_data(trial, ipsi_meta_5_marker)
-            ipsi_meta_5 = ipsi_meta_5.sel(time=slice(event_times[3], event_times[4]))
-            
-            toes_vel = (linalg.calculate_speed_norm(ipsi_meta_2) + 
-                        linalg.calculate_speed_norm(ipsi_meta_5)
-                          )/2
-            toes_vel_up_quart = np.quantile(toes_vel, .5)
-            
-            mtc2_i = self._find_mtc_index(ipsi_meta_2, ipsi_heel, toes_vel, toes_vel_up_quart)
-            mtc5_i = self._find_mtc_index(ipsi_meta_5, ipsi_heel, toes_vel, toes_vel_up_quart)
-            
-            if np.isnan(mtc2_i) & np.isnan(mtc5_i):
-                return {"minimal_toe_clearance": np.NaN}
-            elif np.isnan(mtc2_i):
-                return {"minimal_toe_clearance": ipsi_meta_5.sel(axis='z')[mtc5_i]}
-            elif np.isnan(mtc5_i):
-                return {"minimal_toe_clearance": ipsi_meta_2.sel(axis='z')[mtc2_i]}
-            else:
-                mtc = min(ipsi_meta_2.sel(axis='z')[mtc2_i], ipsi_meta_5.sel(axis='z')[mtc5_i])
-                return {"minimal_toe_clearance": mtc}
+        Returns:
+            dict[str, np.ndarray]: The calculated minimal toe clearance in a dict
+        """
+        event_times = self.get_event_times(trial.events)
+
+        ipsi_heel = self._get_marker_data(trial, ipsi_heel_marker).sel(time=slice(event_times[3], event_times[4]))
+        ipsi_toe = self._get_marker_data(trial, ipsi_toe_marker).sel(time=slice(event_times[3], event_times[4]))
+
+        toes_vel = linalg.calculate_speed_norm(ipsi_toe)
+
+        additional_meta_data = []
+        
+        for meta_marker in opt_ipsi_toe_markers:
+            if meta_marker is not None:
+                meta_data = self._get_marker_data(trial, meta_marker).sel(time=slice(event_times[3], event_times[4]))
+                toes_vel += linalg.calculate_speed_norm(meta_data)
+                additional_meta_data.append(meta_data)
+                
+        toes_vel /= (1 + len(additional_meta_data))  
+
+        mtc_i = self._find_mtc_index(ipsi_toe, ipsi_heel, toes_vel)
+        mtc_additional_indices = [
+            self._find_mtc_index(meta_data, ipsi_heel, toes_vel)
+            for meta_data in additional_meta_data
+        ]
+
+        # Handle NaN cases and find minimal clearance
+        mtc_values = [] if np.isnan(mtc_i) else [ipsi_toe.sel(axis='z')[mtc_i]]
+        for i, meta_data in zip(mtc_additional_indices, additional_meta_data):
+            if not np.isnan(i):
+                mtc_values.append(meta_data.sel(axis='z')[i])
+
+        if not mtc_values:
+            return {"minimal_toe_clearance": np.NaN}
+
+        return {"minimal_toe_clearance": min(mtc_values)}
+        
         
     def _find_mtc_index(self,
                         toe_position: xr.DataArray, 
                         heel_position: xr.DataArray, 
-                        toes_vel: xr.DataArray, 
-                        toes_vel_up_quart: float):
-            """Find the time corresponding to minimal toe clearance of a specific toe
-
+                        toes_vel: xr.DataArray):
+        """Find the time corresponding to minimal toe clearance of a specific toe.
+            Valid minimal toe clearance point must validates conditions 
+            defined in Schulz 2017 (doi: 10.1016/j.jbiomech.2017.02.024)
             Args:
                 toe_position: A DataArray containing positions of the toe
                 heel_position: A DataArray containing positions of the heel
                 toes_vel: A DataArray containing the mean toes velocity at each timepoint
-                toes_vel_up_quart: The upper quartil of toes mean velocity
             Returns:
                 The time corresponding to minimal toe clearance for the input toe.
             """
-            #print(toe_position.sel(axis='z'))
-            mtc_i = math.find_local_minimas(toe_position.sel(axis='z'))
-            #print(f'value: {toes_vel[mtc_i[0]]}')
-            #print(f'value to overcome: {toes_vel_up_quart}')
-            mtc_i = [i for i in mtc_i if toes_vel[i] >= toes_vel_up_quart]
-            #print(mtc_i)
+        toes_vel_up_quant = np.quantile(toes_vel, .5)
+        toe_z = toe_position.sel(axis='z')
+        heel_z = heel_position.sel(axis='z')
 
-            mtc_i = [i for i in mtc_i if toe_position.sel(axis='z')[i] <= heel_position.sel(axis='z')[i]]
+        # Check conditions according to Schulz 2017
+        mtc_i = math.find_local_minimas(toe_z)
+        mtc_i = [i for i in mtc_i if toes_vel[i] >= toes_vel_up_quant]
+        mtc_i = [i for i in mtc_i if toe_z[i] <= heel_z[i]]
 
-            # If no min toe clearance can be found
-            if not mtc_i:
-                return np.NaN
-            else:
-                return min(mtc_i, key=lambda i: toe_position.sel(axis='z')[i])
+        return np.NaN if not mtc_i else min(mtc_i, key=lambda i: toe_z[i])
+            
             
     def _calculate_AP_margin_of_stability(self,
                             trial: model.Trial,
@@ -701,8 +787,7 @@ class SpatialFeatures(_PointDependentFeature):
                             contra_toe_marker: mapping.MappedMarkers,
                             xcom_marker: mapping.MappedMarkers,
                         ) -> dict[str, np.ndarray]:
-        """Calculate 
-            Calculate the anterio-posterior margin of stability
+        """Calculate the anterio-posterior margin of stability at heel strike
         Args:
             trial: The trial for which to calculate the AP margin of stability
             ipsi_toe_marker: The ipsi-lateral toe marker
@@ -738,14 +823,14 @@ class SpatialFeatures(_PointDependentFeature):
         
         return {"AP_margin_of_stability": mos}
     
+    
     def _calculate_ML_margin_of_stability(self,
                             trial: model.Trial,
                             ipsi_ankle_marker: mapping.MappedMarkers,
                             contra_ankle_marker: mapping.MappedMarkers,
                             xcom_marker: mapping.MappedMarkers
                             ) -> dict[str, np.ndarray]:
-        """Calculate 
-            Calculate the medio-lateral margin of stability
+        """Calculate the medio-lateral margin of stability at heel strike
         Args:
             trial: The trial for which to calculate the AP margin of stability
             ipsi_toe_marker: The ipsi-lateral lateral ankle marker

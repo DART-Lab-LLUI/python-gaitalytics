@@ -6,16 +6,15 @@ import yaml
 
 class MappedMarkers(Enum):
     # Foot
-################# MODIFIED #################
     L_HEEL = "l_heel"
     R_HEEL = "r_heel"
-    L_META_2 = "left_meta_2"    #L_TOE = "l_toe"                       
-    R_META_2 = "right_meta_2"   #R_TOE = "r_toe"
-    L_META_5 = "left_meta_5"
-    R_META_5 = "right_meta_5"  
+    L_TOE = "l_toe"                       
+    R_TOE = "r_toe"
     L_ANKLE = "left_lat_malleoli"
     R_ANKLE = "right_lat_malleoli"
-############### END MODIFIED ###############
+    # Additional toe markers
+    #L_TOE_5 = ""
+    #R_TOE_5 = ""  
 
     # Hip
     L_ANT_HIP = "l_ant_hip"
@@ -24,9 +23,8 @@ class MappedMarkers(Enum):
     R_ANT_HIP = "r_ant_hip"
     SACRUM = "sacrum"
     
-    # CoM
-    COM = "com"
-    XCOM = "xcom"
+    # Extrapolated center of mass marker for margin of stability
+    #XCOM = 
 
 
 class MappingConfigs:
