@@ -480,6 +480,7 @@ class SpatialFeatures(_PointDependentFeature):
     """
 
     def _calculate(self, trial: model.Trial) -> xr.DataArray:
+        
         """Calculate the spatial features for a trial.
 
         Definitions of the spatial features
@@ -502,8 +503,8 @@ class SpatialFeatures(_PointDependentFeature):
             ipsi_marker = mapping.MappedMarkers.R_TOE
             contra_marker = mapping.MappedMarkers.L_TOE
         else:
-            ipsi_marker = mapping.MappedMarkers.R_TOE
-            contra_marker = mapping.MappedMarkers.L_TOE
+            ipsi_marker = mapping.MappedMarkers.L_TOE
+            contra_marker = mapping.MappedMarkers.R_TOE
 
         results_dict = self._calculate_step_length(trial, ipsi_marker, contra_marker)
         results_dict.update(
