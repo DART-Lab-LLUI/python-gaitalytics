@@ -523,32 +523,41 @@ class SpatialFeatures(_PointDependentFeature):
         marker_dict = self.select_markers_for_spatial_features(trial)
 
         results_dict = self._calculate_step_length(
-            trial, marker_dict["ipsi_heel"], marker_dict["contra_heel"]
+            trial,
+            marker_dict["ipsi_heel"],  # type: ignore
+            marker_dict["contra_heel"],  # type: ignore
         )
         results_dict.update(
             self._calculate_step_width(
-                trial, marker_dict["ipsi_heel"], marker_dict["contra_heel"]
+                trial,
+                marker_dict["ipsi_heel"],  # type: ignore
+                marker_dict["contra_heel"],  # type: ignore
             )
         )
         results_dict.update(
             self._calculate_stride_length(
-                trial, marker_dict["ipsi_heel"], marker_dict["contra_heel"]
+                trial,
+                marker_dict["ipsi_heel"],  # type: ignore
+                marker_dict["contra_heel"],  # type: ignore
             )
         )
+
+        toe_markers = [marker_dict["ipsi_toe_2"]]
+        if marker_dict["ipsi_toe_5"] is not None:
+            toe_markers.append(marker_dict["ipsi_toe_5"])
         results_dict.update(
             self._calculate_minimal_toe_clearance(
                 trial,
-                marker_dict["ipsi_toe_2"],
-                marker_dict["ipsi_heel"],
-                marker_dict["ipsi_toe_5"],
+                toe_markers,  # type: ignore
+                marker_dict["ipsi_heel"],  # type: ignore
             )
         )
         if marker_dict["xcom"] is not None:
             results_dict.update(
                 self._calculate_ap_margin_of_stability(
                     trial,
-                    marker_dict["ipsi_toe_2"],
-                    marker_dict["contra_toe_2"],
+                    marker_dict["ipsi_toe_2"],  # type: ignore
+                    marker_dict["contra_toe_2"],  # type: ignore
                     marker_dict["xcom"],
                 )
             )
@@ -568,7 +577,7 @@ class SpatialFeatures(_PointDependentFeature):
 
     def select_markers_for_spatial_features(
         self, trial: model.Trial
-    ) -> dict[str, mapping.MappedMarkers]:
+    ) -> dict[str, mapping.MappedMarkers | None]:
         """Select markers based on the trial's context (Right or Left). If some markers are missing, return them as None
 
         Args:
@@ -736,63 +745,63 @@ class SpatialFeatures(_PointDependentFeature):
     def _calculate_minimal_toe_clearance(
         self,
         trial: model.Trial,
-        ipsi_toe_marker: mapping.MappedMarkers,
+        ipsi_toe_markers: list[mapping.MappedMarkers],
         ipsi_heel_marker: mapping.MappedMarkers,
-        *opt_ipsi_toe_markers: mapping.MappedMarkers,
     ) -> dict[str, np.ndarray]:
-        """Calculate the minimal toe clearance for a trial. Toe clearance is computed for all toe markers passed, only the minimal is returned
+        """Calculate the minimal toe clearance for a trial. <br />
+        Toe clearance is computed for all toe markers passed, only the minimal is returned. <br />
+        Addition toe markers can be passed to improve the accuracy of the calculation. <br />
+        If the minimal toe clearance cannot be calculated, an empty array is returned. <br />
 
         Args:
-            trial (model.Trial): The trial to compute the minimal toe clearance for
-            ipsi_toe_marker (mapping.MappedMarkers): The ipsilateral toe marker
-            ipsi_heel_marker (mapping.MappedMarkers): The ipsilateral heel marker
+            trial: The trial to compute the minimal toe clearance for
+            ipsi_toe_markers: The ipsi-lateral toe markers
+            ipsi_heel_marker (mapping.MappedMarkers): The ipsi-lateral heel marker
 
         Returns:
             dict[str, np.ndarray]: The calculated minimal toe clearance in a dict
+
+        Raises:
+            ValueError: If no toe markers are found for minimal toe clearance calculation
         """
         event_times = self.get_event_times(trial.events)
 
         ipsi_heel = self._get_marker_data(trial, ipsi_heel_marker).sel(
             time=slice(event_times[3], event_times[4])
         )
-        ipsi_toe = self._get_marker_data(trial, ipsi_toe_marker).sel(
-            time=slice(event_times[3], event_times[4])
-        )
+        ipsi_toes = []
+        ipsi_toe_velocities = None
 
-        toes_vel = linalg.calculate_speed_norm(ipsi_toe)
+        # Get all ipsi toe marker positions and calculate the mean velocity of them
+        for ipsi_toe_marker in ipsi_toe_markers:
+            ipsi_toe = self._get_marker_data(trial, ipsi_toe_marker).sel(
+                time=slice(event_times[3], event_times[4])
+            )
+            ipsi_toes.append(ipsi_toe)
+            if ipsi_toe_velocities is None:
+                ipsi_toe_velocities = linalg.calculate_speed_norm(ipsi_toe)
+            else:
+                ipsi_toe_velocities += linalg.calculate_speed_norm(ipsi_toe)
 
-        additional_meta_data = []
+        if ipsi_toe_velocities is None:
+            raise ValueError(
+                "No toe markers found for minimal toe clearance calculation"
+            )
 
-        for meta_marker in opt_ipsi_toe_markers:
-            if meta_marker is not None:
-                meta_data = self._get_marker_data(trial, meta_marker).sel(
-                    time=slice(event_times[3], event_times[4])
-                )
-                toes_vel += linalg.calculate_speed_norm(meta_data)
-                additional_meta_data.append(meta_data)
+        ipsi_toe_velocities /= len(ipsi_toe_markers)
 
-        toes_vel /= 1 + len(additional_meta_data)
+        minimal_toe_clearance = np.full(1, np.inf)
+        for ipsi_toe in ipsi_toes:
+            i = self._find_mtc_index(ipsi_toe, ipsi_heel, ipsi_toe_velocities)
+            clearance = ipsi_toe.sel(axis="z")[i].values
+            if clearance < minimal_toe_clearance:
+                minimal_toe_clearance = clearance
 
-        mtc_i = self._find_mtc_index(ipsi_toe, ipsi_heel, toes_vel)
-        mtc_additional_indices = [
-            self._find_mtc_index(meta_data, ipsi_heel, toes_vel)
-            for meta_data in additional_meta_data
-        ]
-
-        # Handle NaN cases and find minimal clearance
-        mtc_values = [] if np.isnan(mtc_i) else [ipsi_toe.sel(axis="z")[mtc_i]]
-        for i, meta_data in zip(mtc_additional_indices, additional_meta_data):
-            if not np.isnan(i):
-                mtc_values.append(meta_data.sel(axis="z")[i])
-
-        if not mtc_values:
-            return {"minimal_toe_clearance": np.empty(1)}
-
-        return {"minimal_toe_clearance": min(mtc_values)}
+        return {"minimal_toe_clearance": minimal_toe_clearance}
 
     @staticmethod
     def _find_mtc_index(
-        toe_position: xr.DataArray, heel_position: xr.DataArray, toes_vel: xr.DataArray
+        toe_position: xr.DataArray, heel_position: xr.DataArray, toes_vel: np.ndarray
     ):
         """Find the time corresponding to minimal toe clearance of a specific toe.
         Valid minimal toe clearance point must pass conditions
@@ -813,7 +822,7 @@ class SpatialFeatures(_PointDependentFeature):
         mtc_i = [i for i in mtc_i if toes_vel[i] >= toes_vel_up_quant]
         mtc_i = [i for i in mtc_i if toe_z[i] <= heel_z[i]]
 
-        return None if not mtc_i else min(mtc_i, key=lambda i: toe_z[i])
+        return None if not mtc_i else min(mtc_i, key=lambda i: toe_z[i])  # type: ignore
 
     def _calculate_ap_margin_of_stability(
         self,

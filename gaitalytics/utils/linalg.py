@@ -61,7 +61,7 @@ def normalize_vector(vector: xr.DataArray) -> xr.DataArray:
     return vector / vector.meca.norm(dim="axis")
 
 
-def calculate_speed_norm(position: xr.DataArray, dt: float = 0.01) -> xr.DataArray:
+def calculate_speed_norm(position: xr.DataArray, dt: float = 0.01) -> np.ndarray:
     """
     Compute the speed from a 3xN position data array obtained with constant sampling rate
 
@@ -71,7 +71,7 @@ def calculate_speed_norm(position: xr.DataArray, dt: float = 0.01) -> xr.DataArr
         dt: Time interval between samples.
 
     Returns:
-        A 1D xarray.DataArray of velocity at each time point.
+        An np array with the speed values.
     """
     velocity_squared_sum = sum(
         (np.diff(position.sel(axis=axis).values) / dt) ** 2
@@ -80,6 +80,4 @@ def calculate_speed_norm(position: xr.DataArray, dt: float = 0.01) -> xr.DataArr
     speed_values = np.sqrt(velocity_squared_sum)
     speed_values = np.append(speed_values, speed_values[-1])
 
-    return xr.DataArray(
-        speed_values, dims=["time"], coords={"time": position.coords["time"]}
-    )
+    return speed_values
