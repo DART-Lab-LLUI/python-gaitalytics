@@ -107,20 +107,20 @@ class Trial(BaseTrial):
         """
         self._events = events
 
-
     def add_channel(self, category: DataCategory, data: xr.DataArray):
-            """Adds a channel to the trial.
+        """Adds a channel to the trial.
 
-            Args:
-                category: The category of the data.
-                data: The data array to be added.
-            """
-            if category in self._data:
-                self._data[category] = xr.concat([self._data[category], data], dim="channel")
-            else:
-                self._data[category] = data
-                
-                
+        Args:
+            category: The category of the data.
+            data: The data array to be added.
+        """
+        if category in self._data:
+            self._data[category] = xr.concat(
+                [self._data[category], data], dim="channel"
+            )
+        else:
+            self._data[category] = data
+
     def add_data(self, category: DataCategory, data: xr.DataArray):
         """Adds data to the trial.
 

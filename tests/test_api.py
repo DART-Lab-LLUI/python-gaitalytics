@@ -133,7 +133,7 @@ def test_calculate_features():
     trial = api.load_c3d_trial("./tests/treadmill_events.c3d", config)
     trial_cycles = api.segment_trial(trial)
     features = api.calculate_features(trial_cycles, config)
-    assert features.shape == (2, 10, 2278)
+    assert features.shape == (2, 10, 2280)
 
 
 def test_export_trial(out_folder):
