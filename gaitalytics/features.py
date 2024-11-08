@@ -391,11 +391,11 @@ class PhaseTimeSeriesFeatures(TimeSeriesFeatures):
         stand_trial = self._create_phase_trial(trial, slice(start_time, fo_time))
         swing_trial = self._create_phase_trial(trial, slice(fo_time, end_time))
         stand_features = super()._calculate(stand_trial)
-        stand_features.assign_coords(
-            feature=[f"{f}_swing" for f in stand_features.feature.values]
+        stand_features = stand_features.assign_coords(
+            feature=[f"{f}_stand" for f in stand_features.feature.values]
         )
         swing_features = super()._calculate(swing_trial)
-        swing_features.assign_coords(
+        swing_features = swing_features.assign_coords(
             feature=[f"{f}_swing" for f in swing_features.feature.values]
         )
 
