@@ -66,7 +66,7 @@ def calculate_speed_norm(position: xr.DataArray, dt: float = 0.01) -> xr.DataArr
     Compute the speed from a 3xN position data array obtained with constant sampling rate
 
     Args:
-        position_data: A 3xN xarray.DataArray where each row corresponds to an axis (x, y, z),
+        position: A 3xN xarray.DataArray where each row corresponds to an axis (x, y, z),
                           and each column represents a time point (positions in space).
         dt: Time interval between samples.
 
