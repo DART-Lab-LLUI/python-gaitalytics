@@ -61,6 +61,10 @@ mapping:
     r_post_hip: "RPSI"
     sacrum: "SACR"
 
+    #CoM
+    com: "COM"
+    xcom: "XCOM"
+
 
 
 

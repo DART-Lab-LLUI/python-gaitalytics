@@ -302,4 +302,23 @@ class TestSpatialFeatures:
 
         rec_value = features.loc["Right", 0, "step_length"]
         exp_value = 565.24
-        assert rec_value == pytest.approx(exp_value, rel=1e-1)
+        assert rec_value == pytest.approx(exp_value,rel=1e-1)
+        
+        rec_value = features.loc["Right", 0, "stride_length"]
+        exp_value = 1114.59
+        assert rec_value == pytest.approx(exp_value,rel=1e-2)
+        
+        rec_value = features.loc["Left", 0, "stride_length"]
+        exp_value = 1112.47
+        assert rec_value == pytest.approx(exp_value,rel=1e-2)
+        
+        rec_value = features.loc["Left", 0, "minimal_toe_clearance"]
+        exp_value = 68.75803
+        assert rec_value == pytest.approx(exp_value, rel=1e-6)
+        
+        rec_value = features.loc["Right", 0, "minimal_toe_clearance"]
+        exp_value = 60.77047
+        assert rec_value == pytest.approx(exp_value, rel=1e-6)
+        
+        
+
