@@ -65,4 +65,4 @@ def get_progression_vector(
     l_ant_hip = get_marker_data(trial, config, mapping.MappedMarkers.L_ANT_HIP)
     ant_marker = (r_ant_hip + l_ant_hip) / 2
 
-    return (sacrum_marker - ant_marker).mean(dim="time")
+    return (ant_marker - sacrum_marker).mean(dim="time")
