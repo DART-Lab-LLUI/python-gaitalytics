@@ -30,7 +30,7 @@ Gaitalytics
     :target: https://pixi.sh
 .. end-badges
 
-.. image:: ./_static/images/Gaitalytics_noBackground.png
+.. image:: https://github.com/DART-Lab-LLUI/python-gaitalytics/blob/960332e21954b499825e7eb4944e6b6e2c565b24/docs/_static/images/Gaitalytics_noBackground.png
     :alt: Gaitalytics Logo
     :align: center
     :width: 200px
@@ -60,7 +60,7 @@ Event Detection
 +------------+--------------------------+----------------------------------------------------------------------------+
 | Method     | Description              | options                                                                    |
 +============+==========================+============================================================================+
-| Marker     | based on Zenis 2006      | - height: The height of peaks for events.                                  |
+| Marker     | Zeni et al. 2008 [1]     | - height: The height of peaks for events.                                  |
 |            |                          | - threshold: The threshold for detecting events.                           |
 |            |                          | - distance: The min distance in frames between events.                     |
 |            |                          | - rel_height: The relative height of peak for events.                      |
@@ -137,29 +137,38 @@ Feature calculation
 |                         | - swing_median                                        |                                       |
 |                         | - swing_amplitude                                     |                                       |
 +-------------------------+-------------------------------------------------------+---------------------------------------+
-| SpatialFeatures         | - step_length [1]                                     |                                       |
-|                         | - stride_length [1]                                   |                                       |
+| SpatialFeatures         | - step_length [2]                                     |                                       |
+|                         | - stride_length [2]                                   |                                       |
+|                         | - step_width [2]                                      |                                       |
+|                         | - minimal_toe_clearance [3]                           |                                       |
 +-------------------------+-------------------------------------------------------+---------------------------------------+
 | TemporalFeatures        | - cycle_duration                                      |                                       |
 |                         | - swing_duration_perc                                 |                                       |
 |                         | - stance_duration_perc                                |                                       |
-|                         | - step_width [1]                                      |                                       |
-|                         | - cadence [1]                                         |                                       |
-|                         | - single_support_duration_percent [2]                 |                                       |
-|                         | - double_support_duration_percent [2]                 |                                       |
+|                         | - cadence [2]                                         |                                       |
+|                         | - single_support_duration_percent [4]                 |                                       |
+|                         | - double_support_duration_percent [4]                 |                                       |
 +-------------------------+-------------------------------------------------------+---------------------------------------+
 
 References
 """"""""""
+[1] J. A. Zeni, J. G. Richards, and J. S. Higginson,
+“Two simple methods for determining gait events during treadmill and overground walking
+using kinematic data,” Gait and Posture, vol. 27, pp. 710–714, May 2008,
+doi: 10.1016/j.gaitpost.2007.07.007.
 
-[1] J. H. Hollman, E. M. McDade, and R. C. Petersen, “Normative Spatiotemporal
+[2] J. H. Hollman, E. M. McDade, and R. C. Petersen, “Normative Spatiotemporal
 Gait Parameters in Older Adults,” Gait Posture, vol. 34, no. 1, pp. 111–118,
 May 2011, doi: 10.1016/j.gaitpost.2011.03.024.
 
-[2] A. Gouelle and F. Mégrot (2017), “Interpreting spatiotemporal
-parameters, symmetry, and variability in clinical gait analysis”,
-Handbook of Human Motion pp. 1-20, Publisher: Springer International
-Publishing.
+[3] B. W. Schulz, “A new measure of trip risk integrating minimum foot clearance and
+dynamic stability across the swing phase of gait,” Journal of Biomechanics,
+vol. 55, pp. 107–112, Apr. 2017, doi: 10.1016/j.jbiomech.2017.02.024.
+
+[4] A. Gouelle and F. Mégrot, “Interpreting Spatiotemporal Parameters, Symmetry,
+and Variability in Clinical Gait Analysis,” Handbook of Human Motion,
+pp. 1–20, 2016, doi: 10.1007/978-3-319-30808-1_35-1.
+
 
 Quickstart
 ----------

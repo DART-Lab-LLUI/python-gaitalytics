@@ -565,7 +565,7 @@ class SpatialFeatures(_PointDependentFeature):
                 marker_dict["contra_ankle"] is not None
             ):
                 results_dict.update(
-                    self._calculate_ML_margin_of_stability(
+                    self._calculate_ml_margin_of_stability(
                         trial,
                         marker_dict["ipsi_ankle"],
                         marker_dict["contra_ankle"],
@@ -867,7 +867,7 @@ class SpatialFeatures(_PointDependentFeature):
 
         return {"AP_margin_of_stability": mos}
 
-    def _calculate_ML_margin_of_stability(
+    def _calculate_ml_margin_of_stability(
         self,
         trial: model.Trial,
         ipsi_ankle_marker: mapping.MappedMarkers,
