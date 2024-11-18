@@ -24,7 +24,7 @@ class MappedMarkers(Enum):
     SACRUM = "sacrum"
     
     # Extrapolated center of mass marker for margin of stability
-    #XCOM = 
+    XCOM = "xcom"
 
 
 class MappingConfigs:

@@ -46,7 +46,7 @@ def get_sacrum_marker(
         return (l_marker + r_marker) / 2
 
 
-def get_progression_vector(
+def  get_progression_vector(
     trial: model.Trial, config: mapping.MappingConfigs
 ) -> xr.DataArray:
     """Calculate the progression vector for a trial.

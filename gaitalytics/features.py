@@ -528,11 +528,26 @@ class SpatialFeatures(_PointDependentFeature):
             self._calculate_stride_length(trial,  marker_dict["ipsi_heel"], marker_dict["contra_heel"])
         )
         results_dict.update(
+            self._calculate_AP_base_of_support(trial,  marker_dict["ipsi_heel"], marker_dict["contra_toe_2"])
+        )
+        results_dict.update(
+            self._calculate_ML_base_of_support(trial,  marker_dict["ipsi_ankle"], marker_dict["contra_ankle"])
+        )
+        results_dict.update(
             self._calculate_minimal_toe_clearance(trial, marker_dict["ipsi_toe_2"], marker_dict["ipsi_heel"], marker_dict["ipsi_toe_5"])
+        )
+        results_dict.update(
+            self._calculate_foot_angle(trial, marker_dict["ipsi_heel"], marker_dict["ipsi_toe_2"])
         )
         if marker_dict["xcom"] is not None:
             results_dict.update(
-                self._calculate_AP_margin_of_stability(trial, marker_dict["ipsi_toe_2"], marker_dict["contra_toe_2"], marker_dict["xcom"])
+                self._calculate_AP_xcom(trial, marker_dict["xcom"])
+            )
+            results_dict.update(
+                self._calculate_ML_xcom(trial, marker_dict["xcom"])
+            )
+            results_dict.update(
+                self._calculate_AP_margin_of_stability(trial, marker_dict["ipsi_heel"], marker_dict["contra_toe_2"], marker_dict["xcom"])
             )
             if (marker_dict['ipsi_ankle'] is not None) and (marker_dict['contra_ankle'] is not None):
                 results_dict.update(
@@ -575,6 +590,7 @@ class SpatialFeatures(_PointDependentFeature):
 
         xcom_marker = self.get_optional_marker('XCOM')
         
+        
         return {
             "ipsi_toe_2": ipsi_toe_2_marker,
             "ipsi_toe_5": ipsi_toe_5_marker,
@@ -583,7 +599,7 @@ class SpatialFeatures(_PointDependentFeature):
             "contra_toe_2": contra_toe_2_marker,
             "contra_heel": contra_heel_marker,
             "contra_ankle": contra_ankle_marker,
-            "xcom": xcom_marker
+            "xcom": xcom_marker,
         }
     
     
@@ -616,10 +632,10 @@ class SpatialFeatures(_PointDependentFeature):
         event_times = self.get_event_times(trial.events)
 
         ipsi_heel = self._get_marker_data(trial, ipsi_marker).sel(
-            time=event_times[-1], method="nearest"
+            time=event_times[0], method="nearest"
         )
         contra_heel = self._get_marker_data(trial, contra_marker).sel(
-            time=event_times[-1], method="nearest"
+            time=event_times[0], method="nearest"
         )
         progress_axis = self._get_progression_vector(trial)
         progress_axis = linalg.normalize_vector(progress_axis)
@@ -669,7 +685,7 @@ class SpatialFeatures(_PointDependentFeature):
         ipsi_marker: mapping.MappedMarkers,
         contra_marker: mapping.MappedMarkers,
     ) -> dict[str, np.ndarray]:
-        """Calculate the stride length for a trial.
+        """Calculate the stride length for a trial. It is computed as the two consecutive step lengths constituting the gait cycle.
 
         Args:
             trial: The trial for which to calculate the stride length.
@@ -689,19 +705,127 @@ class SpatialFeatures(_PointDependentFeature):
         for event_time in [event_times[2], event_times[-1]]:
             ipsi_heel = self._get_marker_data(trial, ipsi_marker).sel(time=event_time, method="nearest")
             contra_heel = self._get_marker_data(trial, contra_marker).sel(time=event_time, method="nearest")
-            print(f'ipsi heel: {ipsi_heel}')
             
             projected_ipsi = linalg.project_point_on_vector(ipsi_heel, progress_axis)
             projected_contra = linalg.project_point_on_vector(contra_heel, progress_axis)
-            print(f'projected ipsi: {projected_ipsi}')
 
             distance = linalg.calculate_distance(projected_ipsi, projected_contra).values
-            print(f'distance: {distance}')
             total_distance += distance
-        
             
         return {"stride_length": total_distance}
+    
+    def _calculate_AP_xcom(
+        self,
+        trial: model.Trial,
+        xcom_marker: mapping.MappedMarkers
+    ) -> dict[str, np.ndarray]:
+        """
+        Args:
+            trial: The trial for which to calculate the XCoM position relative to the pelvis center.
+            xcom_marker: The XCoM marker
+            sacrum_marker: The sacrum marker
+
+        Returns:
+            The position of the XCoM relative to the sacrum marker.
+        """
+
+        event_times = self.get_event_times(trial.events)
+
+        xcom = self._get_marker_data(trial, xcom_marker).sel(
+            time=event_times[0], method="nearest"
+        )
+        sacrum = self._get_sacrum_marker(trial).sel(
+            time=event_times[0], method="nearest"
+        )
         
+        progress_axis = self._get_progression_vector(trial)
+        progress_axis = linalg.normalize_vector(progress_axis)
+
+        distance = linalg.calculate_signed_distance_on_vector(xcom, sacrum, -progress_axis)
+        return {"AP_xcom": distance}
+    
+    def _calculate_ML_xcom(
+        self,
+        trial: model.Trial,
+        xcom_marker: mapping.MappedMarkers
+    ) -> dict[str, np.ndarray]:
+        """
+        Args:
+            trial: The trial for which to calculate the XCoM position relative to the pelvis center
+            xcom_marker: The XCoM marker
+            sacrum_marker: The sacrum marker
+
+        Returns:
+            The position of the XCoM relative to the sacrum marker in the ML direction.
+        """
+
+        event_times = self.get_event_times(trial.events)
+
+        xcom = self._get_marker_data(trial, xcom_marker).sel(
+            time=event_times[0], method="nearest"
+        )
+        sacrum = self._get_sacrum_marker(trial).sel(
+            time=event_times[0], method="nearest"
+        )
+        
+        sagittal_axis = self._get_sagittal_vector(trial)
+        sagittal_axis = linalg.normalize_vector(sagittal_axis)
+        projected_xcom = linalg.project_point_on_vector(xcom, sagittal_axis)
+        projected_sacrum = linalg.project_point_on_vector(sacrum, sagittal_axis)
+        
+        distance = linalg.calculate_distance(projected_xcom, projected_sacrum).values  
+        return {"ML_xcom": distance}
+    
+    
+    def _calculate_AP_base_of_support(
+            self,
+            trial: model.Trial,
+            ipsi_heel_marker: mapping.MappedMarkers,
+            contra_toe_marker: mapping.MappedMarkers,
+        ) -> dict[str, np.ndarray]:
+        
+        event_times = self.get_event_times(trial.events)
+        ipsi_heel = self._get_marker_data(trial, ipsi_heel_marker).sel(
+            time=event_times[0], method="nearest"
+        )
+        contra_toe = self._get_marker_data(trial, contra_toe_marker).sel(
+            time=event_times[0], method="nearest"
+        )
+        
+        progress_axis = self._get_progression_vector(trial)
+        progress_axis = linalg.normalize_vector(progress_axis)
+        projected_ipsi = linalg.project_point_on_vector(ipsi_heel, progress_axis)
+        projected_contra = linalg.project_point_on_vector(contra_toe, progress_axis)
+        
+        bos = linalg.calculate_distance(projected_ipsi, projected_contra).values
+        
+        return{"AP_base_of_support": bos}
+    
+    
+    def _calculate_ML_base_of_support(
+            self,
+            trial: model.Trial,
+            ipsi_ankle_marker: mapping.MappedMarkers,
+            contra_ankle_marker: mapping.MappedMarkers,
+        ) -> dict[str, np.ndarray]:
+        
+        event_times = self.get_event_times(trial.events)
+        ipsi_ankle = self._get_marker_data(trial, ipsi_ankle_marker).sel(
+            time=event_times[0], method="nearest"
+        )
+        contra_ankle = self._get_marker_data(trial, contra_ankle_marker).sel(
+            time=event_times[0], method="nearest"
+        )
+
+        sagittal_axis = self._get_sagittal_vector(trial)
+        sagittal_axis = linalg.normalize_vector(sagittal_axis)
+        projected_ipsi = linalg.project_point_on_vector(ipsi_ankle, sagittal_axis)
+        projected_contra = linalg.project_point_on_vector(contra_ankle, sagittal_axis)
+        
+        bos = linalg.calculate_distance(projected_contra, projected_ipsi).values
+        
+        return{"ML_base_of_support": bos}
+
         
     def _calculate_minimal_toe_clearance(
             self,
@@ -783,14 +907,14 @@ class SpatialFeatures(_PointDependentFeature):
             
     def _calculate_AP_margin_of_stability(self,
                             trial: model.Trial,
-                            ipsi_toe_marker: mapping.MappedMarkers,
+                            ipsi_heel_marker: mapping.MappedMarkers,
                             contra_toe_marker: mapping.MappedMarkers,
                             xcom_marker: mapping.MappedMarkers,
                         ) -> dict[str, np.ndarray]:
         """Calculate the anterio-posterior margin of stability at heel strike
         Args:
             trial: The trial for which to calculate the AP margin of stability
-            ipsi_toe_marker: The ipsi-lateral toe marker
+            ipsi_toe_marker: The ipsi-lateral heel marker
             contra_marker: The contra-lateral toe marker
             xcom_marker: The extrapolated center of mass marker
 
@@ -799,7 +923,7 @@ class SpatialFeatures(_PointDependentFeature):
         """
         event_times = self.get_event_times(trial.events)
 
-        ipsi_toe = self._get_marker_data(trial, ipsi_toe_marker).sel(
+        ipsi_heel = self._get_marker_data(trial, ipsi_heel_marker).sel(
             time=event_times[0], method="nearest"
         )
         contra_toe = self._get_marker_data(trial, contra_toe_marker).sel(
@@ -812,14 +936,17 @@ class SpatialFeatures(_PointDependentFeature):
         progress_axis = self._get_progression_vector(trial)
         progress_axis = linalg.normalize_vector(progress_axis)
         
-        projected_ipsi = linalg.project_point_on_vector(ipsi_toe, progress_axis)
+        projected_ipsi = linalg.project_point_on_vector(ipsi_heel, progress_axis)
         projected_contra = linalg.project_point_on_vector(contra_toe, progress_axis)
         projected_xcom = linalg.project_point_on_vector(xcom, progress_axis)
         
         bos_len = linalg.calculate_distance(projected_ipsi, projected_contra).values
-        xcom_len = linalg.calculate_distance(projected_contra, projected_xcom).values
+        
+        xcom_len_contra = linalg.calculate_distance(projected_contra, projected_xcom).values
+        xcom_len_ipsi = linalg.calculate_distance(projected_ipsi, projected_xcom).values
 
-        mos = bos_len - xcom_len
+
+        mos = min(bos_len-xcom_len_ipsi, bos_len-xcom_len_contra)
         
         return {"AP_margin_of_stability": mos}
     
@@ -860,8 +987,45 @@ class SpatialFeatures(_PointDependentFeature):
         projected_xcom = linalg.project_point_on_vector(xcom, sagittal_axis)
         
         bos_len = linalg.calculate_distance(projected_contra, projected_ipsi).values
-        xcom_len = linalg.calculate_distance(projected_contra, projected_xcom).values
         
-        mos = bos_len - xcom_len
+        xcom_len_contra = linalg.calculate_distance(projected_contra, projected_xcom).values
+        xcom_len_ipsi = linalg.calculate_distance(projected_ipsi, projected_xcom).values
+        
+        mos = min(bos_len-xcom_len_ipsi, bos_len-xcom_len_contra)
 
         return {"ML_margin_of_stability": mos}
+    
+    def _calculate_foot_angle(self,
+                            trial: model.Trial,
+                            ipsi_heel_marker: mapping.MappedMarkers,
+                            ipsi_mt2_marker: mapping.MappedMarkers
+                            ) -> dict[str, np.ndarray]:
+        """Calculate the angle between foot and progression axis at heel strike
+        Args:
+            trial: The trial for which to calculate the AP margin of stability
+            ipsi_heel_marker: The ipsi-lateral heel marker
+            ipsi_mt2: The ipsi-lateral metatarsal 2 marker
+
+        Returns:
+            The calculated anterio-posterior margin of stability in a dict
+        """
+        event_times = self.get_event_times(trial.events)
+
+        ipsi_toe = self._get_marker_data(trial, ipsi_mt2_marker).sel(
+            time=event_times[0], method="nearest"
+        )
+        ipsi_heel = self._get_marker_data(trial, ipsi_heel_marker).sel(
+            time=event_times[0], method="nearest"
+        )
+
+        progress_axis = self._get_progression_vector(trial)
+        progress_axis = -linalg.normalize_vector(progress_axis)
+
+        foot_vector = ipsi_toe - ipsi_heel
+        
+        foot_angle = linalg.calculate_angle(foot_vector, progress_axis)
+        
+
+        return {"foot_angle": foot_angle}
+    
+    
