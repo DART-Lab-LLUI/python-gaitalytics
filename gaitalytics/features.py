@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
 import xarray as xr
+import logging
 
 import gaitalytics.events as events
 import gaitalytics.io as io
@@ -11,6 +12,8 @@ import gaitalytics.model as model
 import gaitalytics.utils.linalg as linalg
 import gaitalytics.utils.math as math
 import gaitalytics.utils.mocap as mocap
+
+logger = logging.getLogger(__name__)
 
 
 class FeatureCalculation(ABC):
@@ -542,9 +545,8 @@ class SpatialFeatures(_PointDependentFeature):
             )
         )
 
-        toe_markers = [marker_dict["ipsi_toe_2"]]
-        if marker_dict["ipsi_toe_5"] is not None:
-            toe_markers.append(marker_dict["ipsi_toe_5"])
+        toe_markers = [marker_dict["ipsi_toe_2"], marker_dict["ipsi_toe_5"]]
+
         results_dict.update(
             self._calculate_minimal_toe_clearance(
                 trial,
@@ -552,7 +554,8 @@ class SpatialFeatures(_PointDependentFeature):
                 marker_dict["ipsi_heel"],  # type: ignore
             )
         )
-        if marker_dict["xcom"] is not None:
+
+        try:
             results_dict.update(
                 self._calculate_ap_margin_of_stability(
                     trial,
@@ -561,23 +564,26 @@ class SpatialFeatures(_PointDependentFeature):
                     marker_dict["xcom"],
                 )
             )
-            if (marker_dict["ipsi_ankle"] is not None) and (
-                marker_dict["contra_ankle"] is not None
-            ):
-                results_dict.update(
-                    self._calculate_ml_margin_of_stability(
-                        trial,
-                        marker_dict["ipsi_ankle"],
-                        marker_dict["contra_ankle"],
-                        marker_dict["xcom"],
-                    )
+
+            results_dict.update(
+                self._calculate_ml_margin_of_stability(
+                    trial,
+                    marker_dict["ipsi_ankle"],
+                    marker_dict["contra_ankle"],
+                    marker_dict["xcom"],
                 )
+            )
+        except KeyError:
+            logger.info(
+                "Margin of stability markers are missing. No margin of stability calculated"
+            )
 
         return self._create_result_from_dict(results_dict)
 
+    @staticmethod
     def select_markers_for_spatial_features(
-        self, trial: model.Trial
-    ) -> dict[str, mapping.MappedMarkers | None]:
+        trial: model.Trial,
+    ) -> dict[str, mapping.MappedMarkers]:
         """Select markers based on the trial's context (Right or Left). If some markers are missing, return them as None
 
         Args:
@@ -589,24 +595,24 @@ class SpatialFeatures(_PointDependentFeature):
         if trial.events is not None and trial.events.attrs["context"] == "Right":
             ipsi_heel_marker = mapping.MappedMarkers.R_HEEL
             ipsi_toe_2_marker = mapping.MappedMarkers.R_TOE
-            ipsi_toe_5_marker = self.get_optional_marker("R_TOE_5")
-            ipsi_ankle_marker = self.get_optional_marker("R_ANKLE")
+            ipsi_toe_5_marker = mapping.MappedMarkers.R_TOE_2
+            ipsi_ankle_marker = mapping.MappedMarkers.R_ANKLE
 
             contra_toe_2_marker = mapping.MappedMarkers.L_TOE
             contra_heel_marker = mapping.MappedMarkers.L_HEEL
-            contra_ankle_marker = self.get_optional_marker("L_ANKLE")
+            contra_ankle_marker = mapping.MappedMarkers.L_ANKLE
 
         else:
             ipsi_heel_marker = mapping.MappedMarkers.L_HEEL
             ipsi_toe_2_marker = mapping.MappedMarkers.L_TOE
-            ipsi_toe_5_marker = self.get_optional_marker("L_TOE_5")
-            ipsi_ankle_marker = self.get_optional_marker("L_ANKLE")
+            ipsi_toe_5_marker = mapping.MappedMarkers.L_TOE_2
+            ipsi_ankle_marker = mapping.MappedMarkers.L_ANKLE
 
             contra_toe_2_marker = mapping.MappedMarkers.R_TOE
             contra_heel_marker = mapping.MappedMarkers.R_HEEL
-            contra_ankle_marker = self.get_optional_marker("R_ANKLE")
+            contra_ankle_marker = mapping.MappedMarkers.R_ANKLE
 
-        xcom_marker = self.get_optional_marker("XCOM")
+        xcom_marker = mapping.MappedMarkers.XCOM
 
         return {
             "ipsi_toe_2": ipsi_toe_2_marker,
@@ -618,14 +624,6 @@ class SpatialFeatures(_PointDependentFeature):
             "contra_ankle": contra_ankle_marker,
             "xcom": xcom_marker,
         }
-
-    def get_optional_marker(self, marker_name: str) -> mapping.MappedMarkers | None:
-        """Returns the marker if exists, else returns None
-
-        Args:
-            marker_name (str): The marker name
-        """
-        return getattr(mapping.MappedMarkers, marker_name, None)
 
     def _calculate_step_length(
         self,
@@ -774,21 +772,24 @@ class SpatialFeatures(_PointDependentFeature):
 
         # Get all ipsi toe marker positions and calculate the mean velocity of them
         for ipsi_toe_marker in ipsi_toe_markers:
-            ipsi_toe = self._get_marker_data(trial, ipsi_toe_marker).sel(
-                time=slice(event_times[3], event_times[4])
-            )
-            ipsi_toes.append(ipsi_toe)
-            if ipsi_toe_velocities is None:
-                ipsi_toe_velocities = linalg.calculate_speed_norm(ipsi_toe)
-            else:
-                ipsi_toe_velocities += linalg.calculate_speed_norm(ipsi_toe)
+            try:
+                ipsi_toe = self._get_marker_data(trial, ipsi_toe_marker).sel(
+                    time=slice(event_times[3], event_times[4])
+                )
+                ipsi_toes.append(ipsi_toe)
+                if ipsi_toe_velocities is None:
+                    ipsi_toe_velocities = linalg.calculate_speed_norm(ipsi_toe)
+                else:
+                    ipsi_toe_velocities += linalg.calculate_speed_norm(ipsi_toe)
+            except KeyError:
+                pass
 
         if ipsi_toe_velocities is None:
             raise ValueError(
                 "No toe markers found for minimal toe clearance calculation"
             )
 
-        ipsi_toe_velocities /= len(ipsi_toe_markers)
+        ipsi_toe_velocities /= len(ipsi_toes)
 
         minimal_toe_clearance = np.full(1, np.inf)
         for ipsi_toe in ipsi_toes:

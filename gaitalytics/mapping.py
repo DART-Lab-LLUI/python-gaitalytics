@@ -10,11 +10,11 @@ class MappedMarkers(Enum):
     R_HEEL = "r_heel"
     L_TOE = "l_toe"
     R_TOE = "r_toe"
-    L_ANKLE = "left_lat_malleoli"
-    R_ANKLE = "right_lat_malleoli"
+    L_ANKLE = "l_lat_malleoli"
+    R_ANKLE = "r_lat_malleoli"
     # Additional toe markers
-    # L_TOE_5 = ""
-    # R_TOE_5 = ""
+    L_TOE_2 = "l_toe_2"
+    R_TOE_2 = "r_toe_2"
 
     # Hip
     L_ANT_HIP = "l_ant_hip"
@@ -24,7 +24,7 @@ class MappedMarkers(Enum):
     SACRUM = "sacrum"
 
     # Extrapolated center of mass marker for margin of stability
-    # XCOM =
+    XCOM = "xcom"
 
 
 class MappingConfigs:
