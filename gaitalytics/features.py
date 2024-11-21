@@ -528,7 +528,7 @@ class SpatialFeatures(_PointDependentFeature):
             self._calculate_stride_length(trial,  marker_dict["ipsi_heel"], marker_dict["contra_heel"])
         )
         results_dict.update(
-            self._calculate_AP_base_of_support(trial,  marker_dict["ipsi_heel"], marker_dict["contra_toe_2"])
+            self._calculate_AP_base_of_support(trial,  marker_dict["ipsi_toe_2"], marker_dict["contra_toe_2"])
         )
         results_dict.update(
             self._calculate_ML_base_of_support(trial,  marker_dict["ipsi_ankle"], marker_dict["contra_ankle"])
@@ -547,7 +547,7 @@ class SpatialFeatures(_PointDependentFeature):
                 self._calculate_ML_xcom(trial, marker_dict["xcom"])
             )
             results_dict.update(
-                self._calculate_AP_margin_of_stability(trial, marker_dict["ipsi_heel"], marker_dict["contra_toe_2"], marker_dict["xcom"])
+                self._calculate_AP_margin_of_stability(trial, marker_dict["ipsi_toe_2"], marker_dict["contra_toe_2"], marker_dict["xcom"])
             )
             if (marker_dict['ipsi_ankle'] is not None) and (marker_dict['contra_ankle'] is not None):
                 results_dict.update(
@@ -944,11 +944,27 @@ class SpatialFeatures(_PointDependentFeature):
         
         xcom_len_contra = linalg.calculate_distance(projected_contra, projected_xcom).values
         xcom_len_ipsi = linalg.calculate_distance(projected_ipsi, projected_xcom).values
-
-
+        fall_type=None
+        if bos_len-xcom_len_ipsi < bos_len-xcom_len_contra:
+            mos = bos_len-xcom_len_ipsi
+            if mos < 0:
+                fall_type = -1
+            else: 
+                fall_type = -0.5
+        elif bos_len-xcom_len_contra < bos_len-xcom_len_ipsi:
+            mos = bos_len-xcom_len_contra
+            if mos < 0:
+                fall_type = 1
+            else:
+                fall_type = 0.5
+        else:
+            mos = bos_len-xcom_len_contra
+            fall_type = 0
+            
         mos = min(bos_len-xcom_len_ipsi, bos_len-xcom_len_contra)
         
-        return {"AP_margin_of_stability": mos}
+        return {"AP_margin_of_stability": mos,
+                "fall_type": fall_type}
     
     
     def _calculate_ML_margin_of_stability(self,

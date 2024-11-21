@@ -13,8 +13,8 @@ class MappedMarkers(Enum):
     L_ANKLE = "left_lat_malleoli"
     R_ANKLE = "right_lat_malleoli"
     # Additional toe markers
-    #L_TOE_5 = ""
-    #R_TOE_5 = ""  
+    L_TOE_5 = "l_toe_5"
+    R_TOE_5 = "r_toe_5"  
 
     # Hip
     L_ANT_HIP = "l_ant_hip"
