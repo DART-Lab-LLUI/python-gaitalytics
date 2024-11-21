@@ -3256,7 +3256,7 @@ packages:
   timestamp: 1694616398888
 - kind: pypi
   name: gaitalytics
-  version: 0.1.3.dev36+gae61a70
+  version: 0.2.1.dev21+g70964c7.d20241121
   path: .
   sha256: 7c7bc3186072a35a5f02fc5d824ba1f035b70a392685c7a5871d8226cc7d4340
   requires_dist:
@@ -3266,18 +3266,18 @@ packages:
   - scipy<1.15,>=1.13
   - numpy<2.1,>=1.23
   - xarray<2024.7,>=2024.6.0
-  - build ; extra == 'build'
-  - setuptools>=64 ; extra == 'build'
-  - setuptools-scm>=8 ; extra == 'build'
   - ruff ; extra == 'dev'
   - mypy ; extra == 'dev'
   - pip ; extra == 'dev'
+  - pytest ; extra == 'test'
+  - pytest-cov ; extra == 'test'
+  - build ; extra == 'build'
+  - setuptools>=64 ; extra == 'build'
+  - setuptools-scm>=8 ; extra == 'build'
   - sphinx ; extra == 'docs'
   - sphinx-rtd-theme ; extra == 'docs'
   - sphinx-autodoc-typehints ; extra == 'docs'
   - sphinx-github-changelog ; extra == 'docs'
-  - pytest ; extra == 'test'
-  - pytest-cov ; extra == 'test'
   requires_python: '>=3.11'
   editable: true
 - kind: pypi

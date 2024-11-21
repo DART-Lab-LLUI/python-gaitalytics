@@ -107,6 +107,9 @@ def detect_events(
 
     Returns:
         A DataFrame containing the detected events.
+
+    Raises:
+        ValueError: If the method is not supported.
     """
 
     match method:
@@ -130,6 +133,9 @@ def check_events(event_table: pd.DataFrame, method: str = "sequence"):
 
     Returns:
         The trial with the checked events.
+
+    Raises:
+        ValueError: If the event sequence is not correct or the method is not supported.
     """
     match method:
         case "sequence":
