@@ -176,6 +176,13 @@ class MarkerEventDetection(_BaseEventDetection):
 
     This class provides a method to detect events using marker data in a trial.
     The algorithm is based on the paper by Zeni et al. (2008).
+
+     Args:
+        configs: The mapping configurations.
+        height: The height of peaks for events. Default = None
+        threshold: The threshold for detecting events. Default = None
+        distance: The min distance in frames between events. Default = None
+        rel_height: The relative height of peak for events. Default = 0.5
     """
 
     _TIME_COLUMN = io._EventInputFileReader.COLUMN_TIME
@@ -184,15 +191,9 @@ class MarkerEventDetection(_BaseEventDetection):
     _ICON_COLUMN = io._EventInputFileReader.COLUMN_ICON
 
     def __init__(self, configs: mapping.MappingConfigs, **kwargs):
-        """Initializes a new instance of the MarkerEventDetection class.
+        """Initializes a new instance of the MarkerEventDetection class."""
 
-        Args:
-            configs: The mapping configurations.
-            height: The height of peaks for events. Default = None
-            threshold: The threshold for detecting events. Default = None
-            distance: The min distance in frames between events. Default = None
-            rel_height: The relative height of peak for events. Default = 0.5
-        """
+
         self._height = kwargs.get("height", None)
         self._threshold = kwargs.get("threshold", None)
         self._distance = kwargs.get("distance", None)
