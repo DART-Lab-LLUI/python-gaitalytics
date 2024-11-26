@@ -37,7 +37,7 @@ Issues = "https://github.com/DART-Lab-LLUI/python-gaitalytics/issues"
 Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
-dev = ["ruff", "mypy", "pip"]
+dev = ["ruff", "mypy", "pip", "types-PyYAML"]
 test = ["pytest", "pytest-cov"]
 build = ["build", "setuptools>=64", "setuptools_scm>=8"]
 docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autodoc-typehints", "sphinx_github_changelog"]
@@ -93,8 +93,7 @@ check-code = { cmd = "mypy gaitalytics --check-untyped-defs", depends-on = ["ruf
 build = "python -m build -n"
 sdist = "python -m build --sdist -n"
 wheel = "python -m build --wheel -n"
-conda_clean = "conda clean --all -y"
-conda-build = { cmd ="conda mambabuild . --output-folder conda-build", depends_on = ["conda_clean"] }
+conda-build = { cmd ="conda mambabuild . --output-folder conda-build" }
 
 [tool.setuptools]
 packages = ["gaitalytics", "gaitalytics.utils"]

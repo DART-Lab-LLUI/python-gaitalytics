@@ -193,7 +193,6 @@ class MarkerEventDetection(_BaseEventDetection):
     def __init__(self, configs: mapping.MappingConfigs, **kwargs):
         """Initializes a new instance of the MarkerEventDetection class."""
 
-
         self._height = kwargs.get("height", None)
         self._threshold = kwargs.get("threshold", None)
         self._distance = kwargs.get("distance", None)

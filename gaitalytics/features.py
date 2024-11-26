@@ -791,14 +791,19 @@ class SpatialFeatures(_PointDependentFeature):
 
         ipsi_toe_velocities /= len(ipsi_toes)
 
-        minimal_toe_clearance = np.full(1, np.inf)
+        minimal_toe_clearance = np.inf
         for ipsi_toe in ipsi_toes:
             i = self._find_mtc_index(ipsi_toe, ipsi_heel, ipsi_toe_velocities)
-            clearance = ipsi_toe.sel(axis="z")[i].values
-            if clearance < minimal_toe_clearance:
-                minimal_toe_clearance = clearance
+            if i is not None:
+                clearance = ipsi_toe.sel(axis="z")[i].values
+                if clearance < minimal_toe_clearance:
+                    minimal_toe_clearance = clearance  # type: ignore
 
-        return {"minimal_toe_clearance": minimal_toe_clearance}
+        return {
+            "minimal_toe_clearance": minimal_toe_clearance  # type: ignore
+            if minimal_toe_clearance != np.inf
+            else np.nan
+        }
 
     @staticmethod
     def _find_mtc_index(

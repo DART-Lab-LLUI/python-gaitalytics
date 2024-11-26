@@ -1,7 +1,7 @@
 from enum import Enum
 from pathlib import Path
 
-import yaml
+from yaml import safe_load
 
 
 class MappedMarkers(Enum):
@@ -70,7 +70,7 @@ class MappingConfigs:
         """
         self._configs: dict[str, dict] = {}
         with open(config_path) as stream:
-            self._configs = yaml.safe_load(stream)
+            self._configs = safe_load(stream)
 
     def get_markers_analysis(self) -> list[str]:
         """Gets the markers for analysis.
