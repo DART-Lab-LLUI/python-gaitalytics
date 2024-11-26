@@ -18,10 +18,12 @@ requirements:
   build:
     - pip
     - python >=3.11
-    - setuptools
-    - setuptools_scm
+    - setuptools >=64
+    - setuptools_scm >=8
   host:
     - python >=3.11
+    - setuptools >=64
+    - setuptools_scm >=8
     - pip
   run:
     - python >=3.11
