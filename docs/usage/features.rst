@@ -1,3 +1,7 @@
+.. meta::
+   :description: Gaitalytics User Guide.
+   :keywords: gaitalytics, gait-analysis, mocap, c3d, gait-metrics, biomechanics, time-series, data-analysis, data, gait, guide, tutorial
+
 Feature Extraction
 ==================
 

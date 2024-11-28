@@ -1,3 +1,7 @@
+.. meta::
+   :description: Gaitalytics User Guide.
+   :keywords: gaitalytics, gait-analysis, mocap, c3d, gait-metrics, biomechanics, time-series, data-analysis, data, gait, guide, tutorial
+
 Data Loading
 ============
 Gaitalytics is designed to be marker model independent. It does not require specific marker, analog or modelled marker names.
