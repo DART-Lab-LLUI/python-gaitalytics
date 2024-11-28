@@ -8,9 +8,10 @@ User Guide
 Getting started with Gaitalytics needs some understanding of processes and flows which this framework follows.
 Following overview will help you get started with necessary steps to process your data.
 
-.. image:: ../_static/images/Gailtalytics_schema.svg
+.. thumbnail:: ../_static/images/Gailtalytics_schema.png
     :alt: Gaitalytics Logo
     :align: center
+    :download: true
 
 As shown in the above image, Gaitalytics is a framework which is designed to process motion data and extract useful metrics from it.
 It takes care of following steps in the processing pipeline:

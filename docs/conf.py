@@ -18,7 +18,8 @@ author = 'André Böni'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = ['sphinx.ext.autodoc',
-              'sphinx_codeautolink',]
+              'sphinx_codeautolink',
+              'sphinxcontrib.images',]
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
