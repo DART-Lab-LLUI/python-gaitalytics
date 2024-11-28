@@ -40,7 +40,7 @@ Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 dev = ["ruff", "mypy", "pip", "types-PyYAML"]
 test = ["pytest", "pytest-cov"]
 build = ["build", "setuptools>=64", "setuptools_scm>=8"]
-docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autodoc-typehints", "sphinx_github_changelog"]
+docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autodoc-typehints", "sphinx_github_changelog", "sphinx-codeautolink"]
 
 [tool.pixi.project]
 channels = ["conda-forge"]

@@ -1,5 +1,5 @@
-Overview
-========
+User Guide
+==========
 
 Getting started with Gaitalytics needs some understanding of processes and flows which this framework follows.
 Following overview will help you get started with necessary steps to process your data.
@@ -13,9 +13,10 @@ It takes care of following steps in the processing pipeline:
 
     1. Data Loading
     2. Event Detection
-    3. Data segmentation
-    4. Feature Calculation
-    5. Segment normalization
+    3. Segmentation
+    4. Feature Extraction
+    5. Time Normalisation
+    6. Data Export
 
 Each of these steps are explained in detail in the following pages.
 
@@ -25,6 +26,11 @@ Each of these steps are explained in detail in the following pages.
 
    data_loading
    event_detection
+   segmentation
+   features
+   normalisation
+   export
+
 ..
 
 

@@ -73,7 +73,7 @@ The file is structured as follows:
 
 ..
 
-The configuration file is structured in two parts. The mapping section and the anlysis section.
+The configuration file is structured in two parts. The mapping section and the anlaysis section.
 
 .. _Config Mapping:
 
@@ -125,8 +125,14 @@ Following code snipped illustrates how to load a c3d file with the corresponding
 
 ..
 
-The load_trial function will return a Trial object which contains all the information of the c3d file.
-Internally Gaitalytics uses the pyomeca [1]_, ezc3d [2]_ and xarray [3]_ libraries to load and store the data.
+| The load_trial function will return a Trial object which contains all the information of the c3d file. Internally Gaitalytics uses the pyomeca [1]_, ezc3d [2]_ and xarray [3]_ libraries to load and store the data.
+| The object returned is a :class:`gaitalytics.model.Trial`. It contains three types of data.
+
+    1. Markers -> time series form the Point section of the c3d
+    2. Analog -> time series from the Analog section of the c3d
+    3. Analysis -> flattened time series from the entities specified in the configuration file.
+
+Additionally, the object contains the events which are stored in the c3d file.
 
 .. rubric:: References
 
