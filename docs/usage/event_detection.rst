@@ -5,7 +5,7 @@
 Event Detection
 ===============
 
-To detect gait events Gaitalytics currently only supports a marker based function based on Zeni et al. 2008 [1]_ paper.
+To detect gait events Gaitalytics currently only supports a marker based function based on :footcite:t:`zeni_two_2008` paper.
 Further it provides helping functions to find errors in the detected gait events and store the events into an existing c3d file.
 
 Detection
@@ -32,7 +32,7 @@ Following snipped illustrates the usage of the detection function:
 
 ..
 
-The function returns a pandas [2]_ DataFrame with the following columns:
+The function returns a pandas\ :footcite:p:`mckinney_pandas_2011` DataFrame with the following columns:
 
 .. csv-table::
     :file: ../_static/tables/event_table.csv
@@ -96,10 +96,7 @@ Alternatively the function can be used to store the events into the existing c3d
 
 
 .. rubric:: References
-.. [1] J. A. Zeni, J. G. Richards, and J. S. Higginson, “Two simple methods for determining gait events during treadmill and overground walking using kinematic data,” Gait and Posture, vol. 27, pp. 710–714, May 2008, doi: 10.1016/j.gaitpost.2007.07.007.
-.. [2] W. McKinney, “pandas: a foundational Python library for data analysis and statistics,” Python for high performance and scientific computing, vol. 14, no. 9, pp. 1–9, 2011.
-
-
+.. footbibliography::
 
 
 

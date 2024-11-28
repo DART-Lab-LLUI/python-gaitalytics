@@ -129,7 +129,7 @@ Following code snipped illustrates how to load a c3d file with the corresponding
 
 ..
 
-| The load_trial function will return a Trial object which contains all the information of the c3d file. Internally Gaitalytics uses the pyomeca [1]_, ezc3d [2]_ and xarray [3]_ libraries to load and store the data.
+| The load_trial function will return a Trial object which contains all the information of the c3d file. Internally Gaitalytics uses the pyomeca\ :footcite:p:`martinez_pyomeca_2020`, ezc3d\ :footcite:p:`michaud_ezc3d_2021` and xarray\ :footcite:p:`hoyer_xarray_2017` libraries to load and store the data.
 | The object returned is a :class:`gaitalytics.model.Trial`. It contains three types of data.
 
     1. Markers -> time series form the Point section of the c3d
@@ -139,15 +139,7 @@ Following code snipped illustrates how to load a c3d file with the corresponding
 Additionally, the object contains the events which are stored in the c3d file.
 
 .. rubric:: References
-
-.. [1] R. Martinez, B. Michaud, and M. Begon, “`pyomeca`: An Open-Source Framework for Biomechanical Analysis,” Journal of Open Source Software, vol. 5, no. 53, p. 2431, Sep. 2020, doi: 10.21105/joss.02431.
-
-
-.. [2] B. Michaud and M. Begon, “ezc3d: An easy C3D file I/O cross-platform solution for C++, Python and MATLAB,” JOSS, vol. 6, no. 58, p. 2911, Feb. 2021, doi: 10.21105/joss.02911.
-
-
-.. [3] S. Hoyer and J. Hamman, “xarray: N-D labeled Arrays and Datasets in Python,” Journal of Open Research Software, vol. 5, no. 1, Art. no. 1, Apr. 2017, doi: 10.5334/jors.148.
-
+.. footbibliography::
 
 
 

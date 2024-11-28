@@ -19,7 +19,13 @@ author = 'André Böni'
 
 extensions = ['sphinx.ext.autodoc',
               'sphinx_codeautolink',
-              'sphinxcontrib.images',]
+              'sphinxcontrib.images',
+              'sphinxcontrib.bibtex',]
+
+bibtex_bibfiles = ['_static/Gaitalytics.bib']
+
+bibtex_encoding = 'utf-8'
+bibtex_reference_style = "author_year"
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

@@ -38,6 +38,10 @@ Following features can be extracted from the segmented data:
 | ✝ Depending on the unit of the configured entity in the c3d file.
 | ☨ Feature only calculated if a center of mass marker is present in the c3d file and configured in the config file.
 
+.. rubric:: References
+.. footbibliography::
+
+
 
 
 
