@@ -81,7 +81,7 @@ python = ">=3.12.0,<3.13.0"
 
 [tool.pixi.feature.docs.tasks]
 docs = "sphinx-build -b html ./docs ./docs/_build --keep-going"
-readthedocs = { cmd = "rm -rf $READTHEDOCS_OUTPUT/html && cp -r docs/_build/html $READTHEDOCS_OUTPUT/html", depends_on = ["docs"] }
+readthedocs = { cmd = "rm -rf $READTHEDOCS_OUTPUThtml && cp -r docs/_build/html $READTHEDOCS_OUTPUThtml", depends_on = ["docs"] }
 
 [tool.pixi.tasks]
 test-full = "pytest -vv --cov=gaitalytics --cov-report=term-missing --cov-config=.coveragerc --capture=sys"
