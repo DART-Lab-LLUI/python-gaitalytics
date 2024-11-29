@@ -26,8 +26,8 @@ extensions = ['sphinx.ext.autodoc',
 bibtex_bibfiles = ['_static/Gaitalytics.bib']
 
 bibtex_encoding = 'utf-8'
-bibtex_reference_style = "author_year"
-bibtex_default_style = "plain"
+# bibtex_reference_style = "author_year"
+# bibtex_default_style = "plain"
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

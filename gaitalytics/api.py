@@ -104,7 +104,7 @@ def detect_events(
                 Currently, only "Marker" is supported, which implements
                 the method from Zenis et al. 2008.
                 Default is "Marker".
-        **kwargs: Additional keyword arguments for the event detection method.
+        **kwargs:
             - height: The height of peaks. Default = None
             - threshold: The threshold of peaks. Default = None
             - distance: The min distance in frames between events. Default = None
@@ -164,7 +164,7 @@ def write_events_to_c3d(
         c3d_path: The path to the original c3d file.
         event_table: The DataFrame containing the events.
         output_path: The path to write the c3d file with the events.
-        If None, the original file will be overwritten.
+                     If None, the original file will be overwritten.
     """
     io.C3dEventFileWriter(c3d_path).write_events(event_table, output_path)  # type: ignore
 
@@ -202,7 +202,7 @@ def time_normalise_trial(
         trial: The trial to normalise the time for.
         method: The method to use for normalising the time. Currently, only supports
                 "linear" which normalises the time linearly. Default is "linear".
-        **kwargs: Additional keyword arguments for the normalisation method.
+        **kwargs:
             - n_frames: The number of frames to normalise the data to.
 
     Returns:
@@ -235,6 +235,7 @@ def calculate_features(
         trial: The trial to calculate the features for.
         config: The mapping configurations
         methods: Class objects of the feature calculation methods to use.
+        **kwargs: Currently not used.
 
     Returns:
         The trial with the calculated features.
@@ -255,7 +256,7 @@ def _create_feature_methods(
     Args:
         methods: The list of feature calculation methods to use.
         config: The mapping configurations
-        **kwargs: Additional keyword arguments for the methods.
+        **kwargs: Currently not used.
 
     Returns:
         A list of the feature calculation method objects.

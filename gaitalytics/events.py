@@ -188,7 +188,7 @@ class MarkerEventDetection(_BaseEventDetection):
 
         Args:
             configs: The mapping configurations.
-            **kwargs: Additional keyword arguments for the event detection method.
+            **kwargs:
                 - height: The height of peaks. Default = None
                 - threshold: The threshold of peaks. Default = None
                 - distance: The min distance in frames between events. Default = None

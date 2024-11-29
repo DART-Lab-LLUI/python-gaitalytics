@@ -27,7 +27,7 @@ class FeatureCalculation(ABC):
 
         Args:
             config: The mapping configuration to use for the feature calculation.
-            **kwargs: Additional keyword arguments.
+            **kwargs: Currently not used.
         """
         self._config = config
         self._kwargs = kwargs
