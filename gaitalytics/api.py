@@ -101,9 +101,14 @@ def detect_events(
         trial: The trial to detect the events for.
         config: The mapping configurations
         method: The method to use for detecting the events.
-        Currently, only "Marker" is supported, which implements
-        the method from Zenis et al. 2006.
-        Default is "Marker".
+                Currently, only "Marker" is supported, which implements
+                the method from Zenis et al. 2008.
+                Default is "Marker".
+        **kwargs: Additional keyword arguments for the event detection method.
+            - height: The height of peaks. Default = None
+            - threshold: The threshold of peaks. Default = None
+            - distance: The min distance in frames between events. Default = None
+            - rel_height: The relative height of peak. Default = 0.5
 
     Returns:
         A DataFrame containing the detected events.
@@ -128,8 +133,8 @@ def check_events(event_table: pd.DataFrame, method: str = "sequence"):
     Args:
         event_table: The event table to check.
         method: The method to use for checking the events.
-        Currently, only supports "sequence" which checks the sequence of events
-        in terms of context and label. Default is "sequence".
+                Currently, only supports "sequence" which checks the sequence of events
+                in terms of context and label. Default is "sequence".
 
     Returns:
         The trial with the checked events.
@@ -170,8 +175,8 @@ def segment_trial(trial: model.Trial, method: str = "HS") -> model.TrialCycles:
     Args:
         trial: The trial to segment.
         method: The method to use for segmenting the trial.
-        Currently, only supports "HS" which segments the trial based on heel strikes.
-        Default is "HS".
+                Currently, only supports "HS" which segments the trial based on heel strikes.
+                Default is "HS".
 
     Returns:
         The trial with the segmented data.
@@ -196,7 +201,9 @@ def time_normalise_trial(
     Args:
         trial: The trial to normalise the time for.
         method: The method to use for normalising the time. Currently, only supports
-        "linear" which normalises the time linearly. Default is "linear".
+                "linear" which normalises the time linearly. Default is "linear".
+        **kwargs: Additional keyword arguments for the normalisation method.
+            - n_frames: The number of frames to normalise the data to.
 
     Returns:
         The trial with the normalised time.
@@ -277,14 +284,11 @@ def export_trial(
     - analysis.nc
     - events.nc
 
-    .. warning::
-        Currently events are not exported for segmented Trials.
-
     Args:
         trial: The trial to export.
         output_path: The path to write the c3d file.
         method: The method to use for exporting the trial.
-        Currently, only supports "netcdf".
+                Currently, only supports "netcdf".
     """
     match method:
         case "netcdf":

@@ -8,3 +8,4 @@ Segmentation
 
 .. automodule:: gaitalytics.segmentation
     :members:
+    :special-members: __init__

@@ -31,25 +31,7 @@ class MappingConfigs:
     """A class for reading the mapping configuration file.
 
     This class provides methods to read the mapping configuration file and get
-    the markers and analogs for analysis. The file has to be in the YAML format and
-    has to follow this structure:
-
-    analysis: (Section to define the markers and analogs for general analysis)
-        markers: (List of markers to be used for analysis)
-            - Marker1
-            - Marker2
-            - ...
-        analogs: (List of analogs to be used for analysis)
-            - Analog1
-            - Analog2
-            - ...
-    mapping: (Section to define the mapping of markers to compute complex metrics)
-        markers: (List of mappings for markers)
-            right_heel = RHEE
-            ...
-        analogs: (List of mappings for analogs)
-            right_heel = RHEE
-            ...
+    the markers and analogs for analysis.
     """
 
     _SEC_ANALYSIS: str = "analysis"

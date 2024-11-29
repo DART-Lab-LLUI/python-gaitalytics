@@ -22,13 +22,15 @@ class FeatureCalculation(ABC):
     This class provides a common interface for calculating features.
     """
 
-    def __init__(self, config: mapping.MappingConfigs):
+    def __init__(self, config: mapping.MappingConfigs, **kwargs):
         """Initializes a new instance of the BaseFeatureCalculation class.
 
         Args:
             config: The mapping configuration to use for the feature calculation.
+            **kwargs: Additional keyword arguments.
         """
         self._config = config
+        self._kwargs = kwargs
 
     @abstractmethod
     def calculate(self, trial: model.TrialCycles) -> xr.DataArray:
@@ -523,7 +525,7 @@ class SpatialFeatures(_PointDependentFeature):
         if trial.events is None:
             raise ValueError("Trial does not have events.")
 
-        marker_dict = self.select_markers_for_spatial_features(trial)
+        marker_dict = self._select_markers_for_spatial_features(trial)
 
         results_dict = self._calculate_step_length(
             trial,
@@ -581,7 +583,7 @@ class SpatialFeatures(_PointDependentFeature):
         return self._create_result_from_dict(results_dict)
 
     @staticmethod
-    def select_markers_for_spatial_features(
+    def _select_markers_for_spatial_features(
         trial: model.Trial,
     ) -> dict[str, mapping.MappedMarkers]:
         """Select markers based on the trial's context (Right or Left). If some markers are missing, return them as None

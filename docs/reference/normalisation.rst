@@ -8,3 +8,4 @@ Normalisation
 
 .. automodule:: gaitalytics.normalisation
     :members:
+    :special-members: __init__

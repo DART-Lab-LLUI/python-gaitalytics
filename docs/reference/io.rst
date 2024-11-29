@@ -10,3 +10,4 @@ Input / Output
 
 .. automodule:: gaitalytics.io
     :members:
+    :special-members: __init__

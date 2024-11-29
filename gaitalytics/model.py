@@ -305,33 +305,7 @@ class TrialCycles(BaseTrial):
 def trial_from_hdf5(file_path: Path) -> Trial | TrialCycles:
     """Loads trial data from an HDF5 file.
 
-    Following structure is expected:
-    Trial:
-
-    - file_path (folder)
-        - Left (context)
-            - markers
-                - xarray.DataArray
-            - analogs
-                - xarray.DataArray
-            - events
-                - xarray.Dataset
-        - Right (context)
-            - ...
-
-    TrialCycles:
-
-    - file_path (folder)
-        - 0.h5 (cycle_id)
-            - Left (context)
-                - markers
-                    - xarray.DataArray
-                - analogs
-                    - xarray.DataArray
-                - events
-                    - xarray.Dataset
-            - Right (context)
-                - ...
+    Can be used to load a single trial or a segmented trial after saving it.
 
     Args:
         file_path: The path to the HDF5 file or folder with the expected structure.

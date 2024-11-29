@@ -26,14 +26,14 @@ Model export
 | Depending on the object class the function will store the data in a different way.
 | :class:`gaitalytics.model.Trial` will store the data in a single file, where as :class:`gaitalytics.model.TrialCycles` will store the data in multiple files (one file per gait cycle).
 
-| The data can be loaded again with the static function :func:`gaitalytics.model.BaseTrial.from_hdf5`.
+| The data can be loaded again with the static function :func:`gaitalytics.model.trial_from_hdf5`.
 
 .. code-block:: python
 
-    from gaitalytics import api
+    from gaitalytics import api, model
 
-    trial = api.BaseTrial.from_hdf5("./export_trial.h5")
-    segmented_trial = api.BaseTrial.from_hdf5("./export_segmented_trial.h5")
+    trial = model.trial_from_hdf5("./export_trial.h5")
+    segmented_trial = model.trial_from_hdf5("./export_segmented_trial.h5")
 ..
 
 

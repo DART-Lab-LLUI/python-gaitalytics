@@ -8,4 +8,5 @@ Features
 
 .. automodule:: gaitalytics.features
     :members:
+    :special-members: __init__
 

@@ -8,3 +8,4 @@ Mapping
 
 .. automodule:: gaitalytics.mapping
     :members:
+    :special-members: __init__

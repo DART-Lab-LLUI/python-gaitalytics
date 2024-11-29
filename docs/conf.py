@@ -20,12 +20,14 @@ author = 'André Böni'
 extensions = ['sphinx.ext.autodoc',
               'sphinx_codeautolink',
               'sphinxcontrib.images',
-              'sphinxcontrib.bibtex',]
+              'sphinxcontrib.bibtex',
+              'sphinx.ext.napoleon',]
 
 bibtex_bibfiles = ['_static/Gaitalytics.bib']
 
 bibtex_encoding = 'utf-8'
 bibtex_reference_style = "author_year"
+bibtex_default_style = "plain"
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -46,3 +48,8 @@ html_theme_options = {
 }
 
 html_favicon = '_static/favicon.png'
+
+
+napoleon_google_docstring = True
+napoleon_include_init_with_doc = True
+
