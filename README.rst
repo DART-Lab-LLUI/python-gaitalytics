@@ -42,114 +42,6 @@ it is necessary to perform data labeling, modeling, and filtering procedures.
 The library's versatility allows it to be adaptable to various marker sets and modeling algorithms,
 offering high configurability.
 
-
-Functionalities
----------------
-
-Input
-^^^^^
-Currently only c3d files are supported.
-The library provides a function to load a c3d file into a trial object for usage in the library.
-
-.. note::
-    future efforts will be made to support other file formats such as trc, mot, sto and mox files.
-
-Event Detection
-^^^^^^^^^^^^^^^
-
-+------------+---------------------------------+----------------------------------------------------------------------------+
-| Method     | Description                     | options                                                                    |
-+============+=================================+============================================================================+
-| Marker     | Zeni et al. 2008 [1]_           | - height: The height of peaks for events.                                  |
-|            |                                 | - threshold: The threshold for detecting events.                           |
-|            |                                 | - distance: The min distance in frames between events.                     |
-|            |                                 | - rel_height: The relative height of peak for events.                      |
-+------------+---------------------------------+----------------------------------------------------------------------------+
-
-
-Event Detection Check
-^^^^^^^^^^^^^^^^^^^^^
-
-+------------+--------------------------------------------------+-------------------------+
-| Method     | Description                                      | options                 |
-+============+==================================================+=========================+
-| sequence   | Checks gait event sequences                      |                         |
-|            |  - Heel Strike - Toe off - Heel Strike - Toe off |                         |
-|            |  - Left - Right - Left - Right                   |                         |
-+------------+--------------------------------------------------+-------------------------+
-
-Event Writing
-^^^^^^^^^^^^^
-
-Currently only c3d files are supported.
-The main usage for this feature is the correction of detected events.
-
-Segmentation
-^^^^^^^^^^^^
-
-Currently only the segmentation based on gait-events is supported.
-
-+------------+--------------------------------------------------+-------------------------+
-| Method     | Description                                      | options                 |
-+============+==================================================+=========================+
-| HS         | Segment based on heel strike                     |                         |
-+------------+--------------------------------------------------+-------------------------+
-| TO         | Segment based on toe off                         |                         |
-+------------+--------------------------------------------------+-------------------------+
-
-Time Normalization
-^^^^^^^^^^^^^^^^^^
-Currently only linear time normalization is supported.
-
-.. note::
-    future efforts will be made to support other time normalization
-    methods such as dynamic time warping.
-
-+------------+--------------------------------------------------+-------------------------+
-| Method     | Description                                      | options                 |
-+============+==================================================+=========================+
-| linear     | Linear time-normalisation                        |                         |
-+------------+--------------------------------------------------+-------------------------+
-
-
-Feature calculation
-^^^^^^^^^^^^^^^^^^^
-
-+-------------------------+-----------------------------------------------------------------+---------------------------------------+
-| Method                  | Description                                                     | options                               |
-+=========================+=================================================================+=======================================+
-| TimeSeriesFeatures      | - min                                                           |                                       |
-|                         | - max                                                           |                                       |
-|                         | - mean                                                          |                                       |
-|                         | - sd                                                            |                                       |
-|                         | - median                                                        |                                       |
-|                         | - amplitude                                                     |                                       |
-+-------------------------+-----------------------------------------------------------------+---------------------------------------+
-| PhaseTimeSeriesFeatures | - stand_min                                                     |                                       |
-|                         | - stand_max                                                     |                                       |
-|                         | - stand_mean                                                    |                                       |
-|                         | - stand_sd                                                      |                                       |
-|                         | - stand_median                                                  |                                       |
-|                         | - stand_amplitude                                               |                                       |
-|                         | - swing_max                                                     |                                       |
-|                         | - swing_mean                                                    |                                       |
-|                         | - swing_sd                                                      |                                       |
-|                         | - swing_median                                                  |                                       |
-|                         | - swing_amplitude                                               |                                       |
-+-------------------------+-----------------------------------------------------------------+---------------------------------------+
-| SpatialFeatures         | - step_length [2]_                                              |                                       |
-|                         | - stride_length [2]_                                            |                                       |
-|                         | - step_width [2]_                                               |                                       |
-|                         | - minimal_toe_clearance [3]_                                    |                                       |
-+-------------------------+-----------------------------------------------------------------+---------------------------------------+
-| TemporalFeatures        | - cycle_duration                                                |                                       |
-|                         | - swing_duration_perc                                           |                                       |
-|                         | - stance_duration_perc                                          |                                       |
-|                         | - cadence [2]_                                                  |                                       |
-|                         | - single_support_duration_percent [4]_                          |                                       |
-|                         | - double_support_duration_percent [4]_                          |                                       |
-+-------------------------+-----------------------------------------------------------------+---------------------------------------+
-
 Quickstart
 ----------
 
@@ -182,10 +74,8 @@ Minimal requirements would look like this:
 
 .. code-block:: yaml
 
-    # Markers to analyse
     analysis:
-      markers: # Markers to analyse
-        # Left side
+      markers:
         - "LHipAngles"
         - "LKneeAngles"
         - "LAnkleAngles"
@@ -255,19 +145,4 @@ Simple Pipeline
 Documentation
 -------------
 https://python-gaitalytics.readthedocs.org
-
-.. rubric:: References
-
-.. [1] Zeni Joseph, F. Pozzi, S. Abujaber, and L. Miller, “Relationship between physical impairments and movement patterns during gait in patients with end‐stage hip osteoarthritis,” J Orthopaed Res, vol. 33, no. 3, pp. 382–389, 2015, doi: 10.1002/jor.22772.
-
-.. [2] J. H. Hollman, E. M. McDade, and R. C. Petersen, “Normative Spatiotemporal Gait Parameters in Older Adults,” Gait Posture, vol. 34, no. 1, pp. 111–118, May 2011, doi: 10.1016/j.gaitpost.2011.03.024.`
-
-.. [3] B. W. Schulz, “A new measure of trip risk integrating minimum foot clearance and dynamic stability across the swing phase of gait,” Journal of Biomechanics, vol. 55, pp. 107–112, Apr. 2017, doi: 10.1016/j.jbiomech.2017.02.024.
-
-.. [4] A. Gouelle and F. Mégrot, “Interpreting Spatiotemporal Parameters, Symmetry, and Variability in Clinical Gait Analysis,” Handbook of Human Motion, pp. 1–20, 2016, doi: 10.1007/978-3-319-30808-1_35-1.
-
-
-
-
-
 
