@@ -11,15 +11,25 @@ Gaitalytics
     * - tests
       - | |github-actions|
     * - package
-      - | |pixi-badge|
+      - | |pypi|
+        | |conda|
+    * - development
+      - | |MIT|
+        | |last-commit|
         | |commits-since|
-.. |docs| image:: https://readthedocs.org/projects/python-gaitalytics/badge/?style=flat
+        | |pixi-badge|
+
+.. |docs| image:: https://img.shields.io/readthedocs/python-gaitalytics?logo=readthedocs
     :target: https://python-gaitalytics.readthedocs.io/
     :alt: Documentation Status
 
-.. |github-actions| image:: https://github.com/DART-Lab-LLUI/python-gaitalytics/actions/workflows/on_push_test.yaml/badge.svg
+.. |github-actions| image:: https://img.shields.io/github/actions/workflow/status/DART-Lab-LLUI/python-gaitalytics/on_push_test.yaml?logo=pytest
     :alt: GitHub Actions Build Status
     :target: https://github.com/DART-Lab-LLUI/python-gaitalytics/actions/
+
+.. |last-commit| image:: https://img.shields.io/github/last-commit/DART-Lab-LLUI/python-gaitalytics
+   :alt: GitHub last commit
+   :target: https://github.com/DART-Lab-LLUI/python-gaitalytics
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/DART-Lab-LLUI/python-gaitalytics/latest.svg
     :alt: Commits since latest release
@@ -28,6 +38,23 @@ Gaitalytics
 .. |pixi-badge| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json
     :alt: Pixi Badge
     :target: https://pixi.sh
+
+.. |pypi| image:: https://img.shields.io/pypi/dm/gaitalytics?logo=pypi
+   :alt: PyPI - Downloads
+   :target: https://pypi.org/project/gaitalytics/
+
+.. |conda| image:: https://img.shields.io/conda/dn/DartLab-LLUI/gaitalytics?logo=anaconda
+   :alt: Conda Downloads
+   :target: https://anaconda.org/dartlab-llui/gaitalytics
+
+.. |MIT| image:: https://img.shields.io/github/license/DART-Lab-LLUI/python-gaitalytics?logo=opensourceinitiative
+   :alt: GitHub License
+
+
+
+
+
+
 .. end-badges
 
 This Python package provides a comprehensive set of tools and advanced algorithms for analyzing 3D motion capture data.
@@ -57,8 +84,10 @@ Or with pip:
     pip install gaitalytics
 ..
 
+..
+
 .. warning::
-        | Manual installation of the *pyomeca* package is required. when using the pip installation method.
+        | Manual installation of the `pyomeca <https://pyomeca.github.io/>`_ package is required. when using the pip installation method.
 
 Configuration
 ^^^^^^^^^^^^^
