@@ -30,11 +30,6 @@ Gaitalytics
     :target: https://pixi.sh
 .. end-badges
 
-.. image:: https://github.com/DART-Lab-LLUI/python-gaitalytics/blob/960332e21954b499825e7eb4944e6b6e2c565b24/docs/_static/images/Gaitalytics_noBackground.png
-    :alt: Gaitalytics Logo
-    :align: center
-    :width: 200px
-
 This Python package provides a comprehensive set of tools and advanced algorithms for analyzing 3D motion capture data.
 It is specifically designed to process gait data stored in c3d format. Prior to utilizing the features of gaitalytics,
 it is necessary to perform data labeling, modeling, and filtering procedures.
@@ -54,6 +49,16 @@ Fast install with anaconda:
 
     conda install gaitalytics -c DartLab-LLUI
 ..
+
+Or with pip:
+
+.. code:: shell
+
+    pip install gaitalytics
+..
+
+.. warning::
+        | Manual installation of the *pyomeca* package is required. when using the pip installation method.
 
 Configuration
 ^^^^^^^^^^^^^
