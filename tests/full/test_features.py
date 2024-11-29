@@ -124,7 +124,6 @@ class TestTimeSeriesFeatures:
                                 and not max_value.isnull()
                                 and not mean_value.isnull()
                                 and not median_value.isnull()):
-
                             assert min_value <= max_value
                             assert min_value <= mean_value
                             assert max_value >= mean_value
@@ -201,7 +200,7 @@ class TestTemporalFeatures:
         features = TemporalFeatures(configs).calculate(trial_small)
 
         rec_value = features.shape[2]
-        exp_value = 8
+        exp_value = 9
         assert rec_value == exp_value
 
         # Stride time
@@ -213,21 +212,21 @@ class TestTemporalFeatures:
         assert rec_value == pytest.approx(exp_value, rel=1e-3)
 
         # Stride time
-        rec_value = features.loc["Left", 0, "stride_time"]
+        rec_value = features.loc["Left", 0, "stride_duration"]
         exp_value = 1.06
         assert rec_value == pytest.approx(exp_value, rel=1e-2)
 
-        rec_value = features.loc["Right", 0, "stride_time"]
+        rec_value = features.loc["Right", 0, "stride_duration"]
         exp_value = 1.09
         assert rec_value == pytest.approx(exp_value, rel=1e-2)
 
         # Step time
-        rec_value = features.loc["Left", 0, "step_time"]
-        exp_value = 0.5
+        rec_value = features.loc["Left", 0, "step_duration"]
+        exp_value = 0.39
         assert rec_value == pytest.approx(exp_value, rel=1e-2)
 
-        rec_value = features.loc["Right", 0, "step_time"]
-        exp_value = 0.56
+        rec_value = features.loc["Right", 0, "step_duration"]
+        exp_value = 0.44
         assert rec_value == pytest.approx(exp_value, rel=1e-2)
 
         # Double support
@@ -249,31 +248,47 @@ class TestTemporalFeatures:
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
         # Opposite foot off
-        rec_value = features.loc["Left", 0, "opposite_foot_off"]
+        rec_value = features.loc["Left", 0, "opposite_foot_off_prec"]
         exp_value = 11.3208 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
-        rec_value = features.loc["Right", 0, "opposite_foot_off"]
+        rec_value = features.loc["Right", 0, "opposite_foot_off_prec"]
         exp_value = 12.8440 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
         # Opposite foot contact
-        rec_value = features.loc["Left", 0, "opposite_foot_contact"]
+        rec_value = features.loc["Left", 0, "opposite_foot_contact_prec"]
         exp_value = 52.8302 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
-        rec_value = features.loc["Right", 0, "opposite_foot_contact"]
+        rec_value = features.loc["Right", 0, "opposite_foot_contact_prec"]
         exp_value = 48.6239 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
         # foot off
-        rec_value = features.loc["Left", 0, "foot_off"]
+        rec_value = features.loc["Left", 0, "stance_duration_prec"]
         exp_value = 63.2075 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
-        rec_value = features.loc["Right", 0, "foot_off"]
+        rec_value = features.loc["Right", 0, "stance_duration_prec"]
         exp_value = 59.6330 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
+
+        rec_value = features.loc["Left", 0, "swing_duration_prec"]
+        exp_value = 36.7924 / 100
+        assert rec_value == pytest.approx(exp_value, rel=1e-5)
+
+        rec_value = features.loc["Right", 0, "swing_duration_prec"]
+        exp_value = 40.3669 / 100
+        assert rec_value == pytest.approx(exp_value, rel=1e-5)
+
+        rec_value = features.loc["Right", 0, "swing_duration_prec"] + features.loc["Right", 0, "stance_duration_prec"]
+        exp_value = 1
+        assert rec_value == exp_value
+
+        rec_value = features.loc["Left", 0, "swing_duration_prec"] + features.loc["Left", 0, "stance_duration_prec"]
+        exp_value = 1
+        assert rec_value == exp_value
 
 
 class TestSpatialFeatures:

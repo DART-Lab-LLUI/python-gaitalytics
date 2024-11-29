@@ -26,9 +26,10 @@ SpatialFeatures,step_length,"cm, mm✝"
 TemporalFeatures,cycle_duration,sec
 ,double_support\ :footcite:`muller_interpreting_2016`,%
 ,single_support\ :footcite:`muller_interpreting_2016`,%
-,foot_off,%
-,opposite_foot_off,%
-,opposite_foot_contact,%
-,stride_time,sec
-,step_time,sec
+,stance_duration_prec,%
+,swing_duration_prec,%
+,opposite_foot_off_prec,%
+,opposite_foot_contact_prec,%
+,stride_duration,sec
+,stance_duration,sec
 ,cadence\ :footcite:p:`hollman_normative_2011`,steps/min

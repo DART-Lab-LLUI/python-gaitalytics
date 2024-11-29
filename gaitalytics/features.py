@@ -426,11 +426,12 @@ class TemporalFeatures(_CycleFeaturesCalculation):
     This class calculates following temporal features for a trial.
         - double_support
         - single_support
-        - foot_off
-        - opposite_foot_off
-        - opposite_foot_contact
-        - stride_time
-        - step_time
+        - stance_duration_prec
+        - swing_duration_prec
+        - opposite_foot_off_prec
+        - opposite_foot_contact_prec
+        - stride_duration
+        - stance_duration
         - cadence
     """
 
@@ -461,11 +462,16 @@ class TemporalFeatures(_CycleFeaturesCalculation):
             rel_event_times[3],
             rel_event_times[4],
         )
-        result_dict["foot_off"] = rel_event_times[3] / rel_event_times[4]
-        result_dict["opposite_foot_off"] = rel_event_times[1] / rel_event_times[4]
-        result_dict["opposite_foot_contact"] = rel_event_times[2] / rel_event_times[4]
-        result_dict["stride_time"] = rel_event_times[4]
-        result_dict["step_time"] = rel_event_times[4] - rel_event_times[2]
+        result_dict["stance_duration_prec"] = rel_event_times[3] / rel_event_times[4]
+        result_dict["opposite_foot_off_prec"] = rel_event_times[1] / rel_event_times[4]
+        result_dict["opposite_foot_contact_prec"] = (
+            rel_event_times[2] / rel_event_times[4]
+        )
+        result_dict["stride_duration"] = rel_event_times[4]
+        result_dict["step_duration"] = rel_event_times[4] - rel_event_times[3]
+        result_dict["swing_duration_prec"] = (
+            (result_dict["step_duration"]) / rel_event_times[4]
+        )
         result_dict["cadence"] = 60 / (rel_event_times[4] / 2)
 
         return self._create_result_from_dict(result_dict)
