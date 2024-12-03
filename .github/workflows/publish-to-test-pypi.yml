@@ -5,7 +5,13 @@ on:
   push:
     # Sequence of patterns matched against refs/tags
     tags:
-      - '^\d+\.\d+\.\d+(a|b|\.dev|.post|)\d?$' # Push events to matching 1.2.3 1.2.3a1 1.2.3b1 1.2.3.dev1 1.2.3.post1
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+rc[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+a[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+b[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+\.dev[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+\.post[0-9]+'
+      #- '^\d+\.\d+\.\d+(a|b|\.dev|.post|)\d?$' # Push events to matching 1.2.3 1.2.3a1 1.2.3b1 1.2.3.dev1 1.2.3.post1
 
 jobs:
   build:
