@@ -19,7 +19,6 @@ author = 'André Böni'
 
 extensions = ['sphinx.ext.autodoc',
               'sphinx_codeautolink',
-              'sphinxcontrib.images',
               'sphinxcontrib.bibtex',
               'sphinx.ext.napoleon',]
 
