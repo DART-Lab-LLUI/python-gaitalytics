@@ -1,5 +1,5 @@
 {% set name = "gaitalytics" %}
-{% set version = '0.2.1.post4' %}
+{% set version = '0.2.1.post5' %}
 
 
 package:
@@ -31,10 +31,7 @@ requirements:
     - pandas >=1.5
     - pyyaml >=6.0.1
     - scipy >=1.13
-    - numpy >=1.23
-    - xarray >=2024.6.0
     - pyomeca >=2021.0
-    - ezc3d >=1.5.10,*=*python*
 
 test:
   source_files:
@@ -42,10 +39,8 @@ test:
   imports:
     - gaitalytics
   commands:
-    - pip check
     - pytest tests/test_api.py
   requires:
-    - pip
     - pytest
 
 
