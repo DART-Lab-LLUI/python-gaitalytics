@@ -123,12 +123,21 @@ jobs:
       with:
         repository-url: https://test.pypi.org/legacy/
 
-  publish-to-conda:
+  conda_deployment_with_new_tag:
+    name: Conda deployment of package
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@master
-      - name: publish-to-conda
-        uses: maxibor/conda-package-publish-action@v1.1
+      - name: Check out repository code
+        uses: actions/checkout@master
+      - name: Setup pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
         with:
-          subDir: 'conda.recipe'
-          AnacondaToken: ${{ secrets.ANACONDA_TOKEN }}
+          pixi-version: v0.37.0
+          cache: false
+      - name: Build a binary wheel and a source tarball
+        run: pixi run conda-build
+      - name: anaconda login
+        run: pixi r -e build anaconda login --username ${{ secrets.ANACONDA_USERNAME }} --password ${{ secrets.ANACONDA_PASSWORD }}
+      - name: anaconda upload
+        run: pixi r -e build anaconda upload --user dartlab-llui -p gaitalytics --no-register --skip-existing  .\conda\conda-build\noarch\*.tar.bz2
