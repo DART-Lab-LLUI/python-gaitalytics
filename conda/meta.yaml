@@ -1,5 +1,5 @@
 {% set name = "gaitalytics" %}
-{% set version = '0.2.1.post3' %}
+{% set version = '0.2.1.post4' %}
 
 
 package:
@@ -33,8 +33,8 @@ requirements:
     - scipy >=1.13
     - numpy >=1.23
     - xarray >=2024.6.0
-    - pyomeca >=2024.0.2
-    - ezc3d >=1.5.17,*=*python*
+    - pyomeca >=2021.0
+    - ezc3d >=1.5.10,*=*python*
 
 test:
   source_files:

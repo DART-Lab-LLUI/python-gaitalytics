@@ -126,7 +126,8 @@ jobs:
   conda_deployment_with_new_tag:
     name: Conda deployment of package
     runs-on: ubuntu-latest
-
+    needs:
+      - github-release
     steps:
       - name: Check out repository code
         uses: actions/checkout@master
