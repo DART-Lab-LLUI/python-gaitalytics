@@ -141,4 +141,4 @@ jobs:
       - name: anaconda login
         run: pixi r -e build anaconda login --username ${{ secrets.ANACONDA_USERNAME }} --password ${{ secrets.ANACONDA_PASSWORD }}
       - name: anaconda upload
-        run: pixi r -e build anaconda upload --user dartlab-llui -p gaitalytics --no-register --skip-existing  .\conda\conda-build\noarch\*.tar.bz2
+        run: pixi r -e build anaconda upload --user dartlab-llui -p gaitalytics --no-register --skip-existing  .\conda-build\noarch\gaitalytics*.tar.bz2
