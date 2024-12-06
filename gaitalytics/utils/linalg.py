@@ -31,7 +31,9 @@ def project_point_on_vector(point: xr.DataArray, vector: xr.DataArray) -> xr.Dat
     return vector * point.dot(vector, dim="axis")
 
 def signed_projection_norm(vector: xr.DataArray, onto: xr.DataArray) -> xr.DataArray:
-    """Compute the signed norm of the projection of a vector onto another vector.
+    """Compute the signed norm of the projection of a vector onto another vector. <br>
+    If the projection is in the same direction as the onto vector, the norm is positive. <br>
+    If the projection is in the opposite direction, the norm is negative. <br>
 
     Args:
         vector: The vector to be projected.
@@ -45,25 +47,6 @@ def signed_projection_norm(vector: xr.DataArray, onto: xr.DataArray) -> xr.DataA
     sign = xr.where(vector.dot(onto, dim="axis") > 0, 1, -1)
     sign = xr.where(vector.dot(onto, dim="axis") == 0, 0, sign)
     return projection_norm * sign
-
-def calculate_signed_distance_on_vector(point_a: xr.DataArray, point_b: xr.DataArray, direction_vector: xr.DataArray) -> xr.DataArray: 
-    """Return the signed distance = A - B between two points projected on vector. The sign is determined based on whether point A is in front of point B according to the direction vector
-
-    Args:
-        point_a (xr.DataArray): Point A
-        point_b (xr.DataArray): Point B
-        direction_vector (xr.DataArray): The direction vector on which we project points
-
-    Returns:
-        xr.DataArray: The signed distance A-B
-    """
-    direction_vector = direction_vector / direction_vector.meca.norm(dim="axis")
-    
-    vector_b_to_a = point_a - point_b
-    
-    signed_distance = vector_b_to_a.dot(direction_vector, dim="axis")
-    
-    return signed_distance
 
 
 def get_normal_vector(vector1: xr.DataArray, vector2: xr.DataArray) -> xr.DataArray:
@@ -150,8 +133,3 @@ def get_point_behind(point_a: xr.DataArray, point_b: xr.DataArray, direction_vec
     signed_distance = vector_b_to_a.dot(direction_vector, dim="axis")
     
     return point_b if signed_distance > 0 else point_a
-
-
-
-
-    return speed_values

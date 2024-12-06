@@ -4,10 +4,8 @@ import numpy as np
 
 from gaitalytics.utils.linalg import (
     calculate_distance,
-    calculate_angle,
     project_point_on_vector,
     signed_projection_norm,
-    calculate_signed_distance_on_vector,
     get_normal_vector,
     normalize_vector,
     calculate_speed_norm, 
@@ -29,12 +27,6 @@ def test_calculate_distance(sample_data):
     expected_distance = np.sqrt(27)
     assert distance == pytest.approx(expected_distance)
 
-def test_calculate_angle(sample_data):
-    _, _, vector_a, vector_b = sample_data
-    angle = calculate_angle(vector_a, vector_b)
-    expected_angle = 90.0
-    assert angle == pytest.approx(expected_angle)
-
 def test_project_point_on_vector(sample_data):
     point_a, _, vector_a, _ = sample_data
     projected_point = project_point_on_vector(point_a, vector_a)
@@ -46,12 +38,6 @@ def test_signed_projection_norm(sample_data):
     signed_norm = signed_projection_norm(vector_a, vector_b)
     expected_signed_norm = 0.0
     assert signed_norm == pytest.approx(expected_signed_norm)
-
-def test_calculate_signed_distance_on_vector(sample_data):
-    point_a, point_b, vector_a, _ = sample_data
-    signed_distance = calculate_signed_distance_on_vector(point_a, point_b, vector_a)
-    expected_signed_distance = -3.0
-    assert signed_distance == pytest.approx(expected_signed_distance)
 
 def test_get_normal_vector(sample_data):
     _, _, vector_a, vector_b = sample_data
