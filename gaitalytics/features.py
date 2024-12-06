@@ -535,12 +535,6 @@ class SpatialFeatures(_PointDependentFeature):
         )
         if marker_dict["xcom"] is not None:
             results_dict.update(
-                self._calculate_AP_xcom(trial, marker_dict["xcom"])
-            )
-            results_dict.update(
-                self._calculate_ML_xcom(trial, marker_dict["xcom"])
-            )
-            results_dict.update(
                 self._calculate_AP_margin_of_stability(trial, marker_dict["ipsi_heel"], marker_dict["contra_toe_2"], marker_dict["xcom"])
             )
             if (marker_dict['ipsi_ankle'] is not None) and (marker_dict['contra_ankle'] is not None):
@@ -626,10 +620,10 @@ class SpatialFeatures(_PointDependentFeature):
         event_times = self.get_event_times(trial.events)
 
         ipsi_heel = self._get_marker_data(trial, ipsi_marker).sel(
-            time=event_times[-1], method="nearest"
+            time=event_times[0], method="nearest"
         )
         contra_heel = self._get_marker_data(trial, contra_marker).sel(
-            time=event_times[-1], method="nearest"
+            time=event_times[0], method="nearest"
         )
         progress_axis = self._get_progression_vector(trial)
         progress_axis = linalg.normalize_vector(progress_axis)
@@ -706,70 +700,7 @@ class SpatialFeatures(_PointDependentFeature):
             distance = linalg.calculate_distance(projected_ipsi, projected_contra).values
             total_distance += distance
             
-        return {"stride_length": total_distance}
-    
-    def _calculate_AP_xcom(
-        self,
-        trial: model.Trial,
-        xcom_marker: mapping.MappedMarkers
-    ) -> dict[str, np.ndarray]:
-        """
-        Args:
-            trial: The trial for which to calculate the XCoM position relative to the pelvis center.
-            xcom_marker: The XCoM marker
-            sacrum_marker: The sacrum marker
-
-        Returns:
-            The position of the XCoM relative to the sacrum marker.
-        """
-
-        event_times = self.get_event_times(trial.events)
-
-        xcom = self._get_marker_data(trial, xcom_marker).sel(
-            time=event_times[0], method="nearest"
-        )
-        sacrum = self._get_sacrum_marker(trial).sel(
-            time=event_times[0], method="nearest"
-        )
-        
-        progress_axis = self._get_progression_vector(trial)
-        progress_axis = linalg.normalize_vector(progress_axis)
-
-        distance = linalg.calculate_signed_distance_on_vector(xcom, sacrum, progress_axis)
-        return {"AP_xcom": distance}
-    
-    def _calculate_ML_xcom(
-        self,
-        trial: model.Trial,
-        xcom_marker: mapping.MappedMarkers
-    ) -> dict[str, np.ndarray]:
-        """
-        Args:
-            trial: The trial for which to calculate the XCoM position relative to the pelvis center
-            xcom_marker: The XCoM marker
-            sacrum_marker: The sacrum marker
-
-        Returns:
-            The position of the XCoM relative to the sacrum marker in the ML direction.
-        """
-
-        event_times = self.get_event_times(trial.events)
-
-        xcom = self._get_marker_data(trial, xcom_marker).sel(
-            time=event_times[0], method="nearest"
-        )
-        sacrum = self._get_sacrum_marker(trial).sel(
-            time=event_times[0], method="nearest"
-        )
-        
-        sagittal_axis = self._get_sagittal_vector(trial)
-        sagittal_axis = linalg.normalize_vector(sagittal_axis)
-        projected_xcom = linalg.project_point_on_vector(xcom, sagittal_axis)
-        projected_sacrum = linalg.project_point_on_vector(sacrum, sagittal_axis)
-        
-        distance = linalg.calculate_distance(projected_xcom, projected_sacrum).values  
-        return {"ML_xcom": distance}
-    
+        return {"stride_length": total_distance} 
         
     def _calculate_minimal_toe_clearance(
             self,
@@ -866,6 +797,7 @@ class SpatialFeatures(_PointDependentFeature):
             dict: A dictionary containing:
                 - "AP_margin_of_stability": The calculated anterio-posterior margin of stability.
                 - "AP_base_of_support": The calculated anterio-posterior base of support.
+                - "AP_XCOM": The calculated anterio-posterior position of the extrapolated center of mass.
                 - "AP_stability": The stability status based on the AP margin of stability. 0 if unstable, 1 if stable.
         """
         event_times = self.get_event_times(trial.events)
@@ -897,6 +829,7 @@ class SpatialFeatures(_PointDependentFeature):
         
         return {"AP_margin_of_stability": mos, 
                 "AP_base_of_support": bos_proj,
+                "AP_xcom": xcom_proj,
                 "AP_stability": AP_stability}
     
     
@@ -917,6 +850,7 @@ class SpatialFeatures(_PointDependentFeature):
             dict: A dictionary containing:
                 - "ML_margin_of_stability": The calculated medio-lateral margin of stability.
                 - "ML_base_of_support": The calculated medio-lateral base of support.
+                - "ML_xcom": The calculated medio-lateral position of the extrapolated center of mass.
                 - "ML_stability": The stability status based on the ML margin of stability. 0 if unstable, 1 if stable.
         """
         event_times = self.get_event_times(trial.events)
@@ -952,6 +886,7 @@ class SpatialFeatures(_PointDependentFeature):
         
         return {"ML_margin_of_stability": mos,
                 "ML_base_of_support": bos_proj,
+                "ML_xcom": xcom_proj,
                 "ML_stability": ML_stability}
     
     @staticmethod
@@ -998,7 +933,6 @@ class SpatialFeatures(_PointDependentFeature):
         foot_vector = ipsi_toe - ipsi_heel
         
         foot_angle = linalg.calculate_angle(foot_vector, progress_axis)
-        
 
         return {"foot_angle": foot_angle}
     
