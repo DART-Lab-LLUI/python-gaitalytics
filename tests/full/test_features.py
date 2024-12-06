@@ -95,37 +95,41 @@ class TestTimeSeriesFeatures:
     def test_calculation(self, configs, trial_small):
         features = TimeSeriesFeatures(configs).calculate(trial_small)
         for feature in features.feature.values:
-            if "_min" in features:
+            if "_min" in feature:
                 marker = feature.replace("_min", "")
                 for context in features.context.values:
-                    for cycle_id in features.cycle_id.values:
+                    for cycle_id in features.cycle.values:
                         min_value = features.loc[
                             dict(feature=f"{marker}_min",
                                  context=context,
-                                 cycle_id=cycle_id)]
+                                 cycle=cycle_id)]
                         max_value = features.loc[
                             dict(feature=f"{marker}_max",
                                  context=context,
-                                 cycle_id=cycle_id)]
+                                 cycle=cycle_id)]
                         mean_value = features.loc[
                             dict(feature=f"{marker}_mean",
                                  context=context,
-                                 cycle_id=cycle_id)]
+                                 cycle=cycle_id)]
                         median_value = features.loc[
                             dict(feature=f"{marker}_median",
                                  context=context,
-                                 cycle_id=cycle_id)]
+                                 cycle=cycle_id)]
                         amp_value = features.loc[
                             dict(feature=f"{marker}_amplitude",
                                  context=context,
-                                 cycle_id=cycle_id)]
+                                 cycle=cycle_id)]
 
-                        assert min_value <= max_value
-                        assert min_value <= mean_value
-                        assert max_value >= mean_value
-                        assert min_value <= median_value
-                        assert max_value >= median_value
-                        assert amp_value == (max_value - min_value)
+                        if (not min_value.isnull()
+                                and not max_value.isnull()
+                                and not mean_value.isnull()
+                                and not median_value.isnull()):
+                            assert min_value <= max_value
+                            assert min_value <= mean_value
+                            assert max_value >= mean_value
+                            assert min_value <= median_value
+                            assert max_value >= median_value
+                            assert amp_value == (max_value - min_value)
 
     def test_reshape(self, trial_small):
         features = TimeSeriesFeatures._calculate_features(
@@ -144,37 +148,40 @@ class TestPhaseTimeSeriesFeatures:
         features = PhaseTimeSeriesFeatures(configs).calculate(trial_small)
         for phase in ["_stand", "_swing"]:
             for feature in features.feature.values:
-                if "_min" in features:
+                if f"_min{phase}" in feature:
                     marker = feature.replace(f"_min{phase}", "")
                     for context in features.context.values:
-                        for cycle_id in features.cycle_id.values:
+                        for cycle_id in features.cycle.values:
                             min_value = features.loc[
                                 dict(feature=f"{marker}_min{phase}",
                                      context=context,
-                                     cycle_id=cycle_id)]
+                                     cycle=cycle_id)]
                             max_value = features.loc[
                                 dict(feature=f"{marker}_max{phase}",
                                      context=context,
-                                     cycle_id=cycle_id)]
+                                     cycle=cycle_id)]
                             mean_value = features.loc[
                                 dict(feature=f"{marker}_mean{phase}",
                                      context=context,
-                                     cycle_id=cycle_id)]
+                                     cycle=cycle_id)]
                             median_value = features.loc[
                                 dict(feature=f"{marker}_median{phase}",
                                      context=context,
-                                     cycle_id=cycle_id)]
+                                     cycle=cycle_id)]
                             amp_value = features.loc[
                                 dict(feature=f"{marker}_amplitude{phase}",
                                      context=context,
-                                     cycle_id=cycle_id)]
-
-                            assert min_value <= max_value
-                            assert min_value <= mean_value
-                            assert max_value >= mean_value
-                            assert min_value <= median_value
-                            assert max_value >= median_value
-                            assert amp_value == (max_value - min_value)
+                                     cycle=cycle_id)]
+                            if (not min_value.isnull()
+                                    and not max_value.isnull()
+                                    and not mean_value.isnull()
+                                    and not median_value.isnull()):
+                                assert min_value <= max_value
+                                assert min_value <= mean_value
+                                assert max_value >= mean_value
+                                assert min_value <= median_value
+                                assert max_value >= median_value
+                                assert amp_value == (max_value - min_value)
 
     def test_reshape(self, trial_small):
         features = TimeSeriesFeatures._calculate_features(
@@ -193,7 +200,7 @@ class TestTemporalFeatures:
         features = TemporalFeatures(configs).calculate(trial_small)
 
         rec_value = features.shape[2]
-        exp_value = 8
+        exp_value = 9
         assert rec_value == exp_value
 
         # Stride time
@@ -205,21 +212,21 @@ class TestTemporalFeatures:
         assert rec_value == pytest.approx(exp_value, rel=1e-3)
 
         # Stride time
-        rec_value = features.loc["Left", 0, "stride_time"]
+        rec_value = features.loc["Left", 0, "stride_duration"]
         exp_value = 1.06
         assert rec_value == pytest.approx(exp_value, rel=1e-2)
 
-        rec_value = features.loc["Right", 0, "stride_time"]
+        rec_value = features.loc["Right", 0, "stride_duration"]
         exp_value = 1.09
         assert rec_value == pytest.approx(exp_value, rel=1e-2)
 
         # Step time
-        rec_value = features.loc["Left", 0, "step_time"]
-        exp_value = 0.5
+        rec_value = features.loc["Left", 0, "step_duration"]
+        exp_value = 0.39
         assert rec_value == pytest.approx(exp_value, rel=1e-2)
 
-        rec_value = features.loc["Right", 0, "step_time"]
-        exp_value = 0.56
+        rec_value = features.loc["Right", 0, "step_duration"]
+        exp_value = 0.44
         assert rec_value == pytest.approx(exp_value, rel=1e-2)
 
         # Double support
@@ -241,31 +248,47 @@ class TestTemporalFeatures:
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
         # Opposite foot off
-        rec_value = features.loc["Left", 0, "opposite_foot_off"]
+        rec_value = features.loc["Left", 0, "opposite_foot_off_prec"]
         exp_value = 11.3208 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
-        rec_value = features.loc["Right", 0, "opposite_foot_off"]
+        rec_value = features.loc["Right", 0, "opposite_foot_off_prec"]
         exp_value = 12.8440 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
         # Opposite foot contact
-        rec_value = features.loc["Left", 0, "opposite_foot_contact"]
+        rec_value = features.loc["Left", 0, "opposite_foot_contact_prec"]
         exp_value = 52.8302 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
-        rec_value = features.loc["Right", 0, "opposite_foot_contact"]
+        rec_value = features.loc["Right", 0, "opposite_foot_contact_prec"]
         exp_value = 48.6239 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
         # foot off
-        rec_value = features.loc["Left", 0, "foot_off"]
+        rec_value = features.loc["Left", 0, "stance_duration_prec"]
         exp_value = 63.2075 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
 
-        rec_value = features.loc["Right", 0, "foot_off"]
+        rec_value = features.loc["Right", 0, "stance_duration_prec"]
         exp_value = 59.6330 / 100
         assert rec_value == pytest.approx(exp_value, rel=1e-5)
+
+        rec_value = features.loc["Left", 0, "swing_duration_prec"]
+        exp_value = 36.7924 / 100
+        assert rec_value == pytest.approx(exp_value, rel=1e-5)
+
+        rec_value = features.loc["Right", 0, "swing_duration_prec"]
+        exp_value = 40.3669 / 100
+        assert rec_value == pytest.approx(exp_value, rel=1e-5)
+
+        rec_value = features.loc["Right", 0, "swing_duration_prec"] + features.loc["Right", 0, "stance_duration_prec"]
+        exp_value = 1
+        assert rec_value == exp_value
+
+        rec_value = features.loc["Left", 0, "swing_duration_prec"] + features.loc["Left", 0, "stance_duration_prec"]
+        exp_value = 1
+        assert rec_value == exp_value
 
 
 class TestSpatialFeatures:
@@ -298,27 +321,24 @@ class TestSpatialFeatures:
 
         rec_value = features.loc["Left", 0, "step_length"]
         exp_value = 532.01
-        assert rec_value == pytest.approx(exp_value,rel=1e-1)
+        assert rec_value == pytest.approx(exp_value, rel=1e-1)
 
         rec_value = features.loc["Right", 0, "step_length"]
         exp_value = 565.24
-        assert rec_value == pytest.approx(exp_value,rel=1e-1)
-        
+        assert rec_value == pytest.approx(exp_value, rel=1e-1)
+
         rec_value = features.loc["Right", 0, "stride_length"]
         exp_value = 1114.59
-        assert rec_value == pytest.approx(exp_value,rel=1e-2)
-        
+        assert rec_value == pytest.approx(exp_value, rel=1e-2)
+
         rec_value = features.loc["Left", 0, "stride_length"]
         exp_value = 1112.47
-        assert rec_value == pytest.approx(exp_value,rel=1e-2)
-        
+        assert rec_value == pytest.approx(exp_value, rel=1e-2)
+
         rec_value = features.loc["Left", 0, "minimal_toe_clearance"]
         exp_value = 68.75803
         assert rec_value == pytest.approx(exp_value, rel=1e-6)
-        
+
         rec_value = features.loc["Right", 0, "minimal_toe_clearance"]
         exp_value = 60.77047
         assert rec_value == pytest.approx(exp_value, rel=1e-6)
-        
-        
-

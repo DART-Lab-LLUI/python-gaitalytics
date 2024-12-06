@@ -139,14 +139,14 @@ class C3dEventInputFileReader(_EventInputFileReader):
         self._c3d = ezc3d.c3d(str(file_path))
         super().__init__(file_path)
 
-    def get_events(self) -> pd.DataFrame:
+    def get_events(self) -> pd.DataFrame | None:
         """Gets the events from the input file sorted by time.
 
         Returns:
-            A DataFrame containing the events.
+            pd.DataFrame A DataFrame containing the events.
+            None if there are no events in the C3D file.
 
-        Raises:
-            ValueError: If no events are found in the C3D file.
+
         """
         labels = self._get_event_labels()
         times = self._get_event_times()
@@ -155,7 +155,7 @@ class C3dEventInputFileReader(_EventInputFileReader):
 
         # Check if there are any events in the C3D file
         if not (labels and times and contexts and icons):
-            raise ValueError("No events found in the C3D file.")
+            return None
 
         table = pd.DataFrame(
             {

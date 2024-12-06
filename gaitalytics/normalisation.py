@@ -21,8 +21,7 @@ class BaseNormaliser(ABC):
             trial: The trial to be normalised.
 
         Returns:
-            model.Trial: A new trial containing the normalised data.
-            model.TrialCycles: A new segmented trial containing the normalised data
+            A new trial containing the normalised data.
         """
         raise NotImplementedError
 
@@ -31,7 +30,6 @@ class LinearTimeNormaliser(BaseNormaliser):
     """A class for normalising data based on time.
 
     This class provides a method to normalise the data based on time.
-    It scales the data to the range [0, 1] based on the time.
     """
 
     def __init__(self, n_frames: int = 100):
@@ -51,9 +49,7 @@ class LinearTimeNormaliser(BaseNormaliser):
             trial: The trial to be normalised.
 
         Returns:
-            model.Trial: A new trial containing the time-normalised data.
-            model.TrialCycles: A new segmented trial containing the
-            time-normalised data.
+            A new trial containing the time-normalised data.
         """
         if type(trial) is model.TrialCycles:
             trial = self._normalise_cycle(trial)
@@ -83,7 +79,6 @@ class LinearTimeNormaliser(BaseNormaliser):
 
         Args:
             trial: The trial to be normalised.
-
 
         Returns: A new trial containing the time-normalised data.
         """

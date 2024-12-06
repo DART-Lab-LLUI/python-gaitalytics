@@ -16,32 +16,48 @@ classifiers = [
     #   3 - Alpha
     #   4 - Beta
     #   5 - Production/Stable
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     # Indicate who your project is intended for
-    "Intended Audience :: Researcher",
-    "Topic :: Software Development :: Build Tools",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Utilities",
     # Pick your license as you wish (see also "license" above)
     "License :: OSI Approved :: MIT License",
     # Specify the Python versions you support here.
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12", ]
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    ]
 requires-python = ">= 3.11"
-dependencies = ["h5netcdf>=1.3.0,<1.4", "pandas>=1.5,<2.3", "pyyaml>=6.0.1,<6.1", "scipy>=1.13,<1.15", "numpy>=1.23,<2.1", "xarray>=2024.6.0,<2024.7"]
+dependencies = ["h5netcdf>=1.3.0",
+    "pandas>=1.5",
+    "pyyaml>=6.0.1",
+    "scipy>=1.13",
+    "numpy>=1.23",
+    "pyomeca>=2021.0",
+    "ezc3d>=1.5",
+    "xarray>=20.6",]
 
 [project.urls]
 Homepage = "https://github.com/DART-Lab-LLUI/python-gaitalytics"
 Documentation = "https://python-gaitalytics.readthedocs.io"
 Repository = "https://github.com/DART-Lab-LLUI/python-gaitalytics"
 Issues = "https://github.com/DART-Lab-LLUI/python-gaitalytics/issues"
-#Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
+Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
-dev = ["ruff", "mypy", "pip"]
+dev = ["ruff", "mypy", "pip", "types-PyYAML"]
 test = ["pytest", "pytest-cov"]
 build = ["build", "setuptools>=64", "setuptools_scm>=8"]
-docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autodoc-typehints", "sphinx_github_changelog"]
+docs = ["sphinx",
+    "setuptools>=64",
+    "sphinx-rtd-theme",
+    "sphinx-autodoc-typehints",
+    "sphinx_github_changelog",
+    "sphinx-codeautolink",
+    "sphinxcontrib-bibtex"]
 
 [tool.pixi.project]
 channels = ["conda-forge"]
@@ -51,9 +67,7 @@ platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
 gaitalytics = { path = ".", editable = true }
 
 [tool.pixi.dependencies]
-pyomeca = ">=2021.0,<2021.1"
-ezc3d = { version = ">=1.5.10,<1.6", build = "*python*" }
-pixi-pycharm = ">=0.0.6,<0.1"
+pixi-pycharm = "*"
 
 
 # Environments
@@ -64,6 +78,12 @@ docs = { features = ["docs", "py311"] }
 py311 = { features = ["py311", "test"] }
 py312 = { features = ["py312", "test"] }
 
+[tool.pixi.feature.build.dependencies]
+boa = ">=0.17.0,<0.18.0"
+yaml = ">=0.2.5,<0.3.0"
+conda-verify = ">=3.4.2,<3.5.0"
+anaconda-client= ">=1.12.0,<1.13.0"
+
 
 [tool.pixi.feature.py311.dependencies]
 python = ">=3.11,<3.12"
@@ -72,13 +92,12 @@ python = ">=3.11,<3.12"
 python = ">=3.12.0,<3.13.0"
 
 [tool.pixi.feature.docs.tasks]
-clean-docs = "cleanpy --include-builds --exclude .pixi ."
-docs = "sphinx-build -M html ./docs ./docs/_build -W --keep-going"
+docs = "sphinx-build -M html ./docs ./docs/_build --keep-going"
 readthedocs = { cmd = "rm -rf $READTHEDOCS_OUTPUT/html && cp -r docs/_build/html $READTHEDOCS_OUTPUT/html", depends_on = ["docs"] }
 
 [tool.pixi.tasks]
-test-full = "pytest -vv --cov=gaitalytics --cov-report=term-missing --cov-config=.coveragerc --capture=sys"
-test-api = "pytest -vv --capture=sys tests/test_api.py"
+test-full = "pytest -vv --cov=gaitalytics --cov-report=term-missing --cov-config=.coveragerc --capture=sys -p no:warnings"
+test-api = "pytest -vv --capture=sys tests/test_api.py -p no:warnings"
 
 [tool.pixi.feature.dev.tasks]
 ruff-format = "ruff format gaitalytics"
@@ -89,6 +108,7 @@ check-code = { cmd = "mypy gaitalytics --check-untyped-defs", depends-on = ["ruf
 build = "python -m build -n"
 sdist = "python -m build --sdist -n"
 wheel = "python -m build --wheel -n"
+conda-build = { cmd ="conda mambabuild . -c conda-forge --output-folder conda-build" }
 
 [tool.setuptools]
 packages = ["gaitalytics", "gaitalytics.utils"]
@@ -104,6 +124,7 @@ pydocstyle = "google"
 [tool.mypy]
 python_version = "3.11"
 ignore_missing_imports = "True"
+
 
 
 

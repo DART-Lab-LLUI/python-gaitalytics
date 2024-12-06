@@ -20,6 +20,7 @@ INPUT_STO_SMALL: Path = Path('./tests/full/data/test_small.sto')
 
 INPUT_C3D_BIG: Path = Path('./tests/full/data/test_big.c3d')
 INPUT_C3D_BIG_NO_EVENTS: Path = Path('./tests/full/data/test_big_no_events.c3d')
+INPUT_C3D_OVER_NO_EVENTS: Path = Path('./tests/full/data/treadmill_no_events.c3d')
 
 
 @pytest.fixture()
@@ -83,6 +84,12 @@ class TestWriteEvents:
 
 
 class TestReadEvents:
+
+    def test_read_c3d_no_events(self):
+        c3d_events = C3dEventInputFileReader(INPUT_C3D_OVER_NO_EVENTS)
+        events = c3d_events.get_events()
+        assert events is None
+
     def test_c3d_events_small(self):
         c3d_events = C3dEventInputFileReader(INPUT_C3D_SMALL)
         events = c3d_events.get_events()
@@ -240,8 +247,5 @@ class TestNetCDFExport:
         assert (out_folder / "analysis.nc").exists()
         markers = xr.load_dataset(out_folder / "markers.nc")
         markers = markers.to_dataarray()
-        assert markers.coords['context'].shape == (2, )
-        assert markers.coords['cycle'].shape == (2, )
-
-
-
+        assert markers.coords['context'].shape == (2,)
+        assert markers.coords['cycle'].shape == (2,)

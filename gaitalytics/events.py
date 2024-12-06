@@ -188,11 +188,13 @@ class MarkerEventDetection(_BaseEventDetection):
 
         Args:
             configs: The mapping configurations.
-            height: The height of peaks for events. Default = None
-            threshold: The threshold for detecting events. Default = None
-            distance: The min distance in frames between events. Default = None
-            rel_height: The relative height of peak for events. Default = 0.5
+            **kwargs:
+                - height: The height of peaks. Default = None
+                - threshold: The threshold of peaks. Default = None
+                - distance: The min distance in frames between events. Default = None
+                - rel_height: The relative height of peak. Default = 0.5
         """
+
         self._height = kwargs.get("height", None)
         self._threshold = kwargs.get("threshold", None)
         self._distance = kwargs.get("distance", None)

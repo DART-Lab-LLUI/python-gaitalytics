@@ -53,7 +53,8 @@ To set up `python-gaitalytics` for local development:
 
     pixi install --all
     pixi run check-code
-    pixi run -e py311 test
+    pixi run -e dev test-api
+    pixi run -e dev test-full
 
 5. Commit your changes and push your branch to GitHub::
 
@@ -70,7 +71,7 @@ If you need some code review or feedback while you're developing the code just m
 
 For merging, you should:
 
-1. Include passing tests (run ``pixi run -e py311 test``).
+1. Include passing tests (run ``pixi run -e dev test-full`` and ``pixi run -e dev test-api``).
 2. Update documentation when there's new API, functionality etc.
 3. Add a note to ``CHANGELOG.rst`` about the changes.
 4. Add yourself to ``AUTHORS.rst``.

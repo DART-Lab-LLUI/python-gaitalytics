@@ -1,3 +1,7 @@
+.. meta::
+   :description: Gaitalytics API.
+   :keywords: gaitalytics, gait-analysis, mocap, c3d, gait-metrics, biomechanics, time-series, data-analysis, data, gait, api
+
 Api
 ===
 

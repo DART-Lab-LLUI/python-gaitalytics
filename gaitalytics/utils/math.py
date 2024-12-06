@@ -16,20 +16,26 @@ def get_decimal_places(number: float) -> int:
 
     return abs(places)
 
+
 def find_local_minimas(arr):
     """
-    Finds the indices of local minima in an array. A point is considered a local minima 
+    Finds the indices of local minima in an array. A point is considered a local minima
     if it is smaller than the two points before and after it.
 
     Args:
         arr: The array to find minimas in
-        
-    Returns: 
+
+    Returns:
         A list of indices where the local minima are located.
     """
     local_minimas = []
     for i in range(2, len(arr) - 2):
-        if arr[i] < arr[i-2] and arr[i] < arr[i-1] and arr[i] < arr[i+1] and arr[i] < arr[i+2]:
+        if (
+            arr[i] < arr[i - 2]
+            and arr[i] < arr[i - 1]
+            and arr[i] < arr[i + 1]
+            and arr[i] < arr[i + 2]
+        ):
             local_minimas.append(i)
-    
+
     return local_minimas

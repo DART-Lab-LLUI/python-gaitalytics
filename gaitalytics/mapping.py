@@ -1,20 +1,20 @@
 from enum import Enum
 from pathlib import Path
 
-import yaml
+from yaml import safe_load
 
 
 class MappedMarkers(Enum):
     # Foot
     L_HEEL = "l_heel"
     R_HEEL = "r_heel"
-    L_TOE = "l_toe"                       
+    L_TOE = "l_toe"
     R_TOE = "r_toe"
-    L_ANKLE = "left_lat_malleoli"
-    R_ANKLE = "right_lat_malleoli"
+    L_ANKLE = "l_lat_malleoli"
+    R_ANKLE = "r_lat_malleoli"
     # Additional toe markers
-    L_TOE_5 = "l_toe_5"
-    R_TOE_5 = "r_toe_5"  
+    L_TOE_2 = "l_toe_2"
+    R_TOE_2 = "r_toe_2"
 
     # Hip
     L_ANT_HIP = "l_ant_hip"
@@ -22,7 +22,7 @@ class MappedMarkers(Enum):
     L_POST_HIP = "l_post_hip"
     R_ANT_HIP = "r_ant_hip"
     SACRUM = "sacrum"
-    
+
     # Extrapolated center of mass marker for margin of stability
     XCOM = "xcom"
 
@@ -31,25 +31,7 @@ class MappingConfigs:
     """A class for reading the mapping configuration file.
 
     This class provides methods to read the mapping configuration file and get
-    the markers and analogs for analysis. The file has to be in the YAML format and
-    has to follow this structure:
-
-    analysis: (Section to define the markers and analogs for general analysis)
-        markers: (List of markers to be used for analysis)
-            - Marker1
-            - Marker2
-            - ...
-        analogs: (List of analogs to be used for analysis)
-            - Analog1
-            - Analog2
-            - ...
-    mapping: (Section to define the mapping of markers to compute complex metrics)
-        markers: (List of mappings for markers)
-            right_heel = RHEE
-            ...
-        analogs: (List of mappings for analogs)
-            right_heel = RHEE
-            ...
+    the markers and analogs for analysis.
     """
 
     _SEC_ANALYSIS: str = "analysis"
@@ -70,7 +52,7 @@ class MappingConfigs:
         """
         self._configs: dict[str, dict] = {}
         with open(config_path) as stream:
-            self._configs = yaml.safe_load(stream)
+            self._configs = safe_load(stream)
 
     def get_markers_analysis(self) -> list[str]:
         """Gets the markers for analysis.

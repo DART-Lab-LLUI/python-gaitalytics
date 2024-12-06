@@ -1,0 +1,35 @@
+﻿Method,Description,Unit
+TimeSeriesFeatures,min,"deg, Nmm, N, V*"
+,max,"deg, Nmm, N, V*"
+,mean,"deg, Nmm, N, V*"
+,sd,"deg, Nmm, N, V*"
+,median,"deg, Nmm, N, V*"
+,amplitude,"deg, Nmm, N, V*"
+PhaseTimeSeriesFeatures,stand_min,"deg, Nmm, N, V*"
+,stand_max,"deg, Nmm, N, V*"
+,stand_mean,"deg, Nmm, N, V*"
+,stand_sd,"deg, Nmm, N, V*"
+,stand_median,"deg, Nmm, N, V*"
+,stand_amplitude,"deg, Nmm, N, V*"
+,swing_max,"deg, Nmm, N, V*"
+,swing_mean,"deg, Nmm, N, V*"
+,swing_sd,"deg, Nmm, N, V*"
+,swing_median,"deg, Nmm, N, V*"
+,swing_amplitude,"deg, Nmm, N, V*"
+SpatialFeatures,step_length,"cm, mm✝"
+,stride_length\ :footcite:p:`hollman_normative_2011`,"cm, mm✝"
+,step_length\ :footcite:p:`hollman_normative_2011`,"cm, mm✝"
+,step_width\ :footcite:p:`hollman_normative_2011`,"cm, mm✝"
+,minimal_toe_clearance\ :footcite:p:`schulz_new_2017`,"cm, mm✝"
+,AP_margin_of_stability,"cm, mm✝☨"
+,ML_margin_of_stability,"cm, mm✝☨"
+TemporalFeatures,cycle_duration,sec
+,double_support\ :footcite:`muller_interpreting_2016`,%
+,single_support\ :footcite:`muller_interpreting_2016`,%
+,stance_duration_prec,%
+,swing_duration_prec,%
+,opposite_foot_off_prec,%
+,opposite_foot_contact_prec,%
+,stride_duration,sec
+,stance_duration,sec
+,cadence\ :footcite:p:`hollman_normative_2011`,steps/min

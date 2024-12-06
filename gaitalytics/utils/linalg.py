@@ -17,26 +17,6 @@ def calculate_distance(
     """
     return (point_b - point_a).meca.norm(dim="axis")
 
-def calculate_angle(
-    vector_a: xr.DataArray,
-    vector_b: xr.DataArray,
-) -> xr.DataArray:
-    """Calculate the angle in degrees between two vectors.
-
-    Args:
-        vector_a: The first vector.
-        vector_b: The second vector.
-
-    Returns:
-        An xarray DataArray containing the angle in degrees.
-    """
-    dot_product = (vector_a * vector_b).sum(dim="axis")
-    norm_a = np.sqrt((vector_a**2).sum(dim="axis"))
-    norm_b = np.sqrt((vector_b**2).sum(dim="axis"))
-    cosine_angle = dot_product / (norm_a * norm_b)
-    cosine_angle_clipped = cosine_angle.clip(-1, 1)
-    angle_radians = np.arccos(cosine_angle_clipped)
-    return np.degrees(angle_radians)
 
 def project_point_on_vector(point: xr.DataArray, vector: xr.DataArray) -> xr.DataArray:
     """Project a point onto a vector.
@@ -98,8 +78,8 @@ def get_normal_vector(vector1: xr.DataArray, vector2: xr.DataArray) -> xr.DataAr
     """
     normal_vector = xr.DataArray(
         np.cross(vector1.values, vector2.values),
-        dims=vector1.dims,  
-        coords=vector1.coords
+        dims=vector1.dims,
+        coords=vector1.coords,
     )
     return normalize_vector(normal_vector)
 
@@ -116,20 +96,22 @@ def normalize_vector(vector: xr.DataArray) -> xr.DataArray:
     return vector / vector.meca.norm(dim="axis")
 
 
-def calculate_speed_norm(position: xr.DataArray,
-                    dt: float=0.01) -> xr.DataArray:
+def calculate_speed_norm(position: xr.DataArray, dt: float = 0.01) -> np.ndarray:
     """
     Compute the speed from a 3xN position data array obtained with constant sampling rate
-    
+
     Args:
-        position_data: A 3xN xarray.DataArray where each row corresponds to an axis (x, y, z),
+        position: A 3xN xarray.DataArray where each row corresponds to an axis (x, y, z),
                           and each column represents a time point (positions in space).
         dt: Time interval between samples.
-        
+
     Returns:
-        A 1D xarray.DataArray of velocity at each time point.
+        An np array with the speed values.
     """
-    velocity_squared_sum = sum((np.diff(position.sel(axis=axis).values)/dt) ** 2  for axis in position.coords["axis"])
+    velocity_squared_sum = sum(
+        (np.diff(position.sel(axis=axis).values) / dt) ** 2
+        for axis in position.coords["axis"]
+    )
     speed_values = np.sqrt(velocity_squared_sum)
     speed_values = np.append(speed_values, speed_values[-1])
 
@@ -172,3 +154,4 @@ def get_point_behind(point_a: xr.DataArray, point_b: xr.DataArray, direction_vec
 
 
 
+    return speed_values

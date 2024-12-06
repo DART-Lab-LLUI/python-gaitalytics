@@ -1,0 +1,15 @@
+﻿Internal marker,Description,Optional
+l_heel,Corresponding model marker name on the left heel.,false
+r_heel,Corresponding model marker name on the right heel.,false
+l_lat_malleoli,Corresponding model marker name on the left lateral malleoli.,true☨
+r_lat_malleoli,Corresponding model marker name on the right lateral malleoli.,true☨
+l_toe,Corresponding model marker name on the left toe.,false
+r_toe,Corresponding model marker name on the right toe.,false
+l_toe_2,Corresponding second model marker name on the left toe.,true✝
+r_toe_2,Corresponding second model marker name on the right toe,true✝
+l_ant_hip,Corresponding model marker name on the left anterior hip.,false
+r_ant_hip,Corresponding model marker name on the right anterior hip.,false
+l_post_hip,Corresponding model marker name on the left posterior hip.,true*
+r_post_hip,Corresponding model marker name on the right posterior hip.,true*
+sacrum,Corresponding model marker name on the sacrum.,true*
+xcom,Corresponding model marker name of the extrapolated center of mass.,true☨

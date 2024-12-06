@@ -107,20 +107,20 @@ class Trial(BaseTrial):
         """
         self._events = events
 
-
     def add_channel(self, category: DataCategory, data: xr.DataArray):
-            """Adds a channel to the trial.
+        """Adds a channel to the trial.
 
-            Args:
-                category: The category of the data.
-                data: The data array to be added.
-            """
-            if category in self._data:
-                self._data[category] = xr.concat([self._data[category], data], dim="channel")
-            else:
-                self._data[category] = data
-                
-                
+        Args:
+            category: The category of the data.
+            data: The data array to be added.
+        """
+        if category in self._data:
+            self._data[category] = xr.concat(
+                [self._data[category], data], dim="channel"
+            )
+        else:
+            self._data[category] = data
+
     def add_data(self, category: DataCategory, data: xr.DataArray):
         """Adds data to the trial.
 
@@ -305,33 +305,7 @@ class TrialCycles(BaseTrial):
 def trial_from_hdf5(file_path: Path) -> Trial | TrialCycles:
     """Loads trial data from an HDF5 file.
 
-    Following structure is expected:
-    Trial:
-
-    - file_path (folder)
-        - Left (context)
-            - markers
-                - xarray.DataArray
-            - analogs
-                - xarray.DataArray
-            - events
-                - xarray.Dataset
-        - Right (context)
-            - ...
-
-    TrialCycles:
-
-    - file_path (folder)
-        - 0.h5 (cycle_id)
-            - Left (context)
-                - markers
-                    - xarray.DataArray
-                - analogs
-                    - xarray.DataArray
-                - events
-                    - xarray.Dataset
-            - Right (context)
-                - ...
+    Can be used to load a single trial or a segmented trial after saving it.
 
     Args:
         file_path: The path to the HDF5 file or folder with the expected structure.

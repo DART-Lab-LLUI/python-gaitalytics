@@ -101,12 +101,20 @@ def detect_events(
         trial: The trial to detect the events for.
         config: The mapping configurations
         method: The method to use for detecting the events.
-        Currently, only "Marker" is supported, which implements
-        the method from Zenis et al. 2006.
-        Default is "Marker".
+                Currently, only "Marker" is supported, which implements
+                the method from Zenis et al. 2008.
+                Default is "Marker".
+        **kwargs:
+            - height: The height of peaks. Default = None
+            - threshold: The threshold of peaks. Default = None
+            - distance: The min distance in frames between events. Default = None
+            - rel_height: The relative height of peak. Default = 0.5
 
     Returns:
         A DataFrame containing the detected events.
+
+    Raises:
+        ValueError: If the method is not supported.
     """
 
     match method:
@@ -125,11 +133,14 @@ def check_events(event_table: pd.DataFrame, method: str = "sequence"):
     Args:
         event_table: The event table to check.
         method: The method to use for checking the events.
-        Currently, only supports "sequence" which checks the sequence of events
-        in terms of context and label. Default is "sequence".
+                Currently, only supports "sequence" which checks the sequence of events
+                in terms of context and label. Default is "sequence".
 
     Returns:
         The trial with the checked events.
+
+    Raises:
+        ValueError: If the event sequence is not correct or the method is not supported.
     """
     match method:
         case "sequence":
@@ -153,7 +164,7 @@ def write_events_to_c3d(
         c3d_path: The path to the original c3d file.
         event_table: The DataFrame containing the events.
         output_path: The path to write the c3d file with the events.
-        If None, the original file will be overwritten.
+                     If None, the original file will be overwritten.
     """
     io.C3dEventFileWriter(c3d_path).write_events(event_table, output_path)  # type: ignore
 
@@ -164,8 +175,8 @@ def segment_trial(trial: model.Trial, method: str = "HS") -> model.TrialCycles:
     Args:
         trial: The trial to segment.
         method: The method to use for segmenting the trial.
-        Currently, only supports "HS" which segments the trial based on heel strikes.
-        Default is "HS".
+                Currently, only supports "HS" which segments the trial based on heel strikes.
+                Default is "HS".
 
     Returns:
         The trial with the segmented data.
@@ -190,7 +201,9 @@ def time_normalise_trial(
     Args:
         trial: The trial to normalise the time for.
         method: The method to use for normalising the time. Currently, only supports
-        "linear" which normalises the time linearly. Default is "linear".
+                "linear" which normalises the time linearly. Default is "linear".
+        **kwargs:
+            - n_frames: The number of frames to normalise the data to.
 
     Returns:
         The trial with the normalised time.
@@ -222,6 +235,7 @@ def calculate_features(
         trial: The trial to calculate the features for.
         config: The mapping configurations
         methods: Class objects of the feature calculation methods to use.
+        **kwargs: Currently not used.
 
     Returns:
         The trial with the calculated features.
@@ -242,7 +256,7 @@ def _create_feature_methods(
     Args:
         methods: The list of feature calculation methods to use.
         config: The mapping configurations
-        **kwargs: Additional keyword arguments for the methods.
+        **kwargs: Currently not used.
 
     Returns:
         A list of the feature calculation method objects.
@@ -271,14 +285,11 @@ def export_trial(
     - analysis.nc
     - events.nc
 
-    .. warning::
-        Currently events are not exported for segmented Trials.
-
     Args:
         trial: The trial to export.
         output_path: The path to write the c3d file.
         method: The method to use for exporting the trial.
-        Currently, only supports "netcdf".
+                Currently, only supports "netcdf".
     """
     match method:
         case "netcdf":

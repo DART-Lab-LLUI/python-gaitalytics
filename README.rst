@@ -11,15 +11,25 @@ Gaitalytics
     * - tests
       - | |github-actions|
     * - package
-      - | |pixi-badge|
+      - | |pypi|
+        | |conda|
+    * - development
+      - | |MIT|
+        | |last-commit|
         | |commits-since|
-.. |docs| image:: https://readthedocs.org/projects/python-gaitalytics/badge/?style=flat
+        | |pixi-badge|
+
+.. |docs| image:: https://img.shields.io/readthedocs/python-gaitalytics?logo=readthedocs
     :target: https://python-gaitalytics.readthedocs.io/
     :alt: Documentation Status
 
-.. |github-actions| image:: https://github.com/DART-Lab-LLUI/python-gaitalytics/actions/workflows/on_push_test.yaml/badge.svg
+.. |github-actions| image:: https://img.shields.io/github/actions/workflow/status/DART-Lab-LLUI/python-gaitalytics/on_push_test.yaml?logo=pytest
     :alt: GitHub Actions Build Status
     :target: https://github.com/DART-Lab-LLUI/python-gaitalytics/actions/
+
+.. |last-commit| image:: https://img.shields.io/github/last-commit/DART-Lab-LLUI/python-gaitalytics
+   :alt: GitHub last commit
+   :target: https://github.com/DART-Lab-LLUI/python-gaitalytics
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/DART-Lab-LLUI/python-gaitalytics/latest.svg
     :alt: Commits since latest release
@@ -28,12 +38,24 @@ Gaitalytics
 .. |pixi-badge| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json
     :alt: Pixi Badge
     :target: https://pixi.sh
-.. end-badges
 
-.. image:: ./_static/images/Gaitalytics_noBackground.png
-    :alt: Gaitalytics Logo
-    :align: center
-    :width: 200px
+.. |pypi| image:: https://img.shields.io/pypi/dm/gaitalytics?logo=pypi
+   :alt: PyPI - Downloads
+   :target: https://pypi.org/project/gaitalytics/
+
+.. |conda| image:: https://img.shields.io/conda/dn/DartLab-LLUI/gaitalytics?logo=anaconda
+   :alt: Conda Downloads
+   :target: https://anaconda.org/dartlab-llui/gaitalytics
+
+.. |MIT| image:: https://img.shields.io/github/license/DART-Lab-LLUI/python-gaitalytics?logo=opensourceinitiative
+   :alt: GitHub License
+
+
+
+
+
+
+.. end-badges
 
 This Python package provides a comprehensive set of tools and advanced algorithms for analyzing 3D motion capture data.
 It is specifically designed to process gait data stored in c3d format. Prior to utilizing the features of gaitalytics,
@@ -41,125 +63,6 @@ it is necessary to perform data labeling, modeling, and filtering procedures.
 
 The library's versatility allows it to be adaptable to various marker sets and modeling algorithms,
 offering high configurability.
-
-
-Functionalities
----------------
-
-Input
-^^^^^
-Currently only c3d files are supported.
-The library provides a function to load a c3d file into a trial object for usage in the library.
-
-.. note::
-    future efforts will be made to support other file formats such as trc, mot, sto and mox files.
-
-Event Detection
-^^^^^^^^^^^^^^^
-
-+------------+--------------------------+----------------------------------------------------------------------------+
-| Method     | Description              | options                                                                    |
-+============+==========================+============================================================================+
-| Marker     | based on Zenis 2006      | - height: The height of peaks for events.                                  |
-|            |                          | - threshold: The threshold for detecting events.                           |
-|            |                          | - distance: The min distance in frames between events.                     |
-|            |                          | - rel_height: The relative height of peak for events.                      |
-+------------+--------------------------+----------------------------------------------------------------------------+
-
-
-Event Detection Check
-^^^^^^^^^^^^^^^^^^^^^
-
-+------------+--------------------------------------------------+-------------------------+
-| Method     | Description                                      | options                 |
-+============+==================================================+=========================+
-| sequence   | Checks gait event sequences                      |                         |
-|            |  - Heel Strike - Toe off - Heel Strike - Toe off |                         |
-|            |  - Left - Right - Left - Right                   |                         |
-+------------+--------------------------------------------------+-------------------------+
-
-Event Writing
-^^^^^^^^^^^^^
-
-Currently only c3d files are supported.
-The main usage for this feature is the correction of detected events.
-
-Segmentation
-^^^^^^^^^^^^
-
-Currently only the segmentation based on gait-events is supported.
-
-+------------+--------------------------------------------------+-------------------------+
-| Method     | Description                                      | options                 |
-+============+==================================================+=========================+
-| HS         | Segment based on heel strike                     |                         |
-+------------+--------------------------------------------------+-------------------------+
-| TO         | Segment based on toe off                         |                         |
-+------------+--------------------------------------------------+-------------------------+
-
-Time Normalization
-^^^^^^^^^^^^^^^^^^
-Currently only linear time normalization is supported.
-
-.. note::
-    future efforts will be made to support other time normalization
-    methods such as dynamic time warping.
-
-+------------+--------------------------------------------------+-------------------------+
-| Method     | Description                                      | options                 |
-+============+==================================================+=========================+
-| linear     | Linear time-normalisation                        |                         |
-+------------+--------------------------------------------------+-------------------------+
-
-
-Feature calculation
-^^^^^^^^^^^^^^^^^^^
-
-+-------------------------+-------------------------------------------------------+---------------------------------------+
-| Method                  | Description                                           | options                               |
-+=========================+=======================================================+=======================================+
-| TimeSeriesFeatures      | - min                                                 |                                       |
-|                         | - max                                                 |                                       |
-|                         | - mean                                                |                                       |
-|                         | - sd                                                  |                                       |
-|                         | - median                                              |                                       |
-|                         | - amplitude                                           |                                       |
-+-------------------------+-------------------------------------------------------+---------------------------------------+
-| PhaseTimeSeriesFeatures | - stand_min                                           |                                       |
-|                         | - stand_max                                           |                                       |
-|                         | - stand_mean                                          |                                       |
-|                         | - stand_sd                                            |                                       |
-|                         | - stand_median                                        |                                       |
-|                         | - stand_amplitude                                     |                                       |
-|                         | - swing_max                                           |                                       |
-|                         | - swing_mean                                          |                                       |
-|                         | - swing_sd                                            |                                       |
-|                         | - swing_median                                        |                                       |
-|                         | - swing_amplitude                                     |                                       |
-+-------------------------+-------------------------------------------------------+---------------------------------------+
-| SpatialFeatures         | - step_length [1]                                     |                                       |
-|                         | - stride_length [1]                                   |                                       |
-+-------------------------+-------------------------------------------------------+---------------------------------------+
-| TemporalFeatures        | - cycle_duration                                      |                                       |
-|                         | - swing_duration_perc                                 |                                       |
-|                         | - stance_duration_perc                                |                                       |
-|                         | - step_width [1]                                      |                                       |
-|                         | - cadence [1]                                         |                                       |
-|                         | - single_support_duration_percent [2]                 |                                       |
-|                         | - double_support_duration_percent [2]                 |                                       |
-+-------------------------+-------------------------------------------------------+---------------------------------------+
-
-References
-""""""""""
-
-[1] J. H. Hollman, E. M. McDade, and R. C. Petersen, “Normative Spatiotemporal
-Gait Parameters in Older Adults,” Gait Posture, vol. 34, no. 1, pp. 111–118,
-May 2011, doi: 10.1016/j.gaitpost.2011.03.024.
-
-[2] A. Gouelle and F. Mégrot (2017), “Interpreting spatiotemporal
-parameters, symmetry, and variability in clinical gait analysis”,
-Handbook of Human Motion pp. 1-20, Publisher: Springer International
-Publishing.
 
 Quickstart
 ----------
@@ -173,6 +76,18 @@ Fast install with anaconda:
 
     conda install gaitalytics -c DartLab-LLUI
 ..
+
+Or with pip:
+
+.. code:: shell
+
+    pip install gaitalytics
+..
+
+..
+
+.. warning::
+        | Manual installation of the `pyomeca <https://pyomeca.github.io/>`_ package is required. when using the pip installation method.
 
 Configuration
 ^^^^^^^^^^^^^
@@ -191,12 +106,10 @@ are configured in as specific yaml file.
 
 Minimal requirements would look like this:
 
-.. code:: yaml
+.. code-block:: yaml
 
-    # Markers to analyse
     analysis:
-      markers: # Markers to analyse
-        # Left side
+      markers:
         - "LHipAngles"
         - "LKneeAngles"
         - "LAnkleAngles"
@@ -222,11 +135,9 @@ Minimal requirements would look like this:
 
 Simple Pipeline
 ^^^^^^^^^^^^^^^^
-
-.. code:: python
+.. code-block:: python
 
     from gaitalytics import api
-
     # Load configuration (yaml file from above)
     config = api.load_config("./pig_config.yaml")
 
@@ -263,12 +174,9 @@ Simple Pipeline
 
     except ValueError as e:
         print(e)
+..
 
 Documentation
 -------------
-
 https://python-gaitalytics.readthedocs.org
-
-
-
 

@@ -17,7 +17,16 @@ author = 'André Böni'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx_codeautolink',
+              'sphinxcontrib.bibtex',
+              'sphinx.ext.napoleon',]
+
+bibtex_bibfiles = ['_static/Gaitalytics.bib']
+
+bibtex_encoding = 'utf-8'
+# bibtex_reference_style = "author_year"
+# bibtex_default_style = "plain"
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -33,7 +42,13 @@ html_theme_options = {
     'sticky_navigation': True,
     'navigation_depth': 4,
     'includehidden': True,
-    'titles_only': False
+    'titles_only': False,
+    'prev_next_buttons_location': 'bottom',
 }
 
 html_favicon = '_static/favicon.png'
+
+
+napoleon_google_docstring = True
+napoleon_include_init_with_doc = True
+
