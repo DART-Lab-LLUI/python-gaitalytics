@@ -20,7 +20,7 @@ Following snipped illustrates the usage of the detection function:
 
         config = api.load_config("./config.yaml")
         trial = api.load_c3d_trial("./example.c3d", config)
-        events = api.detect_events(trial)
+        events = api.detect_events(trial, config)
 
 ..
 

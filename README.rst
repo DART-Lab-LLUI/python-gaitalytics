@@ -51,10 +51,6 @@ Gaitalytics
    :alt: GitHub License
 
 
-
-
-
-
 .. end-badges
 
 This Python package provides a comprehensive set of tools and advanced algorithms for analyzing 3D motion capture data.
@@ -77,6 +73,9 @@ Fast install with anaconda:
     conda install gaitalytics -c DartLab-LLUI
 ..
 
+.. warning::
+        | To avoid dependencies issues, make sure conda-forge is the first channel in your conda configuration.
+
 Or with pip:
 
 .. code:: shell
@@ -84,16 +83,12 @@ Or with pip:
     pip install gaitalytics
 ..
 
-..
-
-.. warning::
-        | Manual installation of the `pyomeca <https://pyomeca.github.io/>`_ package is required. when using the pip installation method.
 
 Configuration
 ^^^^^^^^^^^^^
 
 Gaitalytics can be used with any marker set, which at least includes
-three or for hip markers (front left/right, back left/right or sacrum) and four foot
+three or four hip markers (front left/right, back left/right or sacrum) and four foot
 markers (left heel/toe, right heel/toe).
 
 Additionally markers can be defined on which standard time-series features such as min max mean etc.
