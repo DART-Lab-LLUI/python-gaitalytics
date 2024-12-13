@@ -21,8 +21,8 @@ SpatialFeatures,step_length,"cm, mm✝"
 ,step_length\ :footcite:p:`hollman_normative_2011`,"cm, mm✝"
 ,step_width\ :footcite:p:`hollman_normative_2011`,"cm, mm✝"
 ,minimal_toe_clearance\ :footcite:p:`schulz_new_2017`,"cm, mm✝"
-,AP_margin_of_stability,"cm, mm✝☨"
-,ML_margin_of_stability,"cm, mm✝☨"
+,AP_margin_of_stability\ :footcite:p:`curtze2024notes`,"cm, mm✝☨"
+,ML_margin_of_stability\ :footcite:p:`curtze2024notes`,"cm, mm✝☨"
 TemporalFeatures,cycle_duration,sec
 ,double_support\ :footcite:`muller_interpreting_2016`,%
 ,single_support\ :footcite:`muller_interpreting_2016`,%
