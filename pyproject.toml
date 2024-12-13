@@ -36,9 +36,9 @@ dependencies = ["h5netcdf>=1.3.0",
     "pyyaml>=6.0.1",
     "scipy>=1.13",
     "numpy>=1.23",
-    "pyomeca>=2021.0",
-    "ezc3d>=1.5",
-    "xarray>=20.6",]
+    "pyomeca>=2024.0",
+    "ezc3d>=1.5.17",
+    "xarray>=2024.9",]
 
 [project.urls]
 Homepage = "https://github.com/DART-Lab-LLUI/python-gaitalytics"

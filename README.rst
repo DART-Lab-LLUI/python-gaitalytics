@@ -9,15 +9,11 @@ Gaitalytics
     * - docs
       - |docs|
     * - tests
-      - | |github-actions|
+      - |github-actions|
     * - package
-      - | |pypi|
-        | |conda|
+      - |pypi| |conda|
     * - development
-      - | |MIT|
-        | |last-commit|
-        | |commits-since|
-        | |pixi-badge|
+      - |MIT| |last-commit| |commits-since| |pixi-badge|
 
 .. |docs| image:: https://img.shields.io/readthedocs/python-gaitalytics?logo=readthedocs
     :target: https://python-gaitalytics.readthedocs.io/
