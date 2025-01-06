@@ -167,6 +167,10 @@ Simple Pipeline
 Documentation
 -------------
 https://python-gaitalytics.readthedocs.org
+
 https://github.com/DART-Lab-LLUI/python-gaitalytics
+
 https://pypi.org/project/gaitalytics/
+
 https://anaconda.org/dartlab-llui/gaitalytics
+
