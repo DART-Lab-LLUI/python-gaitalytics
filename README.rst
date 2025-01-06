@@ -69,9 +69,6 @@ Fast install with anaconda:
     conda install gaitalytics -c DartLab-LLUI
 ..
 
-.. warning::
-        | To avoid dependencies issues, make sure conda-forge is the first channel in your conda configuration.
-
 Or with pip:
 
 .. code:: shell
@@ -170,4 +167,6 @@ Simple Pipeline
 Documentation
 -------------
 https://python-gaitalytics.readthedocs.org
-
+https://github.com/DART-Lab-LLUI/python-gaitalytics
+https://pypi.org/project/gaitalytics/
+https://anaconda.org/dartlab-llui/gaitalytics

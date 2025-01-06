@@ -21,6 +21,7 @@ gaitalytics could always use more documentation, whether as part of the
 official gaitalytics docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
+
 Feature requests and feedback
 =============================
 
@@ -31,6 +32,8 @@ If you are proposing a feature:
 * Explain in detail how it would work.
 * Keep the scope as narrow as possible, to make it easier to implement.
 * Remember that this is a volunteer-driven project, and that code contributions are welcome :)
+
+.. _Development:
 
 Development
 ===========

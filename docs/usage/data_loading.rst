@@ -26,6 +26,7 @@ Here is an example of how to load a c3d file and the corresponding configuration
 
 ..
 
+.. _Configuration:
 
 Configuration
 -------------

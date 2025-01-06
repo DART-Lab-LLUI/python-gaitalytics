@@ -18,6 +18,7 @@
    usage/index
    api
    reference/index
+   extend/index
    contributing
    authors
    changelog

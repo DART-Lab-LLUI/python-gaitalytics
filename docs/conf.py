@@ -20,7 +20,8 @@ author = 'André Böni'
 extensions = ['sphinx.ext.autodoc',
               'sphinx_codeautolink',
               'sphinxcontrib.bibtex',
-              'sphinx.ext.napoleon',]
+              'sphinx.ext.napoleon',
+              'sphinxcontrib.mermaid',]
 
 bibtex_bibfiles = ['_static/Gaitalytics.bib']
 

@@ -45,7 +45,7 @@ class FeatureCalculation(ABC):
         raise NotImplementedError
 
 
-class _CycleFeaturesCalculation(FeatureCalculation, ABC):
+class CycleFeaturesCalculation(FeatureCalculation, ABC):
     def calculate(self, trial: model.TrialCycles) -> xr.DataArray:
         """Calculate the features for a trial.
 
@@ -87,6 +87,8 @@ class _CycleFeaturesCalculation(FeatureCalculation, ABC):
 
         Returns:
             An xarray DataArray containing the calculated features.
+
+        :meta public:
         """
         raise NotImplementedError
 
@@ -211,7 +213,7 @@ class _CycleFeaturesCalculation(FeatureCalculation, ABC):
         return new_format
 
 
-class _PointDependentFeature(_CycleFeaturesCalculation, ABC):
+class PointDependentFeature(CycleFeaturesCalculation, ABC):
     def _get_marker_data(
         self, trial: model.Trial, marker: mapping.MappedMarkers
     ) -> xr.DataArray:
@@ -223,6 +225,8 @@ class _PointDependentFeature(_CycleFeaturesCalculation, ABC):
 
         Returns:
             An xarray DataArray containing the marker data.
+
+        :meta public:
         """
         return mocap.get_marker_data(trial, self._config, marker)
 
@@ -237,6 +241,8 @@ class _PointDependentFeature(_CycleFeaturesCalculation, ABC):
 
         Returns:
             An xarray DataArray containing the sacrum marker data.
+
+        :meta public:
         """
         return mocap.get_sacrum_marker(trial, self._config)
 
@@ -270,7 +276,9 @@ class _PointDependentFeature(_CycleFeaturesCalculation, ABC):
         return linalg.get_normal_vector(progression_vector, vertical_vector)
 
 
-class TimeSeriesFeatures(_CycleFeaturesCalculation):
+
+
+class TimeSeriesFeatures(CycleFeaturesCalculation):
     """Calculate time series features for a trial.
 
     This class calculates following time series features for a trial.
@@ -420,7 +428,7 @@ class PhaseTimeSeriesFeatures(TimeSeriesFeatures):
         return phase_trial
 
 
-class TemporalFeatures(_CycleFeaturesCalculation):
+class TemporalFeatures(CycleFeaturesCalculation):
     """Calculate temporal features for a trial.
 
     This class calculates following temporal features for a trial.
@@ -499,7 +507,7 @@ class TemporalFeatures(_CycleFeaturesCalculation):
         return {"double_support": double_support, "single_support": single_support}
 
 
-class SpatialFeatures(_PointDependentFeature):
+class SpatialFeatures(PointDependentFeature):
     """Calculate spatial features for a trial.
 
     This class calculates following spatial features for a trial.

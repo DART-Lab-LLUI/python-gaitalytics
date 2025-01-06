@@ -2,6 +2,13 @@
 Changelog
 =========
 
+0.2.2
+------------------
+- Added better support for extensions and custom metrics
+- Refine implementation of MoS metric according to the the latest findings
+- Fixed bug resolving dependencies with conda main channel
+
+
 0.2.1
 ------------------
 - Added minimal toe clearance metric
