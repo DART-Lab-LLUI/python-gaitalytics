@@ -5,6 +5,26 @@ from yaml import safe_load
 
 
 class MappedMarkers(Enum):
+    """This defines the markers that are mapped in the configuration file.
+
+    Attributes:
+        L_HEEL (str): Left heel marker
+        R_HEEL (str): Right heel marker
+        L_TOE (str): Left toe marker
+        R_TOE (str): Right toe marker
+        L_ANKLE (str): Left ankle marker
+        R_ANKLE (str): Right ankle marker
+        L_TOE_2 (str): Left toe 2 marker
+        R_TOE_2 (str): Right toe 2 marker
+        L_ANT_HIP (str): Left anterior hip marker
+        R_ANT_HIP (str): Right anterior hip marker
+        L_POST_HIP (str): Left posterior hip marker
+        R_POST_HIP (str): Right posterior hip marker
+        SACRUM (str): Sacrum marker
+        XCOM (str): Extrapolated center of mass marker
+
+    """
+
     # Foot
     L_HEEL = "l_heel"
     R_HEEL = "r_heel"
