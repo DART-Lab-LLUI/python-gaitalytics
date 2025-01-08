@@ -16,9 +16,9 @@
    :hidden:
 
    usage/index
+   extend/index
    api
    reference/index
-   extend/index
    contributing
    authors
    changelog

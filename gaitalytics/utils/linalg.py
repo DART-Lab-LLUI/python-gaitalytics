@@ -30,6 +30,7 @@ def project_point_on_vector(point: xr.DataArray, vector: xr.DataArray) -> xr.Dat
     """
     return vector * point.dot(vector, dim="axis")
 
+
 def signed_projection_norm(vector: xr.DataArray, onto: xr.DataArray) -> xr.DataArray:
     """Compute the signed norm of the projection of a vector onto another vector. <br>
     If the projection is in the same direction as the onto vector, the norm is positive. <br>
@@ -98,9 +99,14 @@ def calculate_speed_norm(position: xr.DataArray, dt: float = 0.01) -> np.ndarray
     speed_values = np.sqrt(velocity_squared_sum)
     speed_values = np.append(speed_values, speed_values[-1])
 
-    return xr.DataArray(speed_values, dims=["time"], coords={"time": position.coords["time"]})
+    return xr.DataArray(
+        speed_values, dims=["time"], coords={"time": position.coords["time"]}
+    )
 
-def get_point_in_front(point_a: xr.DataArray, point_b: xr.DataArray, direction_vector: xr.DataArray) -> xr.DataArray:
+
+def get_point_in_front(
+    point_a: xr.DataArray, point_b: xr.DataArray, direction_vector: xr.DataArray
+) -> xr.DataArray:
     """Determine which point is in front of the other according to the direction vector.
 
     Args:
@@ -114,10 +120,13 @@ def get_point_in_front(point_a: xr.DataArray, point_b: xr.DataArray, direction_v
     direction_vector = direction_vector / direction_vector.meca.norm(dim="axis")
     vector_b_to_a = point_a - point_b
     signed_distance = vector_b_to_a.dot(direction_vector, dim="axis")
-    
+
     return point_a if signed_distance > 0 else point_b
 
-def get_point_behind(point_a: xr.DataArray, point_b: xr.DataArray, direction_vector: xr.DataArray) -> xr.DataArray:
+
+def get_point_behind(
+    point_a: xr.DataArray, point_b: xr.DataArray, direction_vector: xr.DataArray
+) -> xr.DataArray:
     """Determine which point is behind the other according to the direction vector.
 
     Args:
@@ -131,5 +140,5 @@ def get_point_behind(point_a: xr.DataArray, point_b: xr.DataArray, direction_vec
     direction_vector = direction_vector / direction_vector.meca.norm(dim="axis")
     vector_b_to_a = point_a - point_b
     signed_distance = vector_b_to_a.dot(direction_vector, dim="axis")
-    
+
     return point_b if signed_distance > 0 else point_a

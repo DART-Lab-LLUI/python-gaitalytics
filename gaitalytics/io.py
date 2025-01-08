@@ -1,4 +1,5 @@
 """This module provides classes for reading biomechanical file-types."""
+
 import math
 from abc import abstractmethod, ABC
 from pathlib import Path

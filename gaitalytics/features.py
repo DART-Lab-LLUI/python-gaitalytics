@@ -172,6 +172,7 @@ class CycleFeaturesCalculation(FeatureCalculation, ABC):
 
         Returns:
             An xarray DataArray containing the data from the dictionary.
+        :meta public:
         """
         xr_dict = {
             "coords": {
@@ -193,6 +194,8 @@ class CycleFeaturesCalculation(FeatureCalculation, ABC):
 
         Returns:
             The reshaped features.
+
+        :meta public:
         """
 
         np_data = features.to_numpy()
@@ -256,6 +259,8 @@ class PointDependentFeature(CycleFeaturesCalculation, ABC):
 
         Returns:
             An xarray DataArray containing the calculated progression vector.
+
+        :meta public:
         """
         return mocap.get_progression_vector(trial, self._config)
 
@@ -268,14 +273,13 @@ class PointDependentFeature(CycleFeaturesCalculation, ABC):
             trial: The trial for which to calculate the sagittal vector.
         Returns:
             An xarray DataArray containing the calculated sagittal vector.
+        :meta public:
         """
         progression_vector = self._get_progression_vector(trial)
         vertical_vector = xr.DataArray(
             [0, 0, 1], dims=["axis"], coords={"axis": ["x", "y", "z"]}
         )
         return linalg.get_normal_vector(progression_vector, vertical_vector)
-
-
 
 
 class TimeSeriesFeatures(CycleFeaturesCalculation):
@@ -531,7 +535,7 @@ class SpatialFeatures(PointDependentFeature):
         Minimal toe clearance: Schulz 2017 (doi: 10.1016/j.jbiomech.2017.02.024)
 
         Args:
-            trial: The trial for which to calculate the features. 
+            trial: The trial for which to calculate the features.
 
         Returns:
             An xarray DataArray containing the calculated features.
@@ -581,7 +585,7 @@ class SpatialFeatures(PointDependentFeature):
                     trial,
                     marker_dict["ipsi_heel"],  # type: ignore
                     marker_dict["contra_toe_2"],  # type: ignore
-                    marker_dict["xcom"]
+                    marker_dict["xcom"],
                 )
             )
 
@@ -590,7 +594,7 @@ class SpatialFeatures(PointDependentFeature):
                     trial,
                     marker_dict["ipsi_ankle"],
                     marker_dict["contra_ankle"],
-                    marker_dict["xcom"]
+                    marker_dict["xcom"],
                 )
             )
         except KeyError:
@@ -850,12 +854,13 @@ class SpatialFeatures(PointDependentFeature):
 
         return None if not mtc_i else min(mtc_i, key=lambda i: toe_z[i])  # type: ignore
 
-    def _calculate_ap_margin_of_stability(self,
-                            trial: model.Trial,
-                            ipsi_heel_marker: mapping.MappedMarkers,
-                            contra_toe_marker: mapping.MappedMarkers,
-                            xcom_marker: mapping.MappedMarkers,
-                        ) -> dict[str, np.ndarray]:
+    def _calculate_ap_margin_of_stability(
+        self,
+        trial: model.Trial,
+        ipsi_heel_marker: mapping.MappedMarkers,
+        contra_toe_marker: mapping.MappedMarkers,
+        xcom_marker: mapping.MappedMarkers,
+    ) -> dict[str, np.ndarray]:
         """Calculate the anterio-posterior margin of stability at heel strike. Result should be interpreted according to Curtze et al. (2024)
         Args:
             trial: The trial for which to calculate the AP margin of stability
@@ -880,30 +885,33 @@ class SpatialFeatures(PointDependentFeature):
         xcom = self._get_marker_data(trial, xcom_marker).sel(
             time=event_times[0], method="nearest"
         )
-        
+
         progress_axis = self._get_progression_vector(trial)
         progress_axis = linalg.normalize_vector(progress_axis)
-        
+
         front_marker = linalg.get_point_in_front(ipsi_heel, contra_toe, progress_axis)
         back_marker = linalg.get_point_behind(ipsi_heel, contra_toe, progress_axis)
-        
+
         bos_vect = front_marker - back_marker
         xcom_vect = xcom - back_marker
-        
+
         bos_proj = abs(linalg.signed_projection_norm(bos_vect, progress_axis))
         xcom_proj = linalg.signed_projection_norm(xcom_vect, progress_axis)
         mos = bos_proj - xcom_proj
 
-        return {"AP_margin_of_stability": mos, 
-                "AP_base_of_support": bos_proj,
-                "AP_xcom": xcom_proj}
+        return {
+            "AP_margin_of_stability": mos,
+            "AP_base_of_support": bos_proj,
+            "AP_xcom": xcom_proj,
+        }
 
-    def _calculate_ml_margin_of_stability(self,
-                            trial: model.Trial,
-                            ipsi_ankle_marker: mapping.MappedMarkers,
-                            contra_ankle_marker: mapping.MappedMarkers,
-                            xcom_marker: mapping.MappedMarkers
-                            ) -> dict[str, np.ndarray]:
+    def _calculate_ml_margin_of_stability(
+        self,
+        trial: model.Trial,
+        ipsi_ankle_marker: mapping.MappedMarkers,
+        contra_ankle_marker: mapping.MappedMarkers,
+        xcom_marker: mapping.MappedMarkers,
+    ) -> dict[str, np.ndarray]:
         """Calculate the medio-lateral margin of stability at heel strike. Result should be interpreted according to Curtze et al. (2024)
         Args:
             trial: The trial for which to calculate the ml margin of stability
@@ -927,27 +935,31 @@ class SpatialFeatures(PointDependentFeature):
         )
         xcom = self._get_marker_data(trial, xcom_marker).sel(
             time=event_times[0], method="nearest"
-        )            
+        )
 
         sagittal_axis = self._get_sagittal_vector(trial)
         sagittal_axis = linalg.normalize_vector(sagittal_axis)
-        
+
         if trial.events.attrs["context"] == "Left":
-            #Rotate sagittal axis so it points towards the left side of the body
+            # Rotate sagittal axis so it points towards the left side of the body
             sagittal_axis = -sagittal_axis
-        
+
         # Lateral is the furthest point in the direction of the sagittal axis
-        lateral_point = linalg.get_point_in_front(ipsi_ankle, contra_ankle, sagittal_axis)
+        lateral_point = linalg.get_point_in_front(
+            ipsi_ankle, contra_ankle, sagittal_axis
+        )
         # Medial is the closest point in the direction of the sagittal axis
         medial_point = linalg.get_point_behind(ipsi_ankle, contra_ankle, sagittal_axis)
 
         bos_vect = lateral_point - medial_point
         xcom_vect = xcom - medial_point
-        
+
         bos_proj = abs(linalg.signed_projection_norm(bos_vect, sagittal_axis))
         xcom_proj = linalg.signed_projection_norm(xcom_vect, sagittal_axis)
         mos = bos_proj - xcom_proj
-                
-        return {"ML_margin_of_stability": mos,
-                "ML_base_of_support": bos_proj,
-                "ML_xcom": xcom_proj}
+
+        return {
+            "ML_margin_of_stability": mos,
+            "ML_base_of_support": bos_proj,
+            "ML_xcom": xcom_proj,
+        }
