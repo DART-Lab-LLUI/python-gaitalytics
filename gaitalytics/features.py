@@ -831,7 +831,7 @@ class SpatialFeatures(PointDependentFeature):
 
     @staticmethod
     def _find_mtc_index(
-        toe_position: xr.DataArray, heel_position: xr.DataArray, toes_vel: np.ndarray
+        toe_position: xr.DataArray, heel_position: xr.DataArray, toes_vel: xr.DataArray
     ):
         """Find the time corresponding to minimal toe clearance of a specific toe.
         Valid minimal toe clearance point must pass conditions
@@ -900,9 +900,9 @@ class SpatialFeatures(PointDependentFeature):
         mos = bos_proj - xcom_proj
 
         return {
-            "AP_margin_of_stability": mos,
-            "AP_base_of_support": bos_proj,
-            "AP_xcom": xcom_proj,
+            "AP_margin_of_stability": mos.to_numpy(),
+            "AP_base_of_support": bos_proj.to_numpy(),
+            "AP_xcom": xcom_proj.to_numpy(),
         }
 
     def _calculate_ml_margin_of_stability(
@@ -940,7 +940,7 @@ class SpatialFeatures(PointDependentFeature):
         sagittal_axis = self._get_sagittal_vector(trial)
         sagittal_axis = linalg.normalize_vector(sagittal_axis)
 
-        if trial.events.attrs["context"] == "Left":
+        if trial.events is not None and trial.events.attrs["context"] == "Left":
             # Rotate sagittal axis so it points towards the left side of the body
             sagittal_axis = -sagittal_axis
 
@@ -959,7 +959,7 @@ class SpatialFeatures(PointDependentFeature):
         mos = bos_proj - xcom_proj
 
         return {
-            "ML_margin_of_stability": mos,
-            "ML_base_of_support": bos_proj,
-            "ML_xcom": xcom_proj,
+            "ML_margin_of_stability": mos.to_numpy(),
+            "ML_base_of_support": bos_proj.to_numpy(),
+            "ML_xcom": xcom_proj.to_numpy(),
         }

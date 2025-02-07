@@ -80,7 +80,7 @@ def normalize_vector(vector: xr.DataArray) -> xr.DataArray:
     return vector / vector.meca.norm(dim="axis")
 
 
-def calculate_speed_norm(position: xr.DataArray, dt: float = 0.01) -> np.ndarray:
+def calculate_speed_norm(position: xr.DataArray, dt: float = 0.01) -> xr.DataArray:
     """
     Compute the speed from a 3xN position data array obtained with constant sampling rate
 
