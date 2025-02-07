@@ -93,14 +93,17 @@ def load_c3d_trial(
 
 
 def detect_events(
-    trial: model.Trial, config: mapping.MappingConfigs, method: str = "Marker", **kwargs
+    trial: model.Trial,
+    config: mapping.MappingConfigs,
+    method: type[events.BaseEventDetection] = events.MarkerEventDetection,
+    **kwargs,
 ) -> pd.DataFrame:
     """Detects the events in the trial.
 
     Args:
         trial: The trial to detect the events for.
         config: The mapping configurations
-        method: The method to use for detecting the events.
+        method: The class to use for detecting the events.
                 Currently, only "Marker" is supported, which implements
                 the method from Zenis et al. 2008.
                 Default is "Marker".
@@ -113,15 +116,9 @@ def detect_events(
     Returns:
         A DataFrame containing the detected events.
 
-    Raises:
-        ValueError: If the method is not supported.
     """
 
-    match method:
-        case "Marker":
-            method_obj = events.MarkerEventDetection(config, **kwargs)
-        case _:
-            raise ValueError(f"Unsupported method: {method}")
+    method_obj = method(config, **kwargs)
 
     event_table = method_obj.detect_events(trial)
     return event_table

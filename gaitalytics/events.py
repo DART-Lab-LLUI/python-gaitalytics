@@ -143,7 +143,7 @@ class SequenceEventChecker(_BaseEventChecker):
         return incorrect_times
 
 
-class _BaseEventDetection(ABC):
+class BaseEventDetection(ABC):
     """Abstract class for event detectors.
 
     This class provides a common interface for detecting events in a trial,
@@ -171,7 +171,7 @@ class _BaseEventDetection(ABC):
         raise NotImplementedError
 
 
-class MarkerEventDetection(_BaseEventDetection):
+class MarkerEventDetection(BaseEventDetection):
     """A class for detecting events using marker data.
 
     This class provides a method to detect events using marker data in a trial.

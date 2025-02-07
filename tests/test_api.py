@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+import gaitalytics.events as events
 import gaitalytics.api as api
 import gaitalytics.mapping as mapping
 import gaitalytics.model as model
@@ -61,8 +62,8 @@ def test_detect_events():
 def test_detect_events_methode():
     config = api.load_config("./tests/pig_config.yaml")
     trial = model.Trial()
-    with pytest.raises(ValueError):
-        api.detect_events(trial, config, method="ForcePlate")
+    with pytest.raises(TypeError):
+        api.detect_events(trial, config, method= events.BaseEventDetection)
 
 
 def test_check_events():
