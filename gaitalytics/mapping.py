@@ -46,6 +46,10 @@ class MappedMarkers(Enum):
     # Extrapolated center of mass marker for margin of stability
     XCOM = "xcom"
 
+    # GRF
+    L_GRF = "l_grf"
+    R_GRF = "r_grf"
+
 
 class MappingConfigs:
     """A class for reading the mapping configuration file.

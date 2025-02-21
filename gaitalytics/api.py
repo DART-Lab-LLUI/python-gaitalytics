@@ -92,36 +92,165 @@ def load_c3d_trial(
     return trial
 
 
+def get_event_detector(
+    method_hs: str,
+    method_to: str,
+    configs: mapping.MappingConfigs,
+    offset: float = 0,
+    trial_ref=None,
+) -> events.EventDetector:
+    """Builds an EventDetector object whose method is the same for all event types
+
+    Args:
+        method_hs: event detection method for heel strike
+        method_to: event detection method for toe off
+                - "Zen" will test the Zeni method
+                - "Des" will test the Desailly method
+                - "AC1" to "AC6" will test the Autocorrelation 1 to 6 methods
+        config: The mapping configurations
+        offset: offset to be applied to all event timings, default is 0
+        trial_ref: object of model.Trial, reference trial if the event detection requires a reference
+
+    Returns:
+        EventDetector object
+    """
+    if trial_ref is None:
+        return events.EventDetectorBuilder.get_event_detector_no_ref(
+            configs, method_hs, method_to, offset
+        )
+    else:
+        return events.EventDetectorBuilder.get_event_detector_with_ref(
+            configs, method_hs, method_to, trial_ref, offset
+        )
+
+
+def get_GRF_event_detector(
+    configs: mapping.MappingConfigs, offset: float = 0
+) -> events.EventDetector:
+    """Builds an EventDetector object whose method is the same for all event types
+
+    Args:
+        config: The mapping configurations
+        offset: offset to be applied to all event timings, default is 0
+
+    Returns:
+        EventDetector object
+    """
+    return events.EventDetectorBuilder.get_event_detector_no_ref(
+        configs, "GRF", "GRF", offset
+    )
+
+
+def get_mixed_event_detector(
+    method_hs_l: str,
+    method_hs_r: str,
+    method_to_l: str,
+    method_to_r: str,
+    configs: mapping.MappingConfigs,
+    offset: float = 0,
+    trial=None,
+) -> events.EventDetector:
+    """Builds an EventDetector object whose method is the same for all event type
+
+    Args:
+        method_to_l: event detection method for left toe off
+        method_to_r: event detection method for right toe off
+        method_hs_l: event detection method for left heel strike
+        method_hs_r: event detection method for right heel strike
+                - "Zen" will test the Zeni method
+                - "Des" will test the Desailly method
+                - "AC1" to "AC6" will test the Autocorrelation 1 to 6 methods
+        config: The mapping configurations
+        offset: offset to be applied to all event timings, default is 0
+        trial_ref: object of model.Trial, reference trial if the event detection requires a reference
+
+    Returns:
+        EventDetector object
+    """
+    return events.EventDetectorBuilder.get_mixed_event_detector(
+        configs, method_hs_l, method_hs_r, method_to_l, method_to_r, offset, trial
+    )
+
+
 def detect_events(
     trial: model.Trial,
-    config: mapping.MappingConfigs,
-    method: type[events.BaseEventDetection] = events.MarkerEventDetection,
-    **kwargs,
+    event_detector: events.EventDetector,
+    parameters: dict | None = None,
 ) -> pd.DataFrame:
     """Detects the events in the trial.
 
     Args:
         trial: The trial to detect the events for.
-        config: The mapping configurations
-        method: The class to use for detecting the events.
-                Currently, only "Marker" is supported, which implements
-                the method from Zenis et al. 2008.
-                Default is "Marker".
-        **kwargs:
-            - height: The height of peaks. Default = None
-            - threshold: The threshold of peaks. Default = None
-            - distance: The min distance in frames between events. Default = None
-            - rel_height: The relative height of peak. Default = 0.5
+        event_detector: object containing detection methods (optimized or not) for each event type
+        parameters: dictionary of event detection parameters. Default None
 
     Returns:
         A DataFrame containing the detected events.
-
     """
-
-    method_obj = method(config, **kwargs)
-
-    event_table = method_obj.detect_events(trial)
+    event_table = event_detector.detect_events(trial, parameters)
     return event_table
+
+
+def find_optimal_detectors(
+    trial_ref: model.Trial,
+    config: mapping.MappingConfigs,
+    method_list: list[str] = ["Zen", "Des", "AC1", "AC2", "AC3", "AC4", "AC5", "AC6"],
+) -> tuple[events.EventDetector, dict]:
+    """Finds the set of best methods that best detect all Gait Event types on a short labeled reference trial
+    Also returns feedback for user
+
+    Args:
+        trial_ref: The reference trial with some labeled gait events
+        config: The mapping configurations
+        method_list: list of methods it tests for
+                        - "Zen" will test the Zeni method
+                        - "Des" will test the Desailly method
+                        - "AC1" to "AC6" will test the Autocorrelation 1 to 6 methods
+    Returns:
+        An EventDetector object with optimized detection methods for each gait event
+        user_show : dict containing the performance of all selected methods, as well as the parameters used to find the events
+    """
+    method_list_mapping = [
+        events.EventDetectorBuilder.get_method(name) for name in method_list
+    ]
+    auto_obj = events.AutoEventDetection(config, trial_ref, method_list_mapping)
+    event_detector, user_show = auto_obj.get_optimised_event_detectors()
+    return event_detector, user_show
+
+
+def get_ref_from_GRF(
+    trial: model.Trial, config: mapping.MappingConfigs, gait_cycles_ref: int = 15
+) -> model.Trial:
+    """Creates a reference set of events detected with Ground Reaction Forces (if available) for the given trial.
+    The detected events meet the following set of conditions:
+    1. Events are regularly spaced (not too close and not too far apart)
+    2. Detected events should have a GRF value close to 0
+    3. Event should be followed/preceded by a large slope
+    4. Order of events is correct
+    If the required number of events is not found, an error is raised¨
+
+    Args:
+        trial: The trial whose events to be detected and used as reference
+        config: The mapping configurations
+        gait_cycles_ref: number of gait cycles to use as reference. Default is 15
+
+    Returns:
+        Trial: the same trial with detected events as attributes
+
+    Raises:
+        ValueError if no events have been selected to use as reference
+    """
+    event_detector = get_GRF_event_detector(config)
+    events_table = detect_events(trial, event_detector)
+
+    obj = events.ReferenceFromGrf(events_table, trial, config, gait_cycles_ref)
+    trial_ref = obj.get_reference()
+    if trial_ref.events is not None and not trial_ref.events.empty:
+        return trial_ref
+    else:
+        raise ValueError(
+            "No valid events detected with GRF. Try manually labeling events to use as reference"
+        )
 
 
 def check_events(event_table: pd.DataFrame, method: str = "sequence"):

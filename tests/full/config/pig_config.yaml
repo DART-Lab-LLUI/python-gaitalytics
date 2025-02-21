@@ -65,6 +65,10 @@ mapping:
     com: "COM"
     xcom: "XCOM"
 
+    # GRF
+    l_grf: "LNormalisedGRF"
+    r_grf: "RNormalisedGRF"
+
 
 
 

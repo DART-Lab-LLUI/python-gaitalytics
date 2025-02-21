@@ -6,7 +6,8 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from gaitalytics.events import MarkerEventDetection
+from gaitalytics.events import EventDetector, MappedMethods
+from gaitalytics.api import get_event_detector
 from gaitalytics.io import C3dEventInputFileReader, MarkersInputFileReader, \
     AnalogsInputFileReader, AnalysisInputReader, C3dEventFileWriter, NetCDFTrialExporter
 from gaitalytics.mapping import MappingConfigs
@@ -70,7 +71,7 @@ class TestWriteEvents:
         markers = MarkersInputFileReader(out_path).get_markers()
         trial = Trial()
         trial.add_data(DataCategory.MARKERS, markers)
-        events = MarkerEventDetection(configs).detect_events(trial)
+        events = get_event_detector(MappedMethods.ZENI, MappedMethods.ZENI, configs).detect_events(trial, {"distance" : 90})
         C3dEventFileWriter(out_path).write_events(events)
 
         rec_events = C3dEventInputFileReader(out_path).get_events()

@@ -4,7 +4,6 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-import gaitalytics.events as events
 import gaitalytics.api as api
 import gaitalytics.mapping as mapping
 import gaitalytics.model as model
@@ -50,21 +49,100 @@ def test_load_c3d_trial_no_events():
     trial = api.load_c3d_trial("./tests/treadmill_no_events.c3d", config)
     assert trial.events is None
 
+def test_get_event_detector_no_ref():
+    config = api.load_config("./tests/pig_config.yaml")
+    event_detector = api.get_event_detector("Zen", "Des", config)
+    assert event_detector.hs_left._CODE == "Zen"
+    assert event_detector.hs_right._CODE == "Zen"
+    assert event_detector.to_left._CODE == "Des"
+    assert event_detector.to_right._CODE == "Des"
+
+def test_get_event_detector_no_ref_AC():
+    config = api.load_config("./tests/pig_config.yaml")
+    with pytest.raises(TypeError):
+        api.get_event_detector("Zen", "AC6", config)
+
+def test_get_event_detector_ref_GRF():
+    config = api.load_config("./tests/pig_config.yaml")
+    trial = api.load_c3d_trial("./tests/treadmill_events.c3d", config)
+    with pytest.raises(TypeError):
+        api.get_event_detector("GRF", "Zen", config, trial_ref=trial)
+
+def test_get_event_detector_ref_method():
+    config = api.load_config("./tests/pig_config.yaml")
+    trial = api.load_c3d_trial("./tests/treadmill_events.c3d", config)
+    with pytest.raises(ValueError):
+        api.get_event_detector("AC6", "AC5", config, trial_ref=trial)
+    
+def test_get_event_detector_ref():
+    config = api.load_config("./tests/pig_config.yaml")
+    trial = api.load_c3d_trial("./tests/treadmill_events.c3d", config)
+    event_detector = api.get_event_detector("Zen", "Zen", config, trial_ref = trial)
+    assert event_detector.hs_left._CODE == "Zen"
+    assert event_detector.hs_right._CODE == "Zen"
+    assert event_detector.to_left._CODE == "Zen"
+    assert event_detector.to_right._CODE == "Zen"
+    assert event_detector.hs_left.trial_ref is not None
+    assert event_detector.to_left.ref_events is not None
+
+def test_get_mixed_event_detector_no_ref():
+    config = api.load_config("./tests/pig_config.yaml")
+    event_detector = api.get_mixed_event_detector(
+                                method_hs_l = "Des",
+                                method_hs_r = "Zen",
+                                method_to_l = "Des",
+                                method_to_r = "Zen",
+                                configs = config
+                                )
+    assert event_detector.hs_left._CODE == "Des"
+    assert event_detector.hs_right._CODE == "Zen"
+    assert event_detector.to_left._CODE == "Des"
+    assert event_detector.to_right._CODE == "Zen"
+
+def test_get_mixed_event_detector_ref():
+    config = api.load_config("./tests/pig_config.yaml")
+    trial = api.load_c3d_trial("./tests/treadmill_events.c3d", config)
+    event_detector = api.get_mixed_event_detector(
+                                method_hs_l = "Des",
+                                method_hs_r = "AC1",
+                                method_to_l = "AC6",
+                                method_to_r = "Zen",
+                                configs = config,
+                                trial= trial
+                                )
+    assert event_detector.hs_left._CODE == "Des"
+    assert event_detector.hs_right._CODE == "AC1"
+    assert event_detector.to_left._CODE == "AC6"
+    assert event_detector.to_right._CODE == "Zen"
+    assert event_detector.hs_left.trial_ref is not None
+    assert event_detector.to_left.ref_events is not None
+
+def find_optimal_detectors():
+    config = api.load_config("./tests/pig_config.yaml")
+    trial = api.load_c3d_trial("./tests/treadmill_events.c3d", config)
+    obj, _ = find_optimal_detectors(trial, config, method_list = ["AC1", "AC6"])
+    assert obj.hs_left._CODE == "AC1"
+    assert obj.hs_right._CODE == "AC1"
+    assert obj.to_left._CODE == "AC6"
+    assert obj.to_right._CODE == "AC6"
+    assert hasattr(obj.hs_left, "_mean_error")
 
 def test_detect_events():
     config = api.load_config("./tests/pig_config.yaml")
     trial = api.load_c3d_trial("./tests/treadmill_events.c3d", config)
-    event_table = api.detect_events(trial, config, distance=1000)
+    event_detector = api.get_event_detector("Zen", "Zen", config)
+    event_table = api.detect_events(trial, event_detector, parameters={"distance": 1000})
     assert event_table is not None
     assert len(event_table) == 5
 
-
-def test_detect_events_methode():
+def test_get_ref_from_GRF():
     config = api.load_config("./tests/pig_config.yaml")
-    trial = model.Trial()
-    with pytest.raises(TypeError):
-        api.detect_events(trial, config, method= events.BaseEventDetection)
-
+    trial = api.load_c3d_trial("./tests/treadmill_no_events.c3d", config)
+    trial_ref = api.get_ref_from_GRF(trial, config, gait_cycles_ref = 1)
+    events = trial_ref.events
+    assert len(events) == 4
+    api.check_events(events)
+    assert True
 
 def test_check_events():
     config = api.load_config("./tests/pig_config.yaml")
@@ -81,7 +159,8 @@ def test_check_events_methode():
 def test_write_events(out_path):
     config = api.load_config("./tests/pig_config.yaml")
     trial = api.load_c3d_trial("./tests/treadmill_events.c3d", config)
-    event_table = api.detect_events(trial, config, distance=1000)
+    event_detector = api.get_event_detector("Zen", "Zen", config)
+    event_table = api.detect_events(trial, event_detector, parameters={"distance": 1000})
     api.write_events_to_c3d("./tests/treadmill_no_events.c3d", event_table, out_path)
     assert True
 

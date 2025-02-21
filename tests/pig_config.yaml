@@ -61,6 +61,11 @@ mapping:
     r_post_hip: "RPSI"
     sacrum: "SACR"
 
+    # GRF
+    l_grf: "LNormalisedGRF"
+    r_grf: "RNormalisedGRF"
+
+
 
 
 
