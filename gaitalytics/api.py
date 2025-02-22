@@ -182,7 +182,7 @@ def detect_events(
     Args:
         trial: The trial to detect the events for.
         event_detector: object containing detection methods (optimized or not) for each event type
-        parameters: dictionary of event detection parameters. Default None
+        parameters: dictionary of event detection parameters. If event_detector is the result of auto_selection, parameters are already saved. Default None
 
     Returns:
         A DataFrame containing the detected events.
@@ -207,7 +207,7 @@ def find_optimal_detectors(
                         - "Des" will test the Desailly method
                         - "AC1" to "AC6" will test the Autocorrelation 1 to 6 methods
     Returns:
-        An EventDetector object with optimized detection methods for each gait event
+        An EventDetector object with optimized detection methods (and optimized parameters) for each gait event
         user_show : dict containing the performance of all selected methods, as well as the parameters used to find the events
     """
     method_list_mapping = [
