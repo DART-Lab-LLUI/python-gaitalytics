@@ -1821,6 +1821,7 @@ class AutoEventDetection:
                     "excess": detector._excess,
                     "quantiles": detector._quantiles,
                     "parameters": detector._parameters,
+                    "offset": detector._offset,
                 }
         return user_show
 
