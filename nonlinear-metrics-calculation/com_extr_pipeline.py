@@ -51,9 +51,11 @@ class TrialProcess:
         """Load raw C3D and compute CoM."""
         self.trial = load_c3d_trial(self.c3d_path, self.config)
         self.trial = self.model_com_body(self.trial)
-        # print("eveent", self.trial.events.columns.tolist())
-        # print("\nFirst few events:")
-        # print(self.trial.events.head())
+        print("eveent", self.trial.events.columns.tolist())
+        print("\nFirst few events:")
+        print(self.trial.events.head())
+        self.trial.events.to_csv(self.c3d_path.parent / f"{self.c3d_path.stem}_events.csv", index=False)
+        print("Events saved to CSV format.")
         
        
         return self.trial
@@ -69,7 +71,7 @@ class TrialProcess:
 if __name__ == "__main__":
     from gaitalytics import api
     import xarray as xr
-    data_root       = Path("../../data/PBT/Young/Cereneo_SR_13/Pre.3")
+    data_root       = Path("../../data/PBT/Young/Cereneo_SR_15/Pre.4")
     config_path     = Path("pig_config.yaml")
     out_events_root = data_root / "markers+Com.3"
 
@@ -82,7 +84,7 @@ if __name__ == "__main__":
 
         tp = TrialProcess(c3d, config, model_com_body)
         tp.compute()
-        tp.export_trial(rel)
+        #tp.export_trial(rel)
       
 
         
