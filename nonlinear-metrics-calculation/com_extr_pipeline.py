@@ -47,19 +47,25 @@ class TrialProcess:
         self.trial          = None
         self.events         = None
 
+
+        
     def compute(self):
         """Load raw C3D and compute CoM."""
         self.trial = load_c3d_trial(self.c3d_path, self.config)
         self.trial = self.model_com_body(self.trial)
-        print("eveent", self.trial.events.columns.tolist())
-        print("\nFirst few events:")
-        print(self.trial.events.head())
-        self.trial.events.to_csv(self.c3d_path.parent / f"{self.c3d_path.stem}_events.csv", index=False)
-        print("Events saved to CSV format.")
+        if self.trial.events is not None:
+            print(f"Events already detected in {self.c3d_path.name}. Skipping event detection.")
+            print("event", self.trial.events.columns.tolist())
+            print("\nFirst few events:")
+            print(self.trial.events.head())
+            self.trial.events.to_csv(self.c3d_path.parent / f"{self.c3d_path.stem}_events.csv", index=False)
+            print("Events saved to CSV format.")
+            return self.trial
+        else:
+            print(f"No events detected in {self.c3d_path.name}.")
+            return self.trial
         
-       
-        return self.trial
-    
+        
     def export_trial(self, out_dir: Path):
         out_dir.mkdir(parents=True, exist_ok=True)
         export_trial(self.trial, self.c3d_path.parent)
@@ -71,20 +77,19 @@ class TrialProcess:
 if __name__ == "__main__":
     from gaitalytics import api
     import xarray as xr
-    data_root       = Path("../../data/PBT/Young/Cereneo_SR_16/Pre.4")
+    # data_root       = Path("../../data/PBT/Young/Cereneo_SR_17/Pre.3")
+    data_root       = Path("../../data/CGA/01/FWS/4")
     config_path     = Path("pig_config.yaml")
-    out_events_root = data_root / "markers+Com.3"
 
     config = api.load_config(config_path)
 
     for c3d in sorted(data_root.rglob("*.c3d")):
         rel   = c3d.parent.relative_to(data_root)
-        evdir = out_events_root / rel
         markers_nc = data_root / 'markers.nc'
 
         tp = TrialProcess(c3d, config, model_com_body)
         tp.compute()
-        #tp.export_trial(rel)
+        tp.export_trial(rel)
       
 
         
