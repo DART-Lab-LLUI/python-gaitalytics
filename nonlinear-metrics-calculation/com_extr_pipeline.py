@@ -71,7 +71,7 @@ class TrialProcess:
 if __name__ == "__main__":
     from gaitalytics import api
     import xarray as xr
-    data_root       = Path("../../data/PBT/Young/Cereneo_SR_15/Pre.4")
+    data_root       = Path("../../data/PBT/Young/Cereneo_SR_16/Pre.4")
     config_path     = Path("pig_config.yaml")
     out_events_root = data_root / "markers+Com.3"
 
