@@ -58,7 +58,7 @@ class TrialProcess:
             print("event", self.trial.events.columns.tolist())
             print("\nFirst few events:")
             print(self.trial.events.head())
-            self.trial.events.to_csv(self.c3d_path.parent / f"{self.c3d_path.stem}_events.csv", index=False)
+            self.trial.events.to_csv(self.c3d_path.parent / f"events.csv", index=False)
             print("Events saved to CSV format.")
             return self.trial
         else:
@@ -77,8 +77,8 @@ class TrialProcess:
 if __name__ == "__main__":
     from gaitalytics import api
     import xarray as xr
-    # data_root       = Path("../../data/PBT/Young/Cereneo_SR_17/Pre.3")
-    data_root       = Path("../../data/CGA/16/FWS/4")
+    data_root       = Path("../../data/PBT/Young/Cereneo_SR_20/Pre.3")
+    # data_root       = Path("../../data/CGA/16/FWS/4")
     config_path     = Path("pig_config.yaml")
 
     config = api.load_config(config_path)
