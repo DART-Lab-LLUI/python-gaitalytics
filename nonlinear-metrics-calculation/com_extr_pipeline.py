@@ -32,13 +32,6 @@ from src.utils.modelling.model import model_com_body
 
 class TrialProcess:
     """
-    Processes a single C3D trial:
-      - Computes CoM + markers
-      - Bootstraps with Zen or Desailly
-      - Trims to first N cycles
-      - Auto‐selects among Zen/Des/AC1/AC6
-      - Detects final events
-      - Exports events to CSV
     """
     def __init__(self, c3d_path: Path, config, model_com_body):
         self.c3d_path       = c3d_path
@@ -77,8 +70,8 @@ class TrialProcess:
 if __name__ == "__main__":
     from gaitalytics import api
     import xarray as xr
-    data_root       = Path("../../data/PBT/Young/Cereneo_SR_20/Pre.3")
-    # data_root       = Path("../../data/CGA/16/FWS/4")
+    # data_root       = Path("../../data/PBT/Young/Cereneo_SR_13/Post")
+    data_root       = Path("../../data/CGA/38/FWS/4")
     config_path     = Path("pig_config.yaml")
 
     config = api.load_config(config_path)
