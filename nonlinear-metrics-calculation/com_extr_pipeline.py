@@ -71,7 +71,7 @@ if __name__ == "__main__":
     from gaitalytics import api
     import xarray as xr
     # data_root       = Path("../../data/PBT/Young/Cereneo_SR_13/Post")
-    data_root       = Path("../../data/CGA/38/FWS/4")
+    data_root       = Path("../../data/CGA/13/PWS/4")
     config_path     = Path("pig_config.yaml")
 
     config = api.load_config(config_path)
