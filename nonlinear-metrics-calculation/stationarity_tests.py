@@ -274,7 +274,7 @@ def preprocess_epochs(data: xr.DataArray,
             coeffs = np.polyfit(tidx, tsf, poly_order)
             full.loc[dict(axis=ax, channel=ch)] = tsf - np.polyval(coeffs, tidx)
 
-    # EPOCHING + (OPTIONAL) STATIONARITY GATING
+    
     n_samp = int(epoch_length_s * fs)
     kept   = []
     for start in range(0, N, n_samp):
@@ -308,3 +308,62 @@ def preprocess_epochs(data: xr.DataArray,
         raise RuntimeError("No epochs passed stationarity and fallback disabled!")
 
     return xr.concat(kept, dim='time')
+
+import numpy as np
+import xarray as xr
+from pathlib import Path
+from scipy.signal import detrend, butter, filtfilt
+import matplotlib.pyplot as plt
+from typing import Union
+
+
+# 1) Preprocessing: detrend, band‐pass, and z‐score
+def process_data(data: Union[xr.DataArray, np.ndarray],
+                 fs: float,
+                 poly_order: int = 1,
+                 hp_cutoff: float = None,
+                 lp_cutoff: float = None,
+                 filter_order: int = 4) -> Union[xr.DataArray, np.ndarray]:
+    """
+    Globally filter and detrend the data.
+    Returns the same type as input (xarray DataArray or numpy array).
+    """
+    # Handle 1D numpy array input
+    if isinstance(data, np.ndarray):
+        if data.ndim != 1:
+            raise ValueError("Numpy array input must be 1D")
+        
+        ts = data.astype(float)
+        N = len(ts)
+        tidx = np.arange(N)
+        
+        # Filter
+        tsf = _butter_filter(ts, fs, hp_cutoff, lp_cutoff, filter_order)
+        
+        # Detrend
+        coeffs = np.polyfit(tidx, tsf, poly_order)
+        return tsf - np.polyval(coeffs, tidx)
+    
+    # Handle xarray DataArray
+    axes = data.coords['axis'].values
+    chans = data.coords['channel'].values
+    full = data.copy(deep=True).astype(float)
+    N = full.sizes['time']
+    # tidx = np.arange(N)
+    
+    if 'time' in data.coords and len(data.coords['time']) == N:
+        time_values = data.coords['time'].values
+        # Normalize time to start at 0 for polynomial fitting
+        tidx = time_values - time_values[0]
+    else:
+        tidx = np.arange(N)
+    
+
+    for ax in axes:
+        for ch in chans:
+            ts = full.sel(axis=ax, channel=ch).values
+            tsf = _butter_filter(ts, fs, hp_cutoff, lp_cutoff, filter_order)
+            coeffs = np.polyfit(tidx, tsf, poly_order)
+            full.loc[dict(axis=ax, channel=ch)] = tsf - np.polyval(coeffs, tidx)
+    
+    return full 
