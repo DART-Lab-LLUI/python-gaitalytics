@@ -1,3 +1,9 @@
+# Author:      Natasha Kovacheva <natasha.kovacheva@stud.hslu.ch>
+# Created:     SS 2025
+# Description: This script is built for calculating the NSI (temporal and spatial) metrics
+#              for the Center of Mass (COM) marker and temporal NSI from foot strike events.
+
+
 import numpy as np
 import pandas as pd
 import xarray as xr
