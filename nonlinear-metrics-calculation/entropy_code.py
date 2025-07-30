@@ -1,82 +1,16 @@
 
 import numpy as np
 import xarray as xr
-import matplotlib.pyplot as plt
 from pathlib import Path
-from scipy.signal import detrend, butter, filtfilt
 from typing import Union
-import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import detrend, butter, filtfilt
-
-import numpy as np
-from scipy.signal import butter, filtfilt
-
-def _butter_filter(ts, fs, hp_cutoff=None, lp_cutoff=None, order=4):
-    """High/low/band pass filter, same as before."""
-    nyq = 0.5 * fs
-    if hp_cutoff is None and lp_cutoff is None:
-        return ts
-
-    if hp_cutoff and lp_cutoff:
-        btype = 'band'
-        freqs = [hp_cutoff/nyq, lp_cutoff/nyq]
-    elif hp_cutoff:
-        btype = 'high'; freqs = hp_cutoff/nyq
-    else:
-        btype = 'low';  freqs = lp_cutoff/nyq
-
-    b, a = butter(order, freqs, btype=btype)
-    return filtfilt(b, a, ts)
-
-# 1) Preprocessing: detrend, band‐pass, and z‐score
-def preprocess_signal(data: Union[xr.DataArray, np.ndarray],
-                      fs: float,
-                      poly_order: int = 1,
-                      hp_cutoff: float = None,
-                      lp_cutoff: float = None,
-                      filter_order: int = 4) -> np.ndarray:
-    """
-    Globally filter and detrend the data, then return as numpy array.
-    Handles both xarray DataArrays and 1D numpy arrays.
-    """
-    # Handle 1D numpy array input
-    if isinstance(data, np.ndarray):
-        if data.ndim != 1:
-            raise ValueError("Numpy array input must be 1D")
-        
-        ts = data.astype(float)
-        N = len(ts)
-        tidx = np.arange(N)
-        
-        # Filter
-        tsf = _butter_filter(ts, fs, hp_cutoff, lp_cutoff, filter_order)
-        
-        # Detrend
-        coeffs = np.polyfit(tidx, tsf, poly_order)
-        return tsf - np.polyval(coeffs, tidx)
-    
-    # Handle xarray DataArray (original code)
-    axes = data.coords['axis'].values
-    chans = data.coords['channel'].values
-    full = data.copy(deep=True).astype(float)
-    N = full.sizes['time']
-    tidx = np.arange(N)
-    
-    for ax in axes:
-        for ch in chans:
-            ts = full.sel(axis=ax, channel=ch).values
-            tsf = _butter_filter(ts, fs, hp_cutoff, lp_cutoff, filter_order)
-            coeffs = np.polyfit(tidx, tsf, poly_order)
-            full.loc[dict(axis=ax, channel=ch)] = tsf - np.polyval(coeffs, tidx)
-    
-    return full.values
-
-
+from preprocessing import preprocess_signal, _butter_filter
 
 def approximate_entropy(U: np.ndarray, m: int = 2, r: float = None) -> float:
     """
-    Approximate Entropy (ApEn) with m=2, r=0.2*SD default.
+    Calculates Approximate Entropy (ApEn) with m=2, r=0.2*SD default.
+    On displacement signal.
     """
     U = np.asarray(U)
     N = len(U)
@@ -99,7 +33,8 @@ def approximate_entropy(U: np.ndarray, m: int = 2, r: float = None) -> float:
 
 def sample_entropy(U: np.ndarray, m: int = 2, r: float = None) -> float:
     """
-    Sample Entropy (SampEn) with m=2, r=0.2*SD default.
+    Calcautes Sample Entropy (SampEn) with m=2, r=0.2*SD default.
+    On displacement signal.
     """
     U = np.asarray(U)
     N = len(U)
@@ -163,7 +98,7 @@ def compute_entropy_on_displacement(ts_disp, fs=100.0, r_factor=0.2):
     ts_norm = (ts_disp - np.mean(ts_disp)) / np.std(ts_disp)
     
     # Set tolerance
-    r = r_factor * np.std(ts_norm)  # This will be r_factor since ts_norm has std=1
+    r = r_factor * np.std(ts_norm) 
     
     # Compute entropies
     apen = approximate_entropy(ts_norm, m=2, r=r)
@@ -175,19 +110,19 @@ def compute_entropy_on_acceleration(ts_disp, fs=100.0, r_factor=0.2):
     """
     Compute ApEn and SampEn on acceleration derived from displacement.
     """
-    # 1) Compute velocity and acceleration
+    # Compute velocity and acceleration
     vel = np.gradient(ts_disp, 1/fs)
     acc = np.gradient(vel, 1/fs)
     
-    # 2) Band-pass filter acceleration (0.5-10 Hz)
+    # Band-pass filter acceleration
     nyq = fs / 2
     b, a = butter(4, [0.5/nyq, 10/nyq], btype='bandpass')
     acc_f = filtfilt(b, a, acc)
     
-    # 3) Z-score normalization
+    # Z-score normalization
     acc_z = (acc_f - np.mean(acc_f)) / np.std(acc_f)
     
-    # 4) Compute entropies with tolerance
+    # Compute entropies with tolerance
     r = r_factor * np.std(acc_z)  # This will be r_factor since acc_z has std=1
     apen = approximate_entropy(acc_z, m=2, r=r)
     sampen = sample_entropy(acc_z, m=2, r=r)
@@ -198,20 +133,20 @@ def compute_MSE_on_acceleration(ts_disp, r_factor=0.2, fs=100.0, max_scale=20):
     """
     Compute Multiscale Entropy on acceleration derived from displacement.
     """
-    # 1) Compute velocity and acceleration
+    # Compute velocity and acceleration
     vel = np.gradient(ts_disp, 1/fs)
     acc = np.gradient(vel, 1/fs)
     
-    # 2) Band-pass filter acceleration (0.5-10 Hz)
+    # Band-pass filter acceleration
     nyq = fs / 2
     b, a = butter(4, [0.5/nyq, 10/nyq], btype='bandpass')
     acc_f = filtfilt(b, a, acc)
     
-    # 3) Z-score normalization
+    # Z-score normalization
     acc_z = (acc_f - np.mean(acc_f)) / np.std(acc_f)
     
-    # 4) Compute MSE
-    r = r_factor * np.std(acc_z)  # This will be r_factor since acc_z has std=1
+    # Compute MSE on acc
+    r = r_factor * np.std(acc_z) 
     scales, mse = multiscale_entropy(acc_z, m=2, r=r, max_scale=max_scale)
     
     return scales, mse
