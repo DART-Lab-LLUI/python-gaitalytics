@@ -1,5 +1,4 @@
-# Author:      Natasha Kovacheva <natasha.kovacheva@stud.hslu.ch>
-# Created:     SS 2025
+
 # Description: This script contains two classes used for the construction of MSM.
 
 

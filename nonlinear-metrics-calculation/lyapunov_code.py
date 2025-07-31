@@ -1,5 +1,4 @@
-# Author:      Natasha Kovacheva <natasha.kovacheva@stud.hslu.ch>
-# Created:     SS 2025
+
 # Description: This script is built for calculating the short term Lyapunov Exponent,
 #              as it is described in the literature, following Rosenstein's Algorithm
 #              and using Taken's Theorem. All steps ans functions needed 

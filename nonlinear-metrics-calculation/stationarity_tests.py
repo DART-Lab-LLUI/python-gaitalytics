@@ -1,5 +1,4 @@
-# Author:      Natasha Kovacheva <natasha.kovacheva@stud.hslu.ch>
-# Created:     SS 2025
+
 # Description: This module contains functions for calculating and plotting 
 #              stationarity tests, mean, variance, rolling statistics of a signal.
 #              Additionally, it processes epochs of time series data, applying

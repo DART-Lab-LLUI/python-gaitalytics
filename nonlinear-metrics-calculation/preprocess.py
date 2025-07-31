@@ -1,5 +1,4 @@
-# Author:      Natasha Kovacheva <natasha.kovacheva@stud.hslu.ch>
-# Created:     SS 2025
+
 # Description: This script is built identically on the preprocessing.py file,
 #              but it is used to preprocess the data when there is downsampling
 #              needed as in the case of sLE, such that the script is distiguishable

@@ -6,8 +6,8 @@ from pathlib import Path
 import sys
 import pandas as pd
 from matplotlib import pyplot as plt
-events_branch = Path(r"..\RepoCode\events\python-gaitalytics").resolve()
-pbt_branch    = Path(r"..\RepoCode\pbt-analysis").resolve()
+events_branch = Path(r"").resolve()
+pbt_branch    = Path(r"").resolve()
 sys.path.insert(0, str(events_branch))
 sys.path.insert(0, str(pbt_branch))
 

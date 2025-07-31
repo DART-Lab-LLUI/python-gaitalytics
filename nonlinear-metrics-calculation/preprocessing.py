@@ -1,5 +1,4 @@
-# Author:      Natasha Kovacheva <natasha.kovacheva@stud.hslu.ch>
-# Created:     SS 2025
+
 # Description: Defines all functions for preprocessing the data, 
 #              including filtering and detrending, as described in the thesis;
 #              it uses a butterworth filter for high-pass, low-pass, or band-pass filtering,

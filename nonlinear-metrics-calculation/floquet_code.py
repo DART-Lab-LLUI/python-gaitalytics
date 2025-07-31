@@ -1,5 +1,4 @@
-# Author:      Natasha Kovacheva <natasha.kovacheva@stud.hslu.ch>
-# Created:     SS 2025
+
 # Description: This script is built for calculating Floquet Multiplier.
 #              The code is adpated to handle strides and steps, plots the Poincare Plot
 #              by default only on the heel strike phase, but if needed can be adjusted to
