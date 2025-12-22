@@ -1,6 +1,7 @@
 """This module contains classes for checking and detecting events in a trial."""
 
 from abc import ABC, abstractmethod
+from calendar import error
 from enum import Enum
 
 import numpy as np
@@ -221,6 +222,7 @@ class BaseEventDetection(ABC):
         configs: mapping.MappingConfigs,
         context: str,
         label: str,
+        errors:  np.ndarray,
         offset: float = 0.0,
     ):
         """Initializes a new instance of the BaseEventDetection class for an event type on a single side.
@@ -236,6 +238,8 @@ class BaseEventDetection(ABC):
         self._context = context
         self._label = label
         self._offset = offset
+        self._errors = errors
+        self._applied_offset = "no"
 
     def _create_data_frame(self, times: np.ndarray) -> pd.DataFrame:
         """Creates a DataFrame from the detected events.
@@ -283,7 +287,18 @@ class BaseEventDetection(ABC):
         Args:
             offset: offset by which all the events are shifted
         """
-        return events - offset
+        if np.all(self._errors > 0):
+            self._applied_offset = "yes"
+            return events + abs(offset)
+
+        elif np.all(self._errors < 0):
+            self._applied_offset = "yes"
+            return events - abs(offset)
+
+
+        else:
+            return events
+
 
     def set_parameters(self, parameters: dict):
         """
@@ -293,7 +308,7 @@ class BaseEventDetection(ABC):
 
     @abstractmethod
     def _detect_events(self, trial: model.Trial) -> np.ndarray:
-        """Detects the events in the trial.
+        """Detects the events in the trial.+
 
         Args:
             trial: The trial for which to detect the events.
@@ -582,7 +597,7 @@ class BaseOptimisedEventDetection(BaseEventDetection, ABC):
                 in_ = np.append(in_, ev)
                 diff_list = np.append(diff_list, ev_ref - ev)
         if len(diff_list) == 0:
-            return np.zeros(len(events_ref)), 1.0, 0
+            return np.zeros(len(events_ref)), 1.0, 0, len(events_ref)
         else:
             offset = self._compute_offset(
                 np.mean(diff_list), self._compute_quantiles(diff_list)
@@ -596,9 +611,10 @@ class BaseOptimisedEventDetection(BaseEventDetection, ABC):
                 np.squeeze(diff_list),
                 missed / len(events_ref),
                 len(out_) / len(times),
+                len(times) - len(events_ref),
             )
 
-    def _save_performance(self, errors, missed, excess):
+    def _save_performance(self, errors, missed, excess, number_events):
         """
         stores performance metrics after detecting events in reference
         """
@@ -608,6 +624,7 @@ class BaseOptimisedEventDetection(BaseEventDetection, ABC):
         self._excess = excess
         self._quantiles = self._compute_quantiles(errors)
         self._offset = self._compute_offset(self._mean_error, self._quantiles)
+        self._number_events = number_events
 
     def _save_parameters(self, parameters: dict):
         """
@@ -630,11 +647,13 @@ class BaseOptimisedEventDetection(BaseEventDetection, ABC):
         else:
             return np.array([np.percentile(errors, 2.5), np.percentile(errors, 97.5)])
 
-    @staticmethod
-    def _compute_offset(mean_error: float, quantiles: np.ndarray) -> float:
+
+    def _compute_offset(self, mean_error: float, quantiles: np.ndarray) -> float:
         """
         Computes the offset of this instance's performance
         """
+        if np.all(self._errors > 0) or np.all(self._errors < 0):
+            self._applied_offset = "yes"
         if quantiles[0] * quantiles[1] >= 0:
             return mean_error
         else:
@@ -687,9 +706,16 @@ class PeakEventDetection(BaseOptimisedEventDetection, ABC):
                     return min_acc, min_missed, min_excess, current_best
             else:
                 return min_acc, min_missed, min_excess, current_best
-
+        """
+        # ***** old interval values for GridSearch *****
         distances = (self.min_dist - np.arange(-0.2, 0.55, 0.05)) * self.frate
         prominences = np.arange(0.05, 0.75, 0.05)
+        """
+        # ***** new  interval values for GridSearch *****
+        distances = (self.min_dist - np.arange(-0.2, 0.55, 0.05)) * self.frate
+        prominences = np.arange(0.03, 0.60, 0.05)
+
+        rad = 0.5 * self.min_dist
         min_missed = 1.0
         min_accuracy = 100
         min_excess = 100
@@ -699,7 +725,21 @@ class PeakEventDetection(BaseOptimisedEventDetection, ABC):
             i += 1
             for p in prominences:
                 if d >= 1:
-                    index, _ = sp.signal.find_peaks(-signal, distance=d, prominence=p)
+                    if self._CODE == MappedMethods.DESAILLY:
+                        idx_pos, _ = sp.signal.find_peaks(signal, distance=d, prominence=p)
+                        idx_neg, _ = sp.signal.find_peaks(-signal)
+                        index = []
+                        if idx_pos.size and idx_neg.size:
+                            j = np.searchsorted(idx_neg, idx_pos, side="right")
+                            for k, jp in enumerate(j):
+                                if jp >= idx_neg.size:
+                                    continue
+                                out = idx_neg[jp]  # first negative peak after idx_pos[k]
+                                index.append(out)
+                        index = np.asarray(index, dtype=int)
+                    else:
+                        index, _ = sp.signal.find_peaks(-signal, distance=d, prominence=p)
+
                     if self.trial_ref is not None and self.trial_ref.events is not None:
                         times = (
                             self.trial_ref.get_data(model.DataCategory.MARKERS)[
@@ -708,15 +748,17 @@ class PeakEventDetection(BaseOptimisedEventDetection, ABC):
                             .coords["time"]
                             .values
                         )
-                        times = times[
-                            (times < self.trial_ref.events[self._TIME_COLUMN].max())
-                            & (times > self.trial_ref.events[self._TIME_COLUMN].min())
-                        ]
+
+                        t_start_ref = self.trial_ref.events[self._TIME_COLUMN].min() - rad
+                        t_end_ref = self.trial_ref.events[self._TIME_COLUMN].max() + rad
+
+                        selected = (times >= t_start_ref) & (times <= t_end_ref)
+                        times = times[selected]
                     else:
                         raise ValueError(
                             "Reference trial must be provided, or privide a value for the parameter 'distance'."
                         )
-                    acc, missed, excess = self._get_accuracy(times)
+                    acc, missed, excess, number_events = self._get_accuracy(times)
                     min_accuracy, min_missed, min_excess, best_params = return_best(
                         min_accuracy,
                         acc,
@@ -727,11 +769,25 @@ class PeakEventDetection(BaseOptimisedEventDetection, ABC):
                         best_params,
                         {"distance": d, "prominence": p},
                     )
-        idx, _ = sp.signal.find_peaks(
-            -signal,
-            distance=best_params["distance"],
-            prominence=best_params["prominence"],
-        )
+        if self._CODE == MappedMethods.DESAILLY:
+            idx_pos, _ = sp.signal.find_peaks(signal, distance=best_params["distance"], prominence=best_params["prominence"])
+            idx_neg, _ = sp.signal.find_peaks(-signal)
+            idx = []
+            if idx_pos.size and idx_neg.size:
+                j = np.searchsorted(idx_neg, idx_pos, side="right")
+                for k, jp in enumerate(j):
+                    if jp >= idx_neg.size:
+                        continue
+                    out = idx_neg[jp]  # first negative peak after idx_pos[k]
+                    idx.append(out)
+            idx = np.asarray(idx, dtype=int)
+
+        else:
+            idx, _ = sp.signal.find_peaks(
+                -signal,
+                distance=best_params["distance"],
+                prominence=best_params["prominence"],
+            )
         return idx, best_params
 
     def _detect_events(self, trial: model.Trial) -> np.ndarray:
@@ -1146,10 +1202,10 @@ class AC(PeakEventDetection):
         if self.trial_ref is None or self.ref_events is None:
             raise ValueError("Reference trial should be provided")
         else:
-            idx = np.isin(
-                self.trial_ref.get_data(model.DataCategory.MARKERS).time.data,
-                self.ref_events,
-            )
+            time_r = np.round(self.trial_ref.get_data(model.DataCategory.MARKERS).time.data,2) #GRF rate = 100, time = 10, so need to round to 2 decimals
+            ref_r = np.round(self.ref_events,2)
+            idx = np.isin(time_r, ref_r)
+            #idx = np.isin(self.trial_ref.get_data(model.DataCategory.MARKERS).time.data, self.ref_events)
             return param_ref[idx]
 
     def _get_params(self, points: dict) -> list[np.ndarray]:
@@ -1698,7 +1754,8 @@ class ReferenceFromGrf:
                 out_events[self._COND_TOTAL] = out_events.apply(
                     lambda x: x[self._COND_TOTAL] * x[cond], axis=1
                 )
-        # select the events that will be taken as reference (number of gait_cycles defined by self.gait_cycles_ref)
+
+        """# select the events that will be taken as reference (number of gait_cycles defined by self.gait_cycles_ref)
         for i in range(correct_size, len(grf_events)):
             ref = (
                 out_events.loc[i - correct_size : (i - 1), self._COND_TOTAL].sum()
@@ -1708,7 +1765,28 @@ class ReferenceFromGrf:
                 out_events.loc[i - correct_size : (i - 1), self._REF_EVENTS] = [
                     ref
                 ] * correct_size
+                break"""
+        # select the events that will be taken as reference (number of gait_cycles defined by self.gait_cycles_ref)
+        found_block = False
+        for i in range(correct_size, len(grf_events)):
+            ref = ( out_events.loc[i - correct_size: (i - 1), self._COND_TOTAL].sum()
+                    == correct_size)
+            if ref:
+                out_events.loc[i - correct_size: (i - 1), self._REF_EVENTS] = [
+                    ref
+                ] * correct_size
+                found_block = True
                 break
+
+        if not found_block:
+            print("No 15 consecutive gait cycles met all conditions. Selecting 15 valid gait cycles separately instead.")
+            n = len(out_events)
+            cycle_id = (np.arange(n) // 4).astype(int)
+            valid_cycle_flags = out_events.groupby(cycle_id)[self._COND_TOTAL].agg("all")
+            valid_cycle_ids = list(valid_cycle_flags[valid_cycle_flags].index)
+            chosen_cycle_ids = set(valid_cycle_ids[: self.gait_cycles_ref])
+            out_events[self._REF_EVENTS] = [cid in chosen_cycle_ids for cid in cycle_id]
+
         return grf_events[out_events[self._REF_EVENTS]]
 
     def _write_ref_events(self, trial: model.Trial, grf_events: pd.DataFrame):
@@ -1765,26 +1843,41 @@ class AutoEventDetection:
                     event_detector = method(
                         self._configs, context, label, trial_ref=self.trial_ref
                     )  ##an instance for each side
+
                     if label in EventDetectorBuilder.get_event_types(
                         event_detector._CODE
                     ):
+                        filtered = self.trial_ref.events[
+                            (self.trial_ref.events["label"] == label) &
+                            (self.trial_ref.events["context"] == context)
+                            ]
+                        ref_times = filtered["time"].to_numpy()
+                        rad = 0.5 * event_detector.min_dist
                         times = event_detector._detect_events(self.trial_ref)
+                        t_start_ref = ref_times.min() - rad
+                        t_end_ref = ref_times.max() + rad
+                        selected = (times >= t_start_ref) & (times <= t_end_ref)
+                        times = times[selected]
+                        """
                         times = times[
                             (
                                 times
-                                < self.trial_ref.events[
+                                <= (self.trial_ref.events[
                                     event_detector._TIME_COLUMN
-                                ].max()
+                                ].max() + rad_)
                             )
                             & (
                                 times
-                                > self.trial_ref.events[
+                                >= (self.trial_ref.events[
                                     event_detector._TIME_COLUMN
-                                ].min()
+                                ].min() - rad_)
                             )
                         ]
-                        errors, missed, excess = event_detector._get_accuracy(times)
-                        event_detector._save_performance(errors, missed, excess)
+                        ref_times = self.trial_ref.events[event_detector._TIME_COLUMN].to_numpy()
+                        center = (ref_times.min() + ref_times.max()) / 2
+                        times = np.sort(times[np.argsort(np.abs(times - center))[:len(ref_times)]])"""
+                        errors, missed, excess, number_events = event_detector._get_accuracy(times)
+                        event_detector._save_performance(errors, missed, excess, number_events)
                         opt[idx] = self._optim_function(event_detector)
                     event_detectors.append(event_detector)
                 index = np.argmax(opt)
@@ -1822,6 +1915,8 @@ class AutoEventDetection:
                     "quantiles": detector._quantiles,
                     "parameters": detector._parameters,
                     "offset": detector._offset,
+                    "offset applied?": detector._applied_offset,
+                    "difference in number of events": detector._number_events,
                 }
         return user_show
 
