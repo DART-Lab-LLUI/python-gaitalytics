@@ -480,10 +480,8 @@ class TemporalFeatures(CycleFeaturesCalculation):
             rel_event_times[2] / rel_event_times[4]
         )
         result_dict["stride_duration"] = rel_event_times[4]
-        result_dict["step_duration"] = rel_event_times[4] - rel_event_times[3]
-        result_dict["swing_duration_prec"] = (
-            (result_dict["step_duration"]) / rel_event_times[4]
-        )
+        result_dict["step_duration"] = rel_event_times[4] - rel_event_times[2]
+        result_dict["swing_duration_prec"] = (rel_event_times[4] - rel_event_times[3]) / rel_event_times[4]
         result_dict["cadence"] = 60 / (rel_event_times[4] / 2)
 
         return self._create_result_from_dict(result_dict)
