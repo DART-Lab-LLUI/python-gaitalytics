@@ -219,9 +219,10 @@ class C3dEventInputFileReader(_EventInputFileReader):
             A list containing the sections of the specified type.
         """
         sections = []
-        for section in self._c3d["parameters"]["EVENT"].keys():
-            if section.startswith(section_base):
-                sections.append(section)
+        if "parameters" in self._c3d and "EVENT" in self._c3d["parameters"]:
+            for section in self._c3d["parameters"]["EVENT"].keys():
+                if section.startswith(section_base):
+                    sections.append(section)
         return sections
 
     def _concat_sections(self, section_base: str) -> list:
